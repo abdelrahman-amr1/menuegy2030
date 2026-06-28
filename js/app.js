@@ -184,11 +184,28 @@ async function initTenantStorefront(slug) {
   });
 }
 
+// Helper to calculate cart subtotal with wholesale discounts
+function getCartSubtotal() {
+  return cart.reduce((sum, item) => {
+    let itemTotal = item.product.price * item.quantity;
+    const wholesaleQty = parseFloat(item.product.wholesale_qty);
+    const wholesalePrice = parseFloat(item.product.wholesale_price);
+    
+    if (wholesaleQty > 0 && wholesalePrice > 0 && item.quantity >= wholesaleQty) {
+      const bundles = Math.floor(item.quantity / wholesaleQty);
+      const remainder = item.quantity % wholesaleQty;
+      itemTotal = (bundles * wholesalePrice) + (remainder * item.product.price);
+    }
+    return sum + itemTotal;
+  }, 0);
+}
+
 // Load products from Supabase scoped to activeShopSlug
 async function loadStoreProducts() {
   products = await getShopProducts(activeShopSlug);
   buildDynamicCategoryTabs();
   renderProducts();
+  renderFeaturedMarqueeBar();
 }
 
 // Render products to grid
@@ -229,15 +246,23 @@ function renderProducts() {
       ? `<img src="${p.image_url}" alt="${p.name}" class="product-grid-image" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.outerHTML='<span>${icon}</span>'">`
       : `<span>${icon}</span>`;
 
+    const wholesaleQty = parseFloat(p.wholesale_qty);
+    const wholesalePrice = parseFloat(p.wholesale_price);
+    const hasWholesale = wholesaleQty > 0 && wholesalePrice > 0;
+    const wholesaleBadgeHtml = hasWholesale 
+      ? `<div class="wholesale-badge"><i class="fa-solid fa-tags"></i> عرض الجملة: ${p.wholesale_qty} ${p.unit} بـ ${p.wholesale_price} ج</div>`
+      : ``;
+
     card.innerHTML = `
       <span class="product-category-badge">${CATEGORY_NAMES[p.category] || p.category}</span>
-      <div class="product-image-container">
+      <div class="product-image-container" onclick="openOfferDetails('${p.id}')" style="cursor: pointer;">
         ${imageContainerContent}
         ${!isAvailable ? '<div class="out-of-stock-overlay">غير متوفر حالياً</div>' : ''}
       </div>
       <div class="product-details">
-        <h3 class="product-title">${p.name}</h3>
+        <h3 class="product-title" onclick="openOfferDetails('${p.id}')" style="cursor: pointer;">${p.name}</h3>
         <p class="product-desc" title="${p.description}">${p.description || "لا يوجد وصف لهذا المنتج حالياً."}</p>
+        ${wholesaleBadgeHtml}
         <div class="product-meta">
           <div class="product-price-info">
             <span class="product-price">${p.price} ج</span>
@@ -380,11 +405,21 @@ function updateCartUI() {
   checkoutSection.style.display = "block";
   itemsContainer.innerHTML = "";
   
-  let subtotal = 0;
+  let subtotal = getCartSubtotal();
   
   cart.forEach(item => {
-    const itemTotal = item.product.price * item.quantity;
-    subtotal += itemTotal;
+    let itemTotal = item.product.price * item.quantity;
+    let wholesaleApplied = false;
+    
+    const wholesaleQty = parseFloat(item.product.wholesale_qty);
+    const wholesalePrice = parseFloat(item.product.wholesale_price);
+    
+    if (wholesaleQty > 0 && wholesalePrice > 0 && item.quantity >= wholesaleQty) {
+      const bundles = Math.floor(item.quantity / wholesaleQty);
+      const remainder = item.quantity % wholesaleQty;
+      itemTotal = (bundles * wholesalePrice) + (remainder * item.product.price);
+      wholesaleApplied = true;
+    }
     
     const div = document.createElement("div");
     div.className = "cart-item";
@@ -392,6 +427,11 @@ function updateCartUI() {
       <div class="cart-item-details">
         <h4 class="cart-item-title">${item.product.name}</h4>
         <span class="cart-item-price">${item.product.price} ج × ${item.quantity} = <strong>${itemTotal} ج</strong></span>
+        ${wholesaleApplied ? `
+          <div class="cart-item-offer-applied">
+            <i class="fa-solid fa-circle-check"></i> تم تطبيق عرض الجملة!
+          </div>
+        ` : ''}
       </div>
       <div class="cart-item-qty-control">
         <button onclick="updateQty('${item.product.id}', 1)">+</button>
@@ -621,3 +661,247 @@ function buildDynamicCategoryTabs() {
 
   container.innerHTML = tabsHtml;
 }
+
+// Render Featured Marquee Bar dynamically
+function renderFeaturedMarqueeBar() {
+  const marqueeBar = document.getElementById("featuredMarqueeBar");
+  const textWrapper = document.getElementById("marqueeTextWrapper");
+  if (!marqueeBar || !textWrapper) return;
+
+  // Filter products marked as featured
+  const featured = products.filter(p => p.is_featured === true || p.is_featured === 'true');
+
+  if (featured.length === 0) {
+    marqueeBar.style.display = "none";
+    const existingTrigger = document.getElementById("marqueeCollapsedTrigger");
+    if (existingTrigger) existingTrigger.remove();
+    return;
+  }
+
+  marqueeBar.style.display = "flex";
+  textWrapper.innerHTML = "";
+
+  featured.forEach(p => {
+    const item = document.createElement("span");
+    item.className = "marquee-item";
+    item.setAttribute("onclick", `openOfferDetails('${p.id}')`);
+
+    const wholesaleQty = parseFloat(p.wholesale_qty);
+    const wholesalePrice = parseFloat(p.wholesale_price);
+    const hasWholesale = wholesaleQty > 0 && wholesalePrice > 0;
+
+    let text = `🔥 عرض مميز: <strong>${p.name}</strong> بسعر ${p.price} ج فقط!`;
+    if (hasWholesale) {
+      text = `🔥 عرض الجملة الخاص: <strong>${p.name}</strong> (${p.wholesale_qty} ${p.unit} بسعر ${p.wholesale_price} ج بدلاً من ${p.wholesale_qty * p.price} ج) - اضغط للتفاصيل`;
+    }
+
+    item.innerHTML = `
+      <span class="badge-offer">عرض</span>
+      <span>${text}</span>
+    `;
+    textWrapper.appendChild(item);
+  });
+
+  // Duplicate elements if list is short to ensure smooth scrolling loop
+  if (featured.length < 5) {
+    const children = Array.from(textWrapper.children);
+    children.forEach(child => {
+      const clone = child.cloneNode(true);
+      textWrapper.appendChild(clone);
+    });
+  }
+}
+
+let isMarqueeClosed = false;
+
+// Handle close action on Marquee bar
+function toggleMarqueeBar() {
+  const marqueeBar = document.getElementById("featuredMarqueeBar");
+  if (!marqueeBar) return;
+  
+  marqueeBar.classList.add("closed");
+  isMarqueeClosed = true;
+  
+  // Create expand button at bottom-left corner
+  createMarqueeCollapsedTrigger();
+}
+
+// Create floating trigger to open the marquee back
+function createMarqueeCollapsedTrigger() {
+  if (document.getElementById("marqueeCollapsedTrigger")) return;
+
+  const trigger = document.createElement("button");
+  trigger.id = "marqueeCollapsedTrigger";
+  trigger.className = "marquee-collapsed-trigger";
+  trigger.innerHTML = `<i class="fa-solid fa-gift"></i> <span>عرض العروض المميزة</span>`;
+  trigger.onclick = () => {
+    const marqueeBar = document.getElementById("featuredMarqueeBar");
+    if (marqueeBar) {
+      marqueeBar.classList.remove("closed");
+      isMarqueeClosed = false;
+    }
+    trigger.remove();
+  };
+  
+  document.body.appendChild(trigger);
+}
+
+// Open Detail view modal for featured/special deals
+function openOfferDetails(productId) {
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
+
+  const existingModal = document.getElementById("offerDetailsModal");
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "offerDetailsModal";
+  modal.style.position = "fixed";
+  modal.style.top = "0";
+  modal.style.left = "0";
+  modal.style.width = "100%";
+  modal.style.height = "100%";
+  modal.style.background = "rgba(0,0,0,0.7)";
+  modal.style.backdropFilter = "blur(8px)";
+  modal.style.zIndex = "1050";
+  modal.style.display = "flex";
+  modal.style.alignItems = "center";
+  modal.style.justifyContent = "center";
+  modal.style.padding = "20px";
+  modal.style.boxSizing = "border-box";
+
+  const wholesaleQty = parseFloat(product.wholesale_qty);
+  const wholesalePrice = parseFloat(product.wholesale_price);
+  const hasWholesale = wholesaleQty > 0 && wholesalePrice > 0;
+
+  let offerDetailsHtml = "";
+  if (hasWholesale) {
+    const regularTotalPrice = wholesaleQty * product.price;
+    const savings = regularTotalPrice - wholesalePrice;
+    
+    offerDetailsHtml = `
+      <div style="background: rgba(25, 20, 17, 0.95); border: 2px solid var(--secondary-color); padding: 1.5rem; border-radius: 20px; text-align: center; max-width: 450px; width: 100%; box-shadow: var(--shadow-lg); color: var(--white); direction: rtl;">
+        <i class="fa-solid fa-gift" style="font-size: 2.5rem; color: var(--secondary-color); margin-bottom: 1rem; display: inline-block;"></i>
+        <h3 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--white);">${product.name}</h3>
+        <p style="font-size: 0.85rem; color: var(--gray-400); margin-bottom: 1rem;">${product.description || "لا يوجد وصف لهذا المنتج حالياً."}</p>
+        
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;">
+            <span style="color: var(--gray-400);">السعر المفرد:</span>
+            <span style="font-weight: 700;">${product.price} ج لكل ${product.unit}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;">
+            <span style="color: var(--secondary-color); font-weight: 700;">عرض الجملة:</span>
+            <span style="font-weight: 700; color: var(--secondary-color);">${wholesaleQty} ${product.unit} بـ ${wholesalePrice} ج</span>
+          </div>
+          ${savings > 0 ? `
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 700; color: var(--success-color);">
+            <span>نسبة التوفير:</span>
+            <span>توفير ${savings} ج!</span>
+          </div>
+          ` : ''}
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.85rem; color: var(--gray-400); margin-bottom: 0.5rem;">اختر الكمية المرغوبة:</label>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <button onclick="decrementOfferQty()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; font-weight: bold;">-</button>
+            <input type="number" id="offerQtyInput" value="${wholesaleQty}" min="1" style="width: 70px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center; font-size: 1.1rem; font-weight: 700; padding: 5px; border-radius: 6px;">
+            <button onclick="incrementOfferQty()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; font-weight: bold;">+</button>
+          </div>
+          <span style="display:block; font-size:11px; color:var(--success-color); margin-top:8px;" id="offerAppliedMsg">✓ تم تفعيل سعر العرض الخاص!</span>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button onclick="addOfferToCart('${product.id}')" style="background: var(--primary-gradient); border: none; color: white; padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 10px; cursor: pointer; flex: 1;">إضافة للسلة</button>
+          <button onclick="closeOfferModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--gray-300); padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 10px; cursor: pointer;">إغلاق</button>
+        </div>
+      </div>
+    `;
+  } else {
+    offerDetailsHtml = `
+      <div style="background: rgba(25, 20, 17, 0.95); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 20px; text-align: center; max-width: 400px; width: 100%; box-shadow: var(--shadow-lg); color: var(--white); direction: rtl;">
+        <h3 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--white);">${product.name}</h3>
+        <p style="font-size: 0.85rem; color: var(--gray-400); margin-bottom: 1.5rem;">${product.description || "لا يوجد وصف لهذا المنتج حالياً."}</p>
+        
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+            <span style="color: var(--gray-400);">السعر:</span>
+            <span style="font-weight: 700;">${product.price} ج لكل ${product.unit}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button onclick="addSingleToCart('${product.id}')" style="background: var(--primary-gradient); border: none; color: white; padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 10px; cursor: pointer; flex: 1;">إضافة للسلة</button>
+          <button onclick="closeOfferModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--gray-300); padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 10px; cursor: pointer;">إغلاق</button>
+        </div>
+      </div>
+    `;
+  }
+
+  modal.innerHTML = offerDetailsHtml;
+  document.body.appendChild(modal);
+
+  window.closeOfferModal = () => modal.remove();
+  
+  window.incrementOfferQty = () => {
+    const input = document.getElementById("offerQtyInput");
+    if (input) {
+      input.value = parseInt(input.value) + 1;
+      updateOfferModalMsg(wholesaleQty);
+    }
+  };
+
+  window.decrementOfferQty = () => {
+    const input = document.getElementById("offerQtyInput");
+    if (input && parseInt(input.value) > 1) {
+      input.value = parseInt(input.value) - 1;
+      updateOfferModalMsg(wholesaleQty);
+    }
+  };
+
+  window.addOfferToCart = (pId) => {
+    const input = document.getElementById("offerQtyInput");
+    const qty = parseInt(input.value) || wholesaleQty;
+    addToCartWithQty(pId, qty);
+    modal.remove();
+  };
+
+  window.addSingleToCart = (pId) => {
+    addToCart(pId);
+    modal.remove();
+  };
+
+  const updateOfferModalMsg = (threshold) => {
+    const input = document.getElementById("offerQtyInput");
+    const msg = document.getElementById("offerAppliedMsg");
+    if (!input || !msg) return;
+    if (parseInt(input.value) >= threshold) {
+      msg.style.color = "#4cd964";
+      msg.textContent = "✓ تم تفعيل سعر العرض الخاص!";
+    } else {
+      msg.style.color = "#ffcc00";
+      msg.textContent = `أضف ${threshold - parseInt(input.value)} قطعة إضافية لتفعيل العرض!`;
+    }
+  };
+}
+
+// Add Item with specified quantity
+function addToCartWithQty(productId, qty) {
+  const product = products.find(p => p.id === productId);
+  if (!product || product.available === false) return;
+
+  const cartItem = cart.find(item => item.product.id === productId);
+  if (cartItem) {
+    cartItem.quantity = qty;
+  } else {
+    cart.push({
+      product: product,
+      quantity: qty
+    });
+  }
+
+  saveCartAndRefresh();
+  showToast(`تمت إضافة "${product.name}" بالكمية المطلوبة (${qty}) إلى السلة!`);
+}
+

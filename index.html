@@ -90,6 +90,18 @@
 
   <!-- 2. Storefront App (Shown only when shop ?s= slug is provided) -->
   <div id="storefrontApp" style="display: none;">
+    <!-- Featured Marquee Bar -->
+    <div class="featured-marquee-bar" id="featuredMarqueeBar" style="display: none;">
+      <div class="marquee-content-container">
+        <div class="marquee-text-wrapper" id="marqueeTextWrapper">
+          <!-- Dynamically populated featured items -->
+        </div>
+      </div>
+      <button class="toggle-marquee-btn" onclick="toggleMarqueeBar()" title="إغلاق شريط العروض">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
     <!-- Header -->
     <header id="storefrontHeader">
       <div class="header-container">
@@ -182,69 +194,72 @@
         </button>
       </div>
 
-      <!-- Free Shipping Tracker -->
-      <div class="shipping-tracker" id="shippingTracker">
-        <div class="shipping-tracker-text">
-          <span id="shippingTrackerMsg">أضف منتجات للحصول على شحن مجاني</span>
-          <strong id="shippingTrackerAmount">0 ج متبقية</strong>
-        </div>
-        <div class="shipping-tracker-progress-bg">
-          <div class="shipping-tracker-progress-bar" id="shippingTrackerProgress"></div>
-        </div>
-      </div>
-
-      <!-- Cart Items list -->
-      <div class="cart-items-list" id="cartItemsList">
-        <!-- Dynamically Rendered Cart Items -->
-      </div>
-
-      <!-- Checkout section -->
-      <div class="cart-checkout-section" id="cartCheckoutSection" style="display: none;">
-        <div class="cart-summary-row">
-          <span>إجمالي المشتريات:</span>
-          <span id="cartSubtotal">0 ج</span>
-        </div>
-        <div class="cart-summary-row">
-          <span>مصاريف الشحن:</span>
-          <span id="cartShipping">احسب أولاً</span>
-        </div>
-        <div class="cart-summary-row total">
-          <span>الإجمالي الكلي:</span>
-          <span id="cartTotal">0 ج</span>
+      <!-- Scrollable Body wrapper to fix scrolling issues -->
+      <div class="cart-drawer-body" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+        <!-- Free Shipping Tracker -->
+        <div class="shipping-tracker" id="shippingTracker">
+          <div class="shipping-tracker-text">
+            <span id="shippingTrackerMsg">أضف منتجات للحصول على شحن مجاني</span>
+            <strong id="shippingTrackerAmount">0 ج متبقية</strong>
+          </div>
+          <div class="shipping-tracker-progress-bg">
+            <div class="shipping-tracker-progress-bar" id="shippingTrackerProgress"></div>
+          </div>
         </div>
 
-        <!-- Customer Checkout Details Form -->
-        <form class="checkout-form" id="checkoutForm" onsubmit="handleCheckout(event)">
-          <div class="form-group">
-            <label for="custName"><i class="fa-solid fa-user"></i> الاسم بالكامل *</label>
-            <input type="text" id="custName" required placeholder="أدخل اسمك لتجهيز الأوردر">
+        <!-- Cart Items list -->
+        <div class="cart-items-list" id="cartItemsList">
+          <!-- Dynamically Rendered Cart Items -->
+        </div>
+
+        <!-- Checkout section -->
+        <div class="cart-checkout-section" id="cartCheckoutSection" style="display: none;">
+          <div class="cart-summary-row">
+            <span>إجمالي المشتريات:</span>
+            <span id="cartSubtotal">0 ج</span>
           </div>
-          
-          <div class="form-group">
-            <label for="custCity"><i class="fa-solid fa-map-location-dot"></i> المحافظة *</label>
-            <select id="custCity" required onchange="calculateShippingPrice()">
-              <option value="" disabled selected>اختر محافظة التوصيل</option>
-              <option value="cairo">القاهرة</option>
-              <option value="giza">الجيزة</option>
-              <option value="others">محافظة أخرى</option>
-            </select>
+          <div class="cart-summary-row">
+            <span>مصاريف الشحن:</span>
+            <span id="cartShipping">احسب أولاً</span>
           </div>
-          
-          <div class="form-group">
-            <label for="custAddress"><i class="fa-solid fa-house"></i> العنوان بالتفصيل *</label>
-            <input type="text" id="custAddress" required placeholder="المنطقة، اسم الشارع، رقم العقار">
-          </div>
-          
-          <div class="form-group">
-            <label for="custPhone"><i class="fa-solid fa-phone"></i> رقم الهاتف (متاح عليه واتس) *</label>
-            <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
+          <div class="cart-summary-row total">
+            <span>الإجمالي الكلي:</span>
+            <span id="cartTotal">0 ج</span>
           </div>
 
-          <button type="submit" class="whatsapp-checkout-btn">
-            <i class="fa-brands fa-whatsapp"></i>
-            <span>إرسال الطلب عبر الواتساب</span>
-          </button>
-        </form>
+          <!-- Customer Checkout Details Form -->
+          <form class="checkout-form" id="checkoutForm" onsubmit="handleCheckout(event)">
+            <div class="form-group">
+              <label for="custName"><i class="fa-solid fa-user"></i> الاسم بالكامل *</label>
+              <input type="text" id="custName" required placeholder="أدخل اسمك لتجهيز الأوردر">
+            </div>
+            
+            <div class="form-group">
+              <label for="custCity"><i class="fa-solid fa-map-location-dot"></i> المحافظة *</label>
+              <select id="custCity" required onchange="calculateShippingPrice()">
+                <option value="" disabled selected>اختر محافظة التوصيل</option>
+                <option value="cairo">القاهرة</option>
+                <option value="giza">الجيزة</option>
+                <option value="others">محافظة أخرى</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="custAddress"><i class="fa-solid fa-house"></i> العنوان بالتفصيل *</label>
+              <input type="text" id="custAddress" required placeholder="المنطقة، اسم الشارع، رقم العقار">
+            </div>
+            
+            <div class="form-group">
+              <label for="custPhone"><i class="fa-solid fa-phone"></i> رقم الهاتف (متاح عليه واتس) *</label>
+              <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
+            </div>
+
+            <button type="submit" class="whatsapp-checkout-btn">
+              <i class="fa-brands fa-whatsapp"></i>
+              <span>إرسال الطلب عبر الواتساب</span>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
 

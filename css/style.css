@@ -737,8 +737,6 @@ header {
 
 /* Cart Items Container */
 .cart-items-list {
-  flex: 1;
-  overflow-y: auto;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -1361,4 +1359,153 @@ footer {
   padding-top: 1.5rem;
   font-size: 0.8rem;
   color: var(--gray-600);
+}
+
+/* Featured Marquee Bar */
+.featured-marquee-bar {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: var(--white);
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 950;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  direction: ltr;
+}
+
+.featured-marquee-bar.closed {
+  height: 0px !important;
+  border-bottom: 0px transparent !important;
+}
+
+/* Floating Expand Tab when Marquee is closed */
+.marquee-collapsed-trigger {
+  position: fixed;
+  top: 10px;
+  left: 20px;
+  background: var(--secondary-color);
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 1100;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition-fast);
+}
+
+.marquee-collapsed-trigger:hover {
+  background: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.marquee-content-container {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.marquee-text-wrapper {
+  display: inline-flex;
+  gap: 6rem;
+  align-items: center;
+  position: absolute;
+  direction: rtl;
+  will-change: transform;
+  animation: marquee-run 35s linear infinite;
+}
+
+@keyframes marquee-run {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--white);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.marquee-item:hover {
+  text-shadow: 0 0 8px rgba(255,255,255,0.8);
+  transform: scale(1.02);
+}
+
+.marquee-item .badge-offer {
+  background: #ea4335;
+  color: var(--white);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.toggle-marquee-btn {
+  background: rgba(0, 0, 0, 0.25);
+  border: none;
+  color: var(--white);
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: var(--transition-fast);
+}
+
+.toggle-marquee-btn:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Wholesale Wholesale Badges and Styles */
+.wholesale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(212, 138, 55, 0.1);
+  border: 1px solid var(--secondary-color);
+  color: var(--secondary-color);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--border-radius-sm);
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
+
+.cart-item-offer-applied {
+  font-size: 0.75rem;
+  color: var(--success-color);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
 }

@@ -247,6 +247,29 @@
             </div>
           </div>
 
+          <!-- Featured Product & Bulk Pricing Details -->
+          <div style="background: var(--gray-100); padding: 15px; border-radius: var(--border-radius-sm); border: 1px dashed var(--gray-300); margin-bottom: 15px;">
+            <h4 style="margin-bottom: 10px; color: var(--dark-color); font-weight: 700; font-size: 13px;">
+              <i class="fa-solid fa-gift" style="color: var(--secondary-color);"></i> شريط العروض المتحرك وعروض الجملة (الكمية)
+            </h4>
+            
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <input type="checkbox" id="prodIsFeatured" style="width: 16px; height: 16px; cursor: pointer;">
+              <label for="prodIsFeatured" style="font-weight: 600; font-size: 13px; cursor: pointer; margin: 0;">عرض المنتج في شريط العروض المتحرك بالأعلى</label>
+            </div>
+            
+            <div class="modal-form-row-2">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="prodWholesaleQty" style="font-size: 12px;">كمية الجملة (مثال: 10) - أو 0 للإلغاء</label>
+                <input type="number" id="prodWholesaleQty" min="0" placeholder="مثال: 10">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="prodWholesalePrice" style="font-size: 12px;">سعر العرض الإجمالي (مثال: 5000)</label>
+                <input type="number" id="prodWholesalePrice" min="0" placeholder="مثال: 5000">
+              </div>
+            </div>
+          </div>
+
           <div class="form-group">
             <label for="prodDesc">وصف المنتج وتفاصيله</label>
             <textarea id="prodDesc" rows="3" placeholder="اكتب نبذة عن فوائد المنتج أو تفاصيل إضافية..."></textarea>

@@ -339,6 +339,9 @@ function openProductModal(productId) {
     saveBtn.textContent = "إضافة المنتج";
     document.getElementById("modalProductId").value = "";
     document.getElementById("prodAvailable").value = "true";
+    document.getElementById("prodIsFeatured").checked = false;
+    document.getElementById("prodWholesaleQty").value = "";
+    document.getElementById("prodWholesalePrice").value = "";
     
     populateAdminCategorySelect("");
   } else {
@@ -355,6 +358,9 @@ function openProductModal(productId) {
     document.getElementById("prodUnit").value = product.unit;
     document.getElementById("prodDesc").value = product.description || "";
     document.getElementById("prodAvailable").value = (product.available !== false).toString();
+    document.getElementById("prodIsFeatured").checked = product.is_featured === true || product.is_featured === 'true';
+    document.getElementById("prodWholesaleQty").value = product.wholesale_qty || "";
+    document.getElementById("prodWholesalePrice").value = product.wholesale_price || "";
     
     prodImageUrl.value = product.image_url || "";
     if (product.image_url) {
@@ -395,6 +401,10 @@ async function saveProductForm(event) {
   const description = document.getElementById("prodDesc").value.trim();
   const available = document.getElementById("prodAvailable").value === "true";
   
+  const is_featured = document.getElementById("prodIsFeatured").checked;
+  const wholesale_qty = parseFloat(document.getElementById("prodWholesaleQty").value) || null;
+  const wholesale_price = parseFloat(document.getElementById("prodWholesalePrice").value) || null;
+  
   if (!name || !category || isNaN(price) || !unit) {
     showToast("يرجى ملء جميع الحقول الإلزامية", "danger");
     return;
@@ -409,7 +419,10 @@ async function saveProductForm(event) {
     unit,
     image_url: image_url || null,
     description: description || null,
-    available
+    available,
+    is_featured,
+    wholesale_qty,
+    wholesale_price
   };
 
   const saveModalBtn = document.getElementById("saveModalBtn");
