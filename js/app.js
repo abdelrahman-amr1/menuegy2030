@@ -187,6 +187,7 @@ async function initTenantStorefront(slug) {
 // Load products from Supabase scoped to activeShopSlug
 async function loadStoreProducts() {
   products = await getShopProducts(activeShopSlug);
+  buildDynamicCategoryTabs();
   renderProducts();
 }
 
@@ -595,4 +596,28 @@ function showToast(message, type = "success") {
       toast.remove();
     }, 300);
   }, 3500);
+}
+
+// Build Dynamic Category Tabs based on active products in the shop
+function buildDynamicCategoryTabs() {
+  const container = document.getElementById("categoryFilterContainer");
+  if (!container) return;
+
+  const uniqueCategories = new Set();
+  products.forEach(p => {
+    if (p.category) {
+      uniqueCategories.add(p.category);
+    }
+  });
+
+  // Start with 'all'
+  let tabsHtml = `<button class="category-tab ${currentCategory === 'all' ? 'active' : ''}" data-category="all" onclick="setCategory('all')">الكل</button>`;
+
+  // Add each unique category
+  uniqueCategories.forEach(cat => {
+    const catLabel = CATEGORY_NAMES[cat] || cat;
+    tabsHtml += `<button class="category-tab ${currentCategory === cat ? 'active' : ''}" data-category="${cat}" onclick="setCategory('${cat}')">${catLabel}</button>`;
+  });
+
+  container.innerHTML = tabsHtml;
 }

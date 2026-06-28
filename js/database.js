@@ -309,3 +309,34 @@ async function getSuperStats() {
     return { totalShops: 0, totalProducts: 0 };
   }
 }
+
+// Upload file to Supabase Storage bucket 'images'
+async function uploadFileToSupabase(file, folder = "general") {
+  if (!isDbConnected()) {
+    throw new Error("قاعدة البيانات غير متصلة");
+  }
+  try {
+    const fileExt = file.name.split('.').pop();
+    // Clean file name using timestamp and random string
+    const cleanFileName = `${folder}/${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+    
+    const { data, error } = await window.supabaseDb.storage
+      .from('images')
+      .upload(cleanFileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+      
+    if (error) throw error;
+    
+    // Get public URL
+    const { data: { publicUrl } } = window.supabaseDb.storage
+      .from('images')
+      .getPublicUrl(cleanFileName);
+      
+    return publicUrl;
+  } catch (e) {
+    console.error("Error uploading file:", e);
+    throw e;
+  }
+}

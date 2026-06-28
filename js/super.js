@@ -13,6 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const shopSlogan = document.getElementById("shopSlogan");
   const shopWhatsapp = document.getElementById("shopWhatsapp");
   const shopLogoUrl = document.getElementById("shopLogoUrl");
+  const shopLogoFile = document.getElementById("shopLogoFile");
+  const shopLogoPreviewContainer = document.getElementById("shopLogoPreviewContainer");
+  const shopLogoPreview = document.getElementById("shopLogoPreview");
+  const shopLogoUploadStatus = document.getElementById("shopLogoUploadStatus");
   const shopPrimaryColor = document.getElementById("shopPrimaryColor");
   const shopSecondaryColor = document.getElementById("shopSecondaryColor");
   const shopFreeShipping = document.getElementById("shopFreeShipping");
@@ -23,6 +27,38 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelEditBtn = document.getElementById("cancelEditBtn");
   const formPanelTitle = document.getElementById("formPanelTitle");
   const saveShopBtn = document.getElementById("saveShopBtn");
+
+  // Logo file upload handler
+  if (shopLogoFile) {
+    shopLogoFile.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      shopLogoPreviewContainer.style.display = "block";
+      shopLogoUploadStatus.style.color = "#d48a37";
+      shopLogoUploadStatus.textContent = "⌛ جاري رفع شعار المحل...";
+      shopLogoPreview.style.opacity = "0.5";
+
+      try {
+        const publicUrl = await uploadFileToSupabase(file, "logos");
+        if (publicUrl) {
+          shopLogoUrl.value = publicUrl;
+          shopLogoPreview.src = publicUrl;
+          shopLogoPreview.style.opacity = "1";
+          shopLogoUploadStatus.style.color = "#4cd964";
+          shopLogoUploadStatus.textContent = "✓ تم رفع الصورة بنجاح";
+        } else {
+          throw new Error("فشل الرفع");
+        }
+      } catch (err) {
+        console.error(err);
+        shopLogoUploadStatus.style.color = "#d9534f";
+        shopLogoUploadStatus.textContent = "❌ فشل رفع الصورة";
+        shopLogoPreviewContainer.style.display = "none";
+        shopLogoUrl.value = "";
+      }
+    });
+  }
 
   // Authentication Handling
   function initAuth() {
@@ -122,7 +158,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="shop-actions">
           <a href="../index.html?s=${shop.id}" target="_blank" class="btn-action btn-visit" title="عرض المتجر">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> المتجر
+            <i class="fa-solid fa-eye"></i> عرض
+          </a>
+          <a href="../admin/index.html?shop=${shop.id}" target="_blank" class="btn-action btn-visit" style="background: rgba(111, 66, 193, 0.15); color: #a180e6;" title="لوحة التحكم للأدمن">
+            <i class="fa-solid fa-user-gear"></i> إدارة
           </a>
           <button class="btn-action btn-edit" data-slug="${shop.id}" title="تعديل المتجر">
             <i class="fa-solid fa-pen"></i> تعديل
@@ -167,6 +206,14 @@ document.addEventListener("DOMContentLoaded", () => {
     shopSlogan.value = shop.slogan || "";
     shopWhatsapp.value = shop.whatsapp_number;
     shopLogoUrl.value = shop.logo_url || "";
+    if (shop.logo_url) {
+      shopLogoPreview.src = shop.logo_url;
+      shopLogoPreviewContainer.style.display = "block";
+      shopLogoUploadStatus.style.color = "#4cd964";
+      shopLogoUploadStatus.textContent = "✓ شعار المحل الحالي";
+    } else {
+      shopLogoPreviewContainer.style.display = "none";
+    }
     shopPrimaryColor.value = shop.primary_color;
     shopSecondaryColor.value = shop.secondary_color;
     shopFreeShipping.value = shop.free_shipping_limit;
@@ -192,6 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
     shopSlug.style.opacity = "1";
     shopPrimaryColor.value = "#b24a27";
     shopSecondaryColor.value = "#d48a37";
+    
+    // Clear logo upload elements
+    if (shopLogoFile) shopLogoFile.value = "";
+    shopLogoUrl.value = "";
+    if (shopLogoPreviewContainer) shopLogoPreviewContainer.style.display = "none";
   }
 
   // Handle Save Shop (New or Edit)

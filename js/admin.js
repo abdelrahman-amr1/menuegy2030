@@ -33,6 +33,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // Bind product image uploader change listener
+  const prodImageFile = document.getElementById("prodImageFile");
+  const prodImageUrl = document.getElementById("prodImageUrl");
+  const prodImagePreviewContainer = document.getElementById("prodImagePreviewContainer");
+  const prodImagePreview = document.getElementById("prodImagePreview");
+  const prodImageUploadStatus = document.getElementById("prodImageUploadStatus");
+
+  if (prodImageFile) {
+    prodImageFile.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      prodImagePreviewContainer.style.display = "block";
+      prodImageUploadStatus.style.color = "#d48a37";
+      prodImageUploadStatus.textContent = "⌛ جاري رفع صورة المنتج...";
+      prodImagePreview.style.opacity = "0.5";
+
+      try {
+        const publicUrl = await uploadFileToSupabase(file, "products");
+        if (publicUrl) {
+          prodImageUrl.value = publicUrl;
+          prodImagePreview.src = publicUrl;
+          prodImagePreview.style.opacity = "1";
+          prodImageUploadStatus.style.color = "#4cd964";
+          prodImageUploadStatus.textContent = "✓ تم رفع الصورة بنجاح";
+        } else {
+          throw new Error("فشل الرفع");
+        }
+      } catch (err) {
+        console.error(err);
+        prodImageUploadStatus.style.color = "#d9534f";
+        prodImageUploadStatus.textContent = "❌ فشل رفع الصورة";
+        prodImagePreviewContainer.style.display = "none";
+        prodImageUrl.value = "";
+      }
+    });
+  }
+
   await checkAuth();
 });
 
@@ -160,6 +198,7 @@ function handleAdminLogout() {
 // Load products and render admin UI
 async function loadAdminProducts() {
   products = await getShopProducts(activeShopSlug);
+  populateAdminCategoryFilter();
   updateStats();
   applyFiltersAndRender();
 }
@@ -285,12 +324,23 @@ function openProductModal(productId) {
   
   form.reset();
   
+  // Clear file input and preview container
+  const prodImageFile = document.getElementById("prodImageFile");
+  if (prodImageFile) prodImageFile.value = "";
+  const prodImagePreviewContainer = document.getElementById("prodImagePreviewContainer");
+  const prodImagePreview = document.getElementById("prodImagePreview");
+  const prodImageUrl = document.getElementById("prodImageUrl");
+  prodImageUrl.value = "";
+  if (prodImagePreviewContainer) prodImagePreviewContainer.style.display = "none";
+  
   if (productId === null) {
     // Add Mode
     modalTitle.textContent = "إضافة منتج جديد";
     saveBtn.textContent = "إضافة المنتج";
     document.getElementById("modalProductId").value = "";
     document.getElementById("prodAvailable").value = "true";
+    
+    populateAdminCategorySelect("");
   } else {
     // Edit Mode
     const product = products.find(p => p.id === productId);
@@ -301,12 +351,21 @@ function openProductModal(productId) {
     
     document.getElementById("modalProductId").value = product.id;
     document.getElementById("prodName").value = product.name;
-    document.getElementById("prodCategory").value = product.category;
     document.getElementById("prodPrice").value = product.price;
     document.getElementById("prodUnit").value = product.unit;
-    document.getElementById("prodImageUrl").value = product.image_url || "";
     document.getElementById("prodDesc").value = product.description || "";
     document.getElementById("prodAvailable").value = (product.available !== false).toString();
+    
+    prodImageUrl.value = product.image_url || "";
+    if (product.image_url) {
+      prodImagePreview.src = product.image_url;
+      prodImagePreviewContainer.style.display = "block";
+      document.getElementById("prodImageUploadStatus").style.color = "#4cd964";
+      document.getElementById("prodImageUploadStatus").textContent = "✓ صورة المنتج الحالية";
+      prodImagePreview.style.opacity = "1";
+    }
+    
+    populateAdminCategorySelect(product.category);
   }
   
   overlay.classList.add("open");
@@ -323,7 +382,13 @@ async function saveProductForm(event) {
   
   const id = document.getElementById("modalProductId").value;
   const name = document.getElementById("prodName").value.trim();
-  const category = document.getElementById("prodCategory").value;
+  
+  // Handle custom category
+  let category = document.getElementById("prodCategory").value;
+  if (category === "__custom__") {
+    category = document.getElementById("prodCategoryCustom").value.trim();
+  }
+  
   const price = parseFloat(document.getElementById("prodPrice").value);
   const unit = document.getElementById("prodUnit").value.trim();
   const image_url = document.getElementById("prodImageUrl").value.trim();

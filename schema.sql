@@ -31,3 +31,28 @@ CREATE TABLE IF NOT EXISTS products (
 -- to directly query and modify the tables using the public anon key.
 ALTER TABLE shops DISABLE ROW LEVEL SECURITY;
 ALTER TABLE products DISABLE ROW LEVEL SECURITY;
+
+-- 4. Enable Storage by creating the 'images' bucket and setting public policies
+-- Create storage bucket for images if it doesn't exist
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('images', 'images', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Drop existing storage policies if they exist to avoid duplication errors
+DROP POLICY IF EXISTS "Public Read Access" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload Access" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update Access" ON storage.objects;
+DROP POLICY IF EXISTS "Public Delete Access" ON storage.objects;
+
+-- Create policies for public access to 'images' bucket
+CREATE POLICY "Public Read Access" ON storage.objects
+    FOR SELECT USING (bucket_id = 'images');
+
+CREATE POLICY "Public Upload Access" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'images');
+
+CREATE POLICY "Public Update Access" ON storage.objects
+    FOR UPDATE USING (bucket_id = 'images') WITH CHECK (bucket_id = 'images');
+
+CREATE POLICY "Public Delete Access" ON storage.objects
+    FOR DELETE USING (bucket_id = 'images');

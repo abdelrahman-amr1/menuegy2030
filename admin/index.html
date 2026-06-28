@@ -200,14 +200,10 @@
           <div class="modal-form-row-2">
             <div class="form-group">
               <label for="prodCategory">التصنيف الرئيسي *</label>
-              <select id="prodCategory" required>
-                <option value="spices">التوابل والبهارات</option>
-                <option value="drinks">المشروبات الطبيعية</option>
-                <option value="herbs">الأعشاب الطبيعية</option>
-                <option value="oils">الزيوت الخام</option>
-                <option value="incense">البخور المشكل</option>
-                <option value="famous">الأشهر في أسوان</option>
+              <select id="prodCategory" required onchange="handleCategorySelectChange(this.value)">
+                <!-- Will be populated dynamically by JS -->
               </select>
+              <input type="text" id="prodCategoryCustom" placeholder="اكتب اسم التصنيف الجديد هنا..." style="margin-top: 8px; display: none; width: 100%; padding: 0.6rem 0.8rem;">
             </div>
             
             <div class="form-group">
@@ -228,12 +224,27 @@
             <div class="form-group">
               <label for="prodUnit">الوحدة التسعيرية *</label>
               <input type="text" id="prodUnit" required placeholder="مثال: 100 جرام، عبوة، كيلو">
+              <div class="quick-unit-tags" style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;">
+                <span class="unit-tag" onclick="setUnitQuick('كيلو')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">كيلو</span>
+                <span class="unit-tag" onclick="setUnitQuick('100 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">100 جرام</span>
+                <span class="unit-tag" onclick="setUnitQuick('250 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">250 جرام</span>
+                <span class="unit-tag" onclick="setUnitQuick('500 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">500 جرام</span>
+                <span class="unit-tag" onclick="setUnitQuick('قطعة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">قطعة</span>
+                <span class="unit-tag" onclick="setUnitQuick('عبوة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">عبوة</span>
+                <span class="unit-tag" onclick="setUnitQuick('علبة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">علبة</span>
+                <span class="unit-tag" onclick="setUnitQuick('زجاجة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">زجاجة</span>
+              </div>
             </div>
           </div>
           
           <div class="form-group">
-            <label for="prodImageUrl">رابط صورة المنتج (URL)</label>
-            <input type="url" id="prodImageUrl" placeholder="https://domain.com/image.jpg (اختياري)" style="direction: ltr;">
+            <label for="prodImageFile">صورة المنتج</label>
+            <input type="file" id="prodImageFile" accept="image/*" class="form-control" style="padding: 5px;">
+            <input type="hidden" id="prodImageUrl">
+            <div id="prodImagePreviewContainer" style="margin-top: 8px; display: none;">
+              <img id="prodImagePreview" src="" style="max-height: 80px; border-radius: 6px; border: 1px solid var(--gray-300);">
+              <span id="prodImageUploadStatus" style="font-size: 11px; color: #4cd964; display: block; margin-top: 2px;">✓ تم رفع الصورة بنجاح</span>
+            </div>
           </div>
 
           <div class="form-group">
