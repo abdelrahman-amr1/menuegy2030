@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم الرئيسية للمنصة | MenuEgy 2030</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom styling inside style.css + local overrides for super-admin -->
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        :root {
+            --super-bg: #120e0c;
+            --super-card-bg: rgba(30, 24, 20, 0.95);
+            --super-accent: #d48a37;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--super-bg);
+            color: #f7ede2;
+            margin: 0;
+            padding-bottom: 60px;
+        }
+
+        .super-header {
+            background: linear-gradient(135deg, #2b1f1a 0%, #1e130f 100%);
+            border-bottom: 2px solid var(--super-accent);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .super-logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--super-accent);
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .super-subtitle {
+            font-size: 14px;
+            color: #c9ad93;
+            margin: 0;
+        }
+
+        .super-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--super-card-bg);
+            border: 1px solid rgba(212, 138, 55, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--super-accent);
+        }
+
+        .stat-card i {
+            font-size: 36px;
+            color: var(--super-accent);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #c9ad93;
+        }
+
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .dashboard-layout {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        .glass-panel {
+            background: var(--super-card-bg);
+            border: 1px solid rgba(212, 138, 55, 0.2);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(212, 138, 55, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--super-accent);
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: #c9ad93;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 138, 55, 0.3);
+            border-radius: 8px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--super-accent);
+            box-shadow: 0 0 5px rgba(212, 138, 55, 0.5);
+        }
+
+        .color-pickers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(212, 138, 55, 0.3);
+            border-radius: 8px;
+            padding: 5px 8px;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            border: none;
+            background: none;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .color-picker-wrapper span {
+            font-size: 12px;
+            color: #c9ad93;
+        }
+
+        .btn-super {
+            width: 100%;
+            padding: 12px;
+            background: var(--super-accent);
+            color: #120e0c;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-super:hover {
+            background: #e69d4c;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 5px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Shops grid list */
+        .shops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .shop-card {
+            background: rgba(30, 24, 20, 0.6);
+            border: 1px solid rgba(212, 138, 55, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--super-accent);
+            box-shadow: 0 4px 15px rgba(212, 138, 55, 0.15);
+        }
+
+        .shop-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .shop-logo-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--super-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--super-accent);
+            overflow: hidden;
+            object-fit: cover;
+        }
+
+        .shop-title-desc h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .shop-title-desc p {
+            margin: 0;
+            font-size: 12px;
+            color: #c9ad93;
+        }
+
+        .shop-meta {
+            font-size: 13px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .meta-label {
+            color: #9d816a;
+        }
+
+        .meta-val {
+            font-weight: 600;
+        }
+
+        .shop-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .btn-action {
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            border: none;
+            transition: background 0.2s ease;
+        }
+
+        .btn-visit {
+            background: rgba(212, 138, 55, 0.15);
+            color: var(--super-accent);
+        }
+
+        .btn-visit:hover {
+            background: rgba(212, 138, 55, 0.3);
+        }
+
+        .btn-edit {
+            background: rgba(74, 144, 226, 0.15);
+            color: #4a90e2;
+        }
+
+        .btn-edit:hover {
+            background: rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-delete {
+            background: rgba(217, 83, 79, 0.15);
+            color: #d9534f;
+        }
+
+        .btn-delete:hover {
+            background: rgba(217, 83, 79, 0.3);
+        }
+
+        /* Login Modal Overrides */
+        .super-auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(18, 14, 12, 0.98);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--super-card-bg);
+            border: 1px solid var(--super-accent);
+            border-radius: 16px;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(212, 138, 55, 0.25);
+            text-align: center;
+        }
+
+        .auth-icon {
+            font-size: 50px;
+            color: var(--super-accent);
+            margin-bottom: 20px;
+        }
+
+        .auth-container h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .auth-container p {
+            color: #c9ad93;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Authentication Overlay -->
+    <div id="superAuthModal" class="super-auth-modal">
+        <div class="auth-container">
+            <i class="fa-solid fa-user-shield auth-icon"></i>
+            <h2>لوحة إدارة المنصة</h2>
+            <p>يُرجى إدخال الرقم السري للسوبر أدمن لمتابعة العمل</p>
+            <div class="form-group" style="text-align: right;">
+                <label>الرقم السري</label>
+                <input type="password" id="superPasswordInput" class="form-control" placeholder="••••••••" style="text-align: center;">
+            </div>
+            <button id="superLoginBtn" class="btn-super">تسجيل الدخول</button>
+            <p id="authErrorMsg" style="color: #d9534f; font-size: 13px; margin-top: 10px; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Main Admin View -->
+    <header class="super-header">
+        <div class="super-logo"><i class="fa-solid fa-cubes"></i> MenuEgy 2030</div>
+        <h1 class="super-subtitle">لوحة التحكم الرئيسية للمنصة متعددة المتاجر (SaaS)</h1>
+    </header>
+
+    <main class="super-container">
+        <!-- Stats Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fa-solid fa-shop"></i>
+                <div id="statShopsCount" class="stat-value">0</div>
+                <div class="stat-label">المتاجر المسجلة</div>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <div id="statProductsCount" class="stat-value">0</div>
+                <div class="stat-label">إجمالي المنتجات بالمنصة</div>
+            </div>
+            <div class="stat-card">
+                <i class="fa-solid fa-clock"></i>
+                <div class="stat-value">مفعلة</div>
+                <div class="stat-label">مزامنة السحابة Supabase</div>
+            </div>
+        </div>
+
+        <div class="dashboard-layout">
+            <!-- Right Panel: Shop creation form -->
+            <section class="glass-panel">
+                <h2 class="panel-title" id="formPanelTitle">
+                    <i class="fa-solid fa-plus-circle"></i> إضافة متجر جديد
+                </h2>
+                <form id="shopForm" onsubmit="event.preventDefault();">
+                    <input type="hidden" id="editShopMode" value="false">
+                    
+                    <div class="form-group">
+                        <label>معرّف الرابط (Slug) * بالإنجليزية فقط بدون فواصل</label>
+                        <input type="text" id="shopSlug" class="form-control" placeholder="مثال: aswan_hm" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>اسم المحل (بالعربية) *</label>
+                        <input type="text" id="shopName" class="form-control" placeholder="الأسوانية H.M جروب" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>شعار المحل / الوصف</label>
+                        <input type="text" id="shopSlogan" class="form-control" placeholder="أجود أنواع العطارة والبهارات الأسوانية">
+                    </div>
+
+                    <div class="form-group">
+                        <label>رقم هاتف الواتساب للمبيعات * (شامل كود الدولة)</label>
+                        <input type="text" id="shopWhatsapp" class="form-control" placeholder="201148666233" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>رابط الشعار (صورة اللوجو)</label>
+                        <input type="url" id="shopLogoUrl" class="form-control" placeholder="https://domain.com/logo.png">
+                    </div>
+
+                    <div class="form-group">
+                        <label>البراند والألوان المخصصة</label>
+                        <div class="color-pickers">
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="shopPrimaryColor" value="#b24a27">
+                                <span>الأساسي</span>
+                            </div>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="shopSecondaryColor" value="#d48a37">
+                                <span>الفرعي</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>حد الشحن المجاني (جنيه)</label>
+                        <input type="number" id="shopFreeShipping" class="form-control" value="1000" min="0">
+                    </div>
+
+                    <h3 class="panel-title" style="font-size:14px; margin-top:20px; margin-bottom:10px;">
+                        <i class="fa-solid fa-key"></i> بيانات لوحة أدمن المحل
+                    </h3>
+
+                    <div class="form-group">
+                        <label>اسم مستخدم الأدمن *</label>
+                        <input type="text" id="shopAdminUser" class="form-control" placeholder="aswan_admin" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>كلمة مرور الأدمن *</label>
+                        <input type="password" id="shopAdminPass" class="form-control" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-group" id="seedOptionsGroup" style="margin-top: 15px;">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" id="seedDefaultsCheck" checked style="width:16px; height:16px;">
+                            <span>تهيئة المحل افتراضياً ببهارات أسوان (60 منتج بسعر 0)</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" id="saveShopBtn" class="btn-super">إنشاء وحفظ المحل</button>
+                    <button type="button" id="cancelEditBtn" class="btn-super btn-secondary" style="display:none; margin-top:10px;">إلغاء التعديل</button>
+                </form>
+            </section>
+
+            <!-- Left Panel: Shops List -->
+            <section class="glass-panel" style="min-height: 400px;">
+                <h2 class="panel-title"><i class="fa-solid fa-list"></i> جميع المتاجر المسجلة بالمنصة</h2>
+                <div id="shopsListContainer" class="shops-grid">
+                    <!-- Loading skeleton -->
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px 0; color:#c9ad93;">
+                        <i class="fa-solid fa-spinner fa-spin" style="font-size:30px; margin-bottom:10px;"></i>
+                        <p>جاري تحميل المتاجر والبيانات من السحابة...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Supabase integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+    <script src="../js/database.js"></script>
+    <script src="../js/super.js"></script>
+</body>
+</html>

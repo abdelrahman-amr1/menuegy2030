@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منصة المتاجر الإلكترونية | MenuEgy 2030</title>
+  
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Central Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Styling overrides for Directory View */
+    .dir-shop-card {
+      background: rgba(30, 24, 20, 0.95);
+      border: 1px solid rgba(212, 138, 55, 0.2);
+      border-radius: 12px;
+      padding: 25px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      color: #f7ede2;
+      text-decoration: none;
+    }
+    .dir-shop-card:hover {
+      transform: translateY(-5px);
+      border-color: #d48a37;
+      box-shadow: 0 8px 25px rgba(212,138,55,0.2);
+    }
+    .dir-shop-logo {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid #d48a37;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: #d48a37;
+      margin-bottom: 15px;
+      overflow: hidden;
+      object-fit: cover;
+    }
+    .dir-shop-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .dir-shop-card p {
+      margin: 0;
+      font-size: 13px;
+      color: #c9ad93;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Platform Shop Directory (Shown when no ?s= parameter is supplied) -->
+  <div id="platformDirectory" style="display: none; min-height: 100vh; background: #120e0c; color: #f7ede2; padding: 60px 20px; box-sizing: border-box;">
+    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
+      <div style="font-size: 48px; color: #d48a37; margin-bottom: 15px;"><i class="fa-solid fa-cubes"></i></div>
+      <h1 style="font-size: 30px; font-weight: 800; margin-bottom: 8px; color: #fff;">أهلاً بكم في منصة MenuEgy 2030</h1>
+      <p style="color: #c9ad93; font-size: 15px; margin-bottom: 40px;">منصة المتاجر الإلكترونية المتكاملة. يرجى اختيار المتجر للتسوق:</p>
+      
+      <div style="max-width: 450px; margin: 0 auto 50px auto; background: rgba(0,0,0,0.4); border-radius: 30px; border: 1px solid rgba(212,138,55,0.3); padding: 5px 20px; display: flex; align-items: center; box-sizing: border-box;">
+        <input type="text" id="directorySearchInput" placeholder="ابحث عن اسم متجر..." oninput="filterDirectoryShops()" style="background: none; border: none; color: #fff; width: 100%; padding: 10px; outline: none; font-family: inherit; font-size: 15px; text-align: right;">
+        <i class="fa-solid fa-magnifying-glass" style="color: #d48a37; font-size:18px;"></i>
+      </div>
+
+      <div id="directoryShopsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; box-sizing: border-box;">
+        <!-- Loading spinner -->
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color:#c9ad93;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:32px; margin-bottom:10px;"></i>
+          <p>جاري تحميل المتاجر من قاعدة البيانات السحابية...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Storefront App (Shown only when shop ?s= slug is provided) -->
+  <div id="storefrontApp" style="display: none;">
+    <!-- Header -->
+    <header id="storefrontHeader">
+      <div class="header-container">
+        <div class="logo">
+          <img id="storeLogo" src="https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=200" alt="الشعار" style="display:none; object-fit: cover; border-radius:50%;">
+          <div class="logo-text">
+            <h1 id="storeTitle">متجر إلكتروني</h1>
+            <span id="storeSubtitle">تسوّق أفضل المنتجات أونلاين</span>
+          </div>
+        </div>
+        <div class="nav-actions">
+          <button class="cart-btn" id="cartBtn" onclick="toggleCart(true)">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <span>السلة</span>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="storefrontHero">
+      <div class="hero-content">
+        <span class="slogan-badge" id="storeSloganBadge">أهلاً بكم في متجرنا</span>
+        <h2 id="storeHeroHeading">منتجات طبيعية ذات جودة <span>فائقة وممتازة</span></h2>
+        <p id="storeHeroDescription">أجود أنواع العطارة والبهارات، المشروبات والأعشاب الطبية، الزيوت الطبيعية وباقي الأصناف المميزة. رضاكم هو هدفنا الأسمى!</p>
+        
+        <div class="info-cards">
+          <div class="info-card">
+            <i class="fa-solid fa-truck-fast"></i>
+            <div>
+              <h4>شحن مجاني</h4>
+              <p id="storeFreeShippingMsg">لأي طلب بقيمة تتجاوز 1000 جنيه</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <i class="fa-solid fa-location-dot"></i>
+            <div>
+              <h4>شحن آمن وسريع</h4>
+              <p>شحن متاح لمنطقتك بأفضل الأسعار</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <i class="fa-solid fa-clock"></i>
+            <div>
+              <h4>مبيعات 24 ساعة</h4>
+              <p>جاهزون لتلقي طلباتكم وتجهيزها فوراً</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Shop Container -->
+    <main class="shop-container" id="storefrontMain">
+      
+      <!-- Control Bar: Search & Category Filters -->
+      <div class="control-bar">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="ابحث عن منتج بالاسم..." oninput="filterProducts()">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        
+        <div class="categories-filter" id="categoryFilterContainer">
+          <button class="category-tab active" data-category="all" onclick="setCategory('all')">الكل</button>
+          <button class="category-tab" data-category="spices" onclick="setCategory('spices')">التوابل والبهارات</button>
+          <button class="category-tab" data-category="drinks" onclick="setCategory('drinks')">المشروبات الطبيعية</button>
+          <button class="category-tab" data-category="herbs" onclick="setCategory('herbs')">الأعشاب الطبيعية</button>
+          <button class="category-tab" data-category="oils" onclick="setCategory('oils')">الزيوت الخام</button>
+          <button class="category-tab" data-category="incense" onclick="setCategory('incense')">البخور المشكل</button>
+          <button class="category-tab" data-category="famous" onclick="setCategory('famous')">الأشهر في أسوان</button>
+        </div>
+      </div>
+
+      <!-- Product Grid Listing -->
+      <div class="products-grid" id="productsGrid">
+        <!-- Generated Dynamically by JS -->
+      </div>
+    </main>
+
+    <!-- Sliding Cart Drawer Panel -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay" onclick="toggleCart(false)"></div>
+    <div class="cart-drawer" id="cartDrawer">
+      
+      <!-- Cart Header -->
+      <div class="cart-drawer-header">
+        <h2>سلة المشتريات</h2>
+        <button class="close-cart-btn" onclick="toggleCart(false)">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Free Shipping Tracker -->
+      <div class="shipping-tracker" id="shippingTracker">
+        <div class="shipping-tracker-text">
+          <span id="shippingTrackerMsg">أضف منتجات للحصول على شحن مجاني</span>
+          <strong id="shippingTrackerAmount">0 ج متبقية</strong>
+        </div>
+        <div class="shipping-tracker-progress-bg">
+          <div class="shipping-tracker-progress-bar" id="shippingTrackerProgress"></div>
+        </div>
+      </div>
+
+      <!-- Cart Items list -->
+      <div class="cart-items-list" id="cartItemsList">
+        <!-- Dynamically Rendered Cart Items -->
+      </div>
+
+      <!-- Checkout section -->
+      <div class="cart-checkout-section" id="cartCheckoutSection" style="display: none;">
+        <div class="cart-summary-row">
+          <span>إجمالي المشتريات:</span>
+          <span id="cartSubtotal">0 ج</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>مصاريف الشحن:</span>
+          <span id="cartShipping">احسب أولاً</span>
+        </div>
+        <div class="cart-summary-row total">
+          <span>الإجمالي الكلي:</span>
+          <span id="cartTotal">0 ج</span>
+        </div>
+
+        <!-- Customer Checkout Details Form -->
+        <form class="checkout-form" id="checkoutForm" onsubmit="handleCheckout(event)">
+          <div class="form-group">
+            <label for="custName"><i class="fa-solid fa-user"></i> الاسم بالكامل *</label>
+            <input type="text" id="custName" required placeholder="أدخل اسمك لتجهيز الأوردر">
+          </div>
+          
+          <div class="form-group">
+            <label for="custCity"><i class="fa-solid fa-map-location-dot"></i> المحافظة *</label>
+            <select id="custCity" required onchange="calculateShippingPrice()">
+              <option value="" disabled selected>اختر محافظة التوصيل</option>
+              <option value="cairo">القاهرة</option>
+              <option value="giza">الجيزة</option>
+              <option value="others">محافظة أخرى</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="custAddress"><i class="fa-solid fa-house"></i> العنوان بالتفصيل *</label>
+            <input type="text" id="custAddress" required placeholder="المنطقة، اسم الشارع، رقم العقار">
+          </div>
+          
+          <div class="form-group">
+            <label for="custPhone"><i class="fa-solid fa-phone"></i> رقم الهاتف (متاح عليه واتس) *</label>
+            <input type="tel" id="custPhone" required placeholder="01xxxxxxxxx">
+          </div>
+
+          <button type="submit" class="whatsapp-checkout-btn">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span>إرسال الطلب عبر الواتساب</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Bottom Mobile Sticky Cart Bar -->
+    <div class="floating-cart-bar" id="floatingCartBar">
+      <div class="floating-cart-info">
+        <h4 id="floatingCartTotal">0 ج</h4>
+        <p id="floatingCartCount">السلة فارغة</p>
+      </div>
+      <button class="open-drawer-btn" onclick="toggleCart(true)">
+        <i class="fa-solid fa-basket-shopping"></i>
+        <span>عرض السلة وتأكيد الطلب</span>
+      </button>
+    </div>
+
+    <!-- Footer Section -->
+    <footer id="storefrontFooter">
+      <div class="footer-logo">
+        <h2 id="footerStoreTitle">اسم المتجر</h2>
+        <p id="footerStoreSlogan">طعم وجودة يفوقان الوصف</p>
+      </div>
+      <div class="footer-slogan" id="footerStoreSloganBadge">
+        شعارنا رضاكم دائماً
+      </div>
+      <div class="footer-contact">
+        <div class="footer-contact-item" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; width: 100%;">
+          <a id="footerPhoneCall" href="tel:" class="btn btn-outline" style="color: var(--white); border-color: rgba(255,255,255,0.3); font-size: 0.85rem; padding: 0.5rem 1rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <i class="fa-solid fa-phone"></i>
+            <span id="footerPhoneText">اتصل بنا</span>
+          </a>
+          <a id="footerWhatsappChat" href="https://wa.me/" target="_blank" class="btn" style="background: #25d366; color: var(--white); font-size: 0.85rem; padding: 0.5rem 1rem; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 10px rgba(37,211,102,0.15);">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span id="footerWhatsappText">واتساب</span>
+          </a>
+        </div>
+        <div class="footer-contact-item" style="margin-top: 0.5rem;">
+          <i class="fa-solid fa-truck"></i>
+          <span>التوصيل متوفر لجميع أنحاء الجمهورية</span>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 جميع الحقوق محفوظة. 
+        تصميم وتطوير <a href="https://abdelrahman-amr1.github.io/AbdelrahmanAmr/#portfolio" target="_blank" style="color: var(--secondary-color); text-decoration: underline; font-weight: 700;">المهندس عبدالرحمن عمرو</a>.
+      </div>
+    </footer>
+  </div>
+
+  <!-- Toast notifications container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Supabase JS Client SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js?v=8"></script>
+
+  <!-- Scripts -->
+  <script src="js/database.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
+</body>
+</html>
