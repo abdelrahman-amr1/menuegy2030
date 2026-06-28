@@ -873,6 +873,7 @@ header {
   font-size: 0.9rem;
   outline: none;
   background: var(--light-color);
+  color: var(--dark-color);
   transition: var(--transition-fast);
 }
 
