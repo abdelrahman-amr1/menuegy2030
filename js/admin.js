@@ -589,10 +589,6 @@ function populateAdminCategorySelect(selectedVal = "") {
     }
   });
 
-  // Recommended default categories
-  const defaults = ["spices", "drinks", "herbs", "oils", "incense", "famous"];
-  defaults.forEach(d => uniqueCategories.add(d));
-
   let optionsHtml = ``;
   uniqueCategories.forEach(cat => {
     const label = CATEGORY_LABELS[cat] || cat;
@@ -616,10 +612,18 @@ function populateAdminCategorySelect(selectedVal = "") {
       customInput.value = selectedVal;
     }
   } else {
-    select.value = Array.from(uniqueCategories)[0] || "spices";
-    customInput.style.display = "none";
-    customInput.required = false;
-    customInput.value = "";
+    const firstCat = Array.from(uniqueCategories)[0];
+    if (firstCat) {
+      select.value = firstCat;
+      customInput.style.display = "none";
+      customInput.required = false;
+      customInput.value = "";
+    } else {
+      select.value = "__custom__";
+      customInput.style.display = "block";
+      customInput.required = true;
+      customInput.value = "";
+    }
   }
 }
 
@@ -634,9 +638,6 @@ function populateAdminCategoryFilter() {
       uniqueCategories.add(p.category);
     }
   });
-
-  const defaults = ["spices", "drinks", "herbs", "oils", "incense", "famous"];
-  defaults.forEach(d => uniqueCategories.add(d));
 
   let optionsHtml = `<option value="all">كل الأقسام</option>`;
   uniqueCategories.forEach(cat => {
