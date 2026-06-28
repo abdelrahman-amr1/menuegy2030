@@ -637,14 +637,15 @@ header {
 .cart-drawer {
   position: fixed;
   top: 0;
-  left: 0;
+  right: 0;
+  left: auto;
   width: 100%;
   max-width: 480px;
   height: 100vh;
   background: var(--light-color);
   z-index: 1001;
   box-shadow: var(--shadow-lg);
-  transform: translateX(-100%);
+  transform: translateX(100%);
   transition: var(--transition-normal);
   display: flex;
   flex-direction: column;
@@ -653,6 +654,26 @@ header {
 
 .cart-drawer.open {
   transform: translateX(0);
+}
+
+/* Mobile Bottom Sheet Cart Drawer */
+@media (max-width: 768px) {
+  .cart-drawer {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    height: 82vh;
+    border-radius: 24px 24px 0 0;
+    transform: translateY(100%);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+  }
+  
+  .cart-drawer.open {
+    transform: translateY(0);
+  }
 }
 
 .cart-drawer-header {

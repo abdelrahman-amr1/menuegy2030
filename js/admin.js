@@ -453,13 +453,13 @@ async function deleteProduct(productId) {
 
 // Reset Database Confirmation
 async function confirmResetDB() {
-  const confirmReset = confirm("تنبيه هام جداً!\nهل أنت متأكد من رغبتك في إعادة تعيين متجرك بالكامل؟\nسيؤدي هذا إلى مسح كافة المنتجات الحالية، وإعادة تهيئة المحل بنموذج المنتجات الافتراضية لعطارة أسوان (60 منتج بسعر 0).");
+  const confirmReset = confirm("تنبيه هام جداً!\nهل أنت متأكد من رغبتك في إعادة تعيين متجرك بالكامل؟\nسيؤدي هذا إلى مسح كافة المنتجات الحالية نهائياً لتتمكن من البدء بمتجر فارغ.");
   if (!confirmReset) return;
   
-  const success = await seedDefaultProducts(activeShopSlug);
+  const success = await clearShopProducts(activeShopSlug);
   if (success) {
     await loadAdminProducts();
-    showToast("تم إعادة ضبط المتجر بنجاح وتهيئة قائمة البهارات الافتراضية.");
+    showToast("تم إعادة ضبط المتجر بنجاح ومسح كافة المنتجات.");
   } else {
     showToast("حدث خطأ أثناء محاولة إعادة التهيئة.", "danger");
   }
@@ -552,4 +552,105 @@ function showToast(message, type = "success") {
       toast.remove();
     }, 300);
   }, 3500);
+}
+
+// Category change handler in modal
+function handleCategorySelectChange(val) {
+  const customInput = document.getElementById("prodCategoryCustom");
+  if (!customInput) return;
+  if (val === "__custom__") {
+    customInput.style.display = "block";
+    customInput.required = true;
+    customInput.focus();
+  } else {
+    customInput.style.display = "none";
+    customInput.required = false;
+    customInput.value = "";
+  }
+}
+
+// Quick Unit selector helper
+function setUnitQuick(val) {
+  const unitInput = document.getElementById("prodUnit");
+  if (unitInput) {
+    unitInput.value = val;
+  }
+}
+
+// Dynamic dropdown category populate
+function populateAdminCategorySelect(selectedVal = "") {
+  const select = document.getElementById("prodCategory");
+  if (!select) return;
+
+  const uniqueCategories = new Set();
+  products.forEach(p => {
+    if (p.category) {
+      uniqueCategories.add(p.category);
+    }
+  });
+
+  // Recommended default categories
+  const defaults = ["spices", "drinks", "herbs", "oils", "incense", "famous"];
+  defaults.forEach(d => uniqueCategories.add(d));
+
+  let optionsHtml = ``;
+  uniqueCategories.forEach(cat => {
+    const label = CATEGORY_LABELS[cat] || cat;
+    optionsHtml += `<option value="${cat}">${label}</option>`;
+  });
+
+  optionsHtml += `<option value="__custom__">+ إضافة تصنيف جديد...</option>`;
+  select.innerHTML = optionsHtml;
+
+  const customInput = document.getElementById("prodCategoryCustom");
+  
+  if (selectedVal) {
+    if (Array.from(uniqueCategories).includes(selectedVal)) {
+      select.value = selectedVal;
+      customInput.style.display = "none";
+      customInput.required = false;
+    } else {
+      select.value = "__custom__";
+      customInput.style.display = "block";
+      customInput.required = true;
+      customInput.value = selectedVal;
+    }
+  } else {
+    select.value = Array.from(uniqueCategories)[0] || "spices";
+    customInput.style.display = "none";
+    customInput.required = false;
+    customInput.value = "";
+  }
+}
+
+// Dynamic toolbar filter categories populate
+function populateAdminCategoryFilter() {
+  const filter = document.getElementById("adminCategorySelect");
+  if (!filter) return;
+
+  const uniqueCategories = new Set();
+  products.forEach(p => {
+    if (p.category) {
+      uniqueCategories.add(p.category);
+    }
+  });
+
+  const defaults = ["spices", "drinks", "herbs", "oils", "incense", "famous"];
+  defaults.forEach(d => uniqueCategories.add(d));
+
+  let optionsHtml = `<option value="all">كل الأقسام</option>`;
+  uniqueCategories.forEach(cat => {
+    const label = CATEGORY_LABELS[cat] || cat;
+    optionsHtml += `<option value="${cat}">${label}</option>`;
+  });
+
+  const previousSelection = selectedCategory;
+  filter.innerHTML = optionsHtml;
+  
+  if (Array.from(uniqueCategories).includes(previousSelection)) {
+    filter.value = previousSelection;
+  } else {
+    filter.value = "all";
+    selectedCategory = "all";
+  }
 }

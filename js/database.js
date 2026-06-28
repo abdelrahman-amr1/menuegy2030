@@ -340,3 +340,20 @@ async function uploadFileToSupabase(file, folder = "general") {
     throw e;
   }
 }
+
+// Clear all products belonging to a specific shop
+async function clearShopProducts(shopSlug) {
+  if (!isDbConnected()) return false;
+  try {
+    const { error } = await window.supabaseDb
+      .from("products")
+      .delete()
+      .eq("shop_id", shopSlug);
+    
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error("Error clearing shop products:", e);
+    return false;
+  }
+}
