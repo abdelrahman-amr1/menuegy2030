@@ -774,6 +774,36 @@ function openOfferDetails(productId) {
   const wholesalePrice = parseFloat(product.wholesale_price);
   const hasWholesale = wholesaleQty > 0 && wholesalePrice > 0;
 
+  // Retrieve other active wholesale deals in the same category
+  const otherOffers = products.filter(p => 
+    p.category === product.category && 
+    p.id !== product.id && 
+    parseFloat(p.wholesale_qty) > 0 && 
+    parseFloat(p.wholesale_price) > 0
+  );
+
+  let otherOffersHtml = "";
+  if (otherOffers.length > 0) {
+    otherOffersHtml = `
+      <div style="margin-top: 1.25rem; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 1rem; text-align: right; max-height: 160px; overflow-y: auto; padding-right: 4px;">
+        <h4 style="font-size: 0.85rem; color: var(--secondary-color); margin-bottom: 0.5rem; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-tags"></i> عروض أخرى متوفرة في هذا القسم:
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${otherOffers.map(o => `
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+              <div style="flex: 1;">
+                <strong style="color: var(--white); display: block; font-size: 0.8rem; line-height: 1.3;">${o.name}</strong>
+                <span style="color: var(--gray-400); font-size: 0.75rem;">العرض: ${o.wholesale_qty} ${o.unit} بـ ${o.wholesale_price} ج</span>
+              </div>
+              <button onclick="openOfferDetails('${o.id}')" style="background: var(--secondary-color); border: none; color: var(--white); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: 700; white-space: nowrap;">عرض</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   let offerDetailsHtml = "";
   if (hasWholesale) {
     const regularTotalPrice = wholesaleQty * product.price;
@@ -812,7 +842,9 @@ function openOfferDetails(productId) {
           <span style="display:block; font-size:11px; color:var(--success-color); margin-top:8px;" id="offerAppliedMsg">✓ تم تفعيل سعر العرض الخاص!</span>
         </div>
 
-        <div style="display: flex; gap: 10px; justify-content: center;">
+        ${otherOffersHtml}
+
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.25rem;">
           <button onclick="addOfferToCart('${product.id}')" style="background: var(--primary-gradient); border: none; color: white; padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 10px; cursor: pointer; flex: 1;">إضافة للسلة</button>
           <button onclick="closeOfferModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--gray-300); padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 10px; cursor: pointer;">إغلاق</button>
         </div>
@@ -831,7 +863,9 @@ function openOfferDetails(productId) {
           </div>
         </div>
 
-        <div style="display: flex; gap: 10px; justify-content: center;">
+        ${otherOffersHtml}
+
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.25rem;">
           <button onclick="addSingleToCart('${product.id}')" style="background: var(--primary-gradient); border: none; color: white; padding: 0.75rem 1.5rem; font-weight: 700; border-radius: 10px; cursor: pointer; flex: 1;">إضافة للسلة</button>
           <button onclick="closeOfferModal()" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--gray-300); padding: 0.75rem 1.25rem; font-weight: 700; border-radius: 10px; cursor: pointer;">إغلاق</button>
         </div>
