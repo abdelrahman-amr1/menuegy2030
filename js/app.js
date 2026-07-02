@@ -690,13 +690,19 @@ function renderFeaturedMarqueeBar() {
     const wholesalePrice = parseFloat(p.wholesale_price);
     const hasWholesale = wholesaleQty > 0 && wholesalePrice > 0;
 
-    let text = `🔥 عرض مميز: <strong>${p.name}</strong> بسعر ${p.price} ج فقط!`;
+    let text = `عرض مميز: <strong>${p.name}</strong> بسعر ${p.price} ج فقط!`;
     if (hasWholesale) {
-      text = `🔥 عرض الجملة الخاص: <strong>${p.name}</strong> (${p.wholesale_qty} ${p.unit} بسعر ${p.wholesale_price} ج بدلاً من ${p.wholesale_qty * p.price} ج) - اضغط للتفاصيل`;
+      text = `عرض الجملة الخاص: <strong>${p.name}</strong> (${p.wholesale_qty} ${p.unit} بسعر ${p.wholesale_price} ج بدلاً من ${p.wholesale_qty * p.price} ج) - اضغط للتفاصيل`;
     }
+
+    const icon = CATEGORY_ICONS[p.category] || "📦";
+    const imgHtml = p.image_url 
+      ? `<img src="${p.image_url}" alt="${p.name}" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.4); flex-shrink: 0;" onerror="this.outerHTML='<span style=\"font-size: 1.1rem;\">${icon}</span>'">`
+      : `<span style="font-size: 1.1rem; flex-shrink: 0;">${icon}</span>`;
 
     item.innerHTML = `
       <span class="badge-offer">عرض</span>
+      ${imgHtml}
       <span>${text}</span>
     `;
     textWrapper.appendChild(item);
