@@ -120,6 +120,19 @@ async function initTenantStorefront(slug) {
     return;
   }
 
+  // Check if the shop is deactivated by the admin
+  if (shop.is_active === false || shop.is_active === 'false') {
+    document.body.innerHTML = `
+      <div style="background-color: #120e0c; color: #fff; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl;">
+        <i class="fa-solid fa-lock" style="font-size: 5rem; color: #d48a37; margin-bottom: 20px; animation: pulse 2s infinite;"></i>
+        <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; color: #fff;">هذا المتجر غير متاح حالياً</h1>
+        <p style="color: #a0a0a0; font-size: 1.1rem; max-width: 500px; line-height: 1.6;">عذراً، تم إيقاف المتجر مؤقتاً بواسطة الإدارة أو صاحب المتجر. يرجى مراجعتنا لاحقاً أو التواصل معنا.</p>
+        <a href="${window.location.pathname}" style="margin-top: 30px; background: #d48a37; color: white; text-decoration: none; padding: 10px 25px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(212,138,55,0.3);">تصفح المتاجر الأخرى</a>
+      </div>
+    `;
+    return;
+  }
+
   // Bind tenant info
   activeShopName = shop.name;
   activeShopWhatsapp = shop.whatsapp_number;

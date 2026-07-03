@@ -409,6 +409,30 @@ async function saveProductForm(event) {
     showToast("يرجى ملء جميع الحقول الإلزامية", "danger");
     return;
   }
+
+  const saveModalBtn = document.getElementById("saveModalBtn");
+
+  // Enforce max products limit when adding a new product
+  if (!id) {
+    saveModalBtn.disabled = true;
+    saveModalBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري فحص باقة المحل...`;
+    
+    try {
+      const shopProfile = await getShopProfile(activeShopSlug);
+      const maxLimit = shopProfile && shopProfile.max_products_limit !== undefined && shopProfile.max_products_limit !== null
+        ? parseInt(shopProfile.max_products_limit)
+        : 50;
+        
+      if (products.length >= maxLimit) {
+        showToast(`عذراً، لقد بلغت الحد الأقصى للمنتجات المسموح بها في باقتك الحالية (${maxLimit} منتج). يرجى الترقية لإضافة المزيد!`, "danger");
+        saveModalBtn.disabled = false;
+        saveModalBtn.innerHTML = `إضافة المنتج`;
+        return;
+      }
+    } catch(err) {
+      console.error("Error verifying shop limit:", err);
+    }
+  }
   
   const productData = {
     id: id || "p_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
@@ -425,7 +449,6 @@ async function saveProductForm(event) {
     wholesale_price
   };
 
-  const saveModalBtn = document.getElementById("saveModalBtn");
   saveModalBtn.disabled = true;
   saveModalBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...`;
 

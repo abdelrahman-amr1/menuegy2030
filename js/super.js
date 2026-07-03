@@ -20,6 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const shopPrimaryColor = document.getElementById("shopPrimaryColor");
   const shopSecondaryColor = document.getElementById("shopSecondaryColor");
   const shopFreeShipping = document.getElementById("shopFreeShipping");
+  const shopMaxProducts = document.getElementById("shopMaxProducts");
+  const shopIsActive = document.getElementById("shopIsActive");
   const shopAdminUser = document.getElementById("shopAdminUser");
   const shopAdminPass = document.getElementById("shopAdminPass");
   const seedDefaultsCheck = document.getElementById("seedDefaultsCheck");
@@ -124,7 +126,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="shop-info">
             ${logoHtml}
             <div class="shop-title-desc">
-              <h3>${shop.name}</h3>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <h3 style="margin: 0;">${shop.name}</h3>
+                ${shop.is_active !== false 
+                  ? `<span style="background: rgba(76, 217, 100, 0.15); color: #4cd964; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700;">نشط</span>`
+                  : `<span style="background: rgba(217, 83, 79, 0.15); color: #d9534f; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700;">متوقف</span>`
+                }
+              </div>
               <p>${shop.slogan || "بدون وصف"}</p>
             </div>
           </div>
@@ -148,6 +156,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="meta-row">
               <span class="meta-label">الشحن المجاني فوق:</span>
               <span class="meta-val">${shop.free_shipping_limit} جنيه</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">الحد الأقصى للمنتجات:</span>
+              <span class="meta-val" style="font-weight: 700; color: var(--super-accent);">${shop.max_products_limit !== undefined && shop.max_products_limit !== null ? shop.max_products_limit : 50} منتج</span>
             </div>
             <div class="meta-row" style="margin-top: 5px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 5px;">
               <span class="meta-label">لوحة التحكم:</span>
@@ -217,6 +229,8 @@ document.addEventListener("DOMContentLoaded", () => {
     shopPrimaryColor.value = shop.primary_color;
     shopSecondaryColor.value = shop.secondary_color;
     shopFreeShipping.value = shop.free_shipping_limit;
+    shopMaxProducts.value = shop.max_products_limit !== undefined && shop.max_products_limit !== null ? shop.max_products_limit : 50;
+    shopIsActive.checked = shop.is_active !== false;
     shopAdminUser.value = shop.admin_username;
     shopAdminPass.value = shop.admin_password;
 
@@ -239,6 +253,8 @@ document.addEventListener("DOMContentLoaded", () => {
     shopSlug.style.opacity = "1";
     shopPrimaryColor.value = "#b24a27";
     shopSecondaryColor.value = "#d48a37";
+    shopMaxProducts.value = "50";
+    shopIsActive.checked = true;
     
     // Clear logo upload elements
     if (shopLogoFile) shopLogoFile.value = "";
@@ -277,6 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
       primary_color: shopPrimaryColor.value,
       secondary_color: shopSecondaryColor.value,
       free_shipping_limit: parseFloat(shopFreeShipping.value) || 0,
+      max_products_limit: parseInt(shopMaxProducts.value) || 50,
+      is_active: shopIsActive.checked,
       admin_username: shopAdminUser.value.trim(),
       admin_password: shopAdminPass.value.trim()
     };

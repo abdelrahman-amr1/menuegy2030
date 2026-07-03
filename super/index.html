@@ -501,6 +501,16 @@
                         <input type="number" id="shopFreeShipping" class="form-control" value="1000" min="0">
                     </div>
 
+                    <div class="form-group">
+                        <label>الحد الأقصى للمنتجات المسموح بها في المتجر *</label>
+                        <input type="number" id="shopMaxProducts" class="form-control" value="50" min="1" required>
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 15px;">
+                        <input type="checkbox" id="shopIsActive" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="shopIsActive" style="cursor: pointer; margin: 0; font-weight: 700; color: var(--white);">حالة المتجر نشط (متاح للجمهور)</label>
+                    </div>
+
                     <h3 class="panel-title" style="font-size:14px; margin-top:20px; margin-bottom:10px;">
                         <i class="fa-solid fa-key"></i> بيانات لوحة أدمن المحل
                     </h3>
