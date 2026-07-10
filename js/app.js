@@ -56,6 +56,23 @@ async function initPlatformDirectory() {
   document.getElementById("storefrontApp").style.display = "none";
   
   allShops = await getAllShops();
+  
+  // Append external shops
+  allShops.push({
+    id: "elnasr_shop",
+    name: "حواوشي النصر",
+    slogan: "أصل الحواوشي البلدي والورقة المميزة",
+    logo_url: "https://abdelrahman-amr1.github.io/elnasr_shop_products/assets/logo.jpg",
+    external_url: "https://abdelrahman-amr1.github.io/elnasr_shop_products/index.html"
+  });
+  allShops.push({
+    id: "hamed_shop",
+    name: "الأسوانية H.M جروب",
+    slogan: "للمنتجات والعطارة الأسوانية",
+    logo_url: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=200",
+    external_url: "https://abdelrahman-amr1.github.io/hamed-shop/index.html"
+  });
+  
   renderDirectoryShops();
 }
 
@@ -85,7 +102,10 @@ function renderDirectoryShops() {
   filteredShops.forEach(shop => {
     const card = document.createElement("a");
     card.className = "dir-shop-card";
-    card.href = `?s=${shop.id}`;
+    card.href = shop.external_url || `?s=${shop.id}`;
+    if (shop.external_url) {
+      card.target = "_blank";
+    }
     
     const logoHtml = shop.logo_url 
       ? `<img src="${shop.logo_url}" class="dir-shop-logo" alt="logo" onerror="this.src=''; this.innerHTML='<i class=fa-solid fa-shop></i>'">`
