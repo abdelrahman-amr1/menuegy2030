@@ -133,6 +133,21 @@ async function initTenantStorefront(slug) {
     return;
   }
 
+  // Check if subscription has expired
+  if (shop.subscription_expiry && new Date(shop.subscription_expiry) < new Date()) {
+    document.body.innerHTML = `
+      <div style="background-color: #120e0c; color: #fff; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; font-family: 'Cairo', sans-serif; direction: rtl;">
+        <i class="fa-solid fa-credit-card" style="font-size: 5rem; color: #d9534f; margin-bottom: 20px; animation: pulse 2s infinite;"></i>
+        <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 10px; color: #fff;">اشتراك المتجر منتهي</h1>
+        <p style="color: #a0a0a0; font-size: 1.1rem; max-width: 500px; line-height: 1.6;">عذراً، تم تعليق هذا المتجر مؤقتاً لانتهاء صلاحية فترة الاشتراك. يرجى من صاحب المتجر تجديد الاشتراك لتفعيل المتجر مرة أخرى.</p>
+        <a href="https://wa.me/201128007078?text=${encodeURIComponent(`السلام عليكم م. عبدالرحمن، أريد تجديد اشتراك متجري (${shop.name}) صاحب الرابط (${shop.id}) في منصة MenuEgy`)}" target="_blank" style="margin-top: 30px; background: #25d366; color: white; text-decoration: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(37,211,102,0.3);">
+          <i class="fa-brands fa-whatsapp"></i> تجديد الاشتراك الآن عبر الواتساب
+        </a>
+      </div>
+    `;
+    return;
+  }
+
   // Bind tenant info
   activeShopName = shop.name;
   activeShopWhatsapp = shop.whatsapp_number;

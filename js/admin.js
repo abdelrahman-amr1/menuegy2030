@@ -106,6 +106,39 @@ async function checkAuth() {
       document.getElementById("adminHeaderTitle").textContent = `لوحة إدارة | ${shop.name}`;
       document.getElementById("adminHeaderSubtitle").textContent = shop.slogan || "لوحة تحكم المتجر وإدارة الأسعار";
       document.getElementById("adminFooterShopName").textContent = shop.name;
+
+      // Display subscription information
+      const subBanner = document.getElementById("subscriptionAlertBanner");
+      const subText = document.getElementById("subscriptionBannerText");
+      const renewBtn = document.getElementById("renewSubscriptionWaBtn");
+      if (subBanner && subText) {
+        subBanner.style.display = "block";
+        const planName = shop.subscription_plan === 'yearly' ? 'الباقة السنوية 🌟' : shop.subscription_plan === 'trial' ? 'الفترة التجريبية 🎁' : 'الباقة الشهرية 💳';
+        const expiryDate = shop.subscription_expiry ? new Date(shop.subscription_expiry) : null;
+        
+        let statusText = `باقة الاشتراك الحالية: <strong>${planName}</strong>. `;
+        if (expiryDate) {
+          const today = new Date();
+          const diffTime = expiryDate - today;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          const formattedExpiry = expiryDate.toLocaleDateString('ar-EG');
+          if (diffDays < 0) {
+            statusText += ` <span style="color: #d9534f; font-weight: 700;">انتهى الاشتراك في تاريخ ${formattedExpiry} (منذ ${Math.abs(diffDays)} يوم).</span>`;
+          } else if (diffDays <= 7) {
+            statusText += ` <span style="color: #d48a37; font-weight: 700;">ينتهي الاشتراك قريباً في تاريخ ${formattedExpiry} (متبقي ${diffDays} يوم).</span>`;
+          } else {
+            statusText += ` ينتهي الاشتراك في تاريخ <strong style="color: #4cd964;">${formattedExpiry}</strong> (متبقي ${diffDays} يوم).`;
+          }
+        } else {
+          statusText += ` صلاحية الاشتراك: مفتوح وغير محدد.`;
+        }
+        subText.innerHTML = statusText;
+        
+        if (renewBtn) {
+          renewBtn.href = `https://wa.me/201128007078?text=${encodeURIComponent(`السلام عليكم م. عبدالرحمن، أريد تجديد اشتراك متجري (${shop.name}) صاحب الرابط (${shop.id}) في منصة MenuEgy`)}`;
+        }
+      }
       
       // Apply theme colors dynamically
       document.documentElement.style.setProperty('--primary-color', shop.primary_color);

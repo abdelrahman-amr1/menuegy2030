@@ -66,26 +66,248 @@
 </head>
 <body>
 
-  <!-- 1. Platform Shop Directory (Shown when no ?s= parameter is supplied) -->
-  <div id="platformDirectory" style="display: none; min-height: 100vh; background: #120e0c; color: #f7ede2; padding: 60px 20px; box-sizing: border-box;">
-    <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-      <div style="font-size: 48px; color: #d48a37; margin-bottom: 15px;"><i class="fa-solid fa-cubes"></i></div>
-      <h1 style="font-size: 30px; font-weight: 800; margin-bottom: 8px; color: #fff;">أهلاً بكم في منصة MenuEgy 2030</h1>
-      <p style="color: #c9ad93; font-size: 15px; margin-bottom: 40px;">منصة المتاجر الإلكترونية المتكاملة. يرجى اختيار المتجر للتسوق:</p>
-      
-      <div style="max-width: 450px; margin: 0 auto 50px auto; background: rgba(0,0,0,0.4); border-radius: 30px; border: 1px solid rgba(212,138,55,0.3); padding: 5px 20px; display: flex; align-items: center; box-sizing: border-box;">
-        <input type="text" id="directorySearchInput" placeholder="ابحث عن اسم متجر..." oninput="filterDirectoryShops()" style="background: none; border: none; color: #fff; width: 100%; padding: 10px; outline: none; font-family: inherit; font-size: 15px; text-align: right;">
-        <i class="fa-solid fa-magnifying-glass" style="color: #d48a37; font-size:18px;"></i>
+  <!-- 1. Platform Sales Landing Page (Shown when no ?s= parameter is supplied) -->
+  <div id="platformDirectory" class="lp-wrapper" style="display: none;">
+    <!-- Header -->
+    <header class="lp-header">
+      <div class="lp-header-container">
+        <a href="#" class="lp-logo">
+          <i class="fa-solid fa-cubes"></i> MenuEgy <span>2030</span>
+        </a>
+        <nav class="lp-nav">
+          <div class="lp-nav-links">
+            <a href="about.html" class="lp-nav-link" style="color: var(--secondary-color); font-weight: 800;"><i class="fa-solid fa-calculator"></i> احسب توفيرك</a>
+            <a href="#features" class="lp-nav-link">المميزات</a>
+            <a href="#showcase" class="lp-nav-link">من داخل النظام</a>
+            <a href="#pricing" class="lp-nav-link">باقات الأسعار</a>
+            <a href="#shops" class="lp-nav-link">شركاء النجاح</a>
+          </div>
+          <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20الاستفسار%20عن%20منصة%20MenuEgy" target="_blank" class="lp-btn lp-btn-whatsapp" style="padding: 0.5rem 1.25rem; font-size: 0.85rem;">
+            <i class="fa-brands fa-whatsapp"></i> اشترك الآن
+          </a>
+        </nav>
       </div>
+    </header>
 
-      <div id="directoryShopsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; box-sizing: border-box;">
-        <!-- Loading spinner -->
-        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color:#c9ad93;">
-          <i class="fa-solid fa-spinner fa-spin" style="font-size:32px; margin-bottom:10px;"></i>
-          <p>جاري تحميل المتاجر من قاعدة البيانات السحابية...</p>
+    <!-- Hero Section -->
+    <section class="lp-hero">
+      <div class="lp-hero-container">
+        <div class="lp-hero-content">
+          <div class="lp-slogan-badge">
+            <i class="fa-solid fa-rocket"></i> منصة المتاجر السحابية الأسهل في مصر
+          </div>
+          <h1>ابنِ متجرك الإلكتروني المتكامل <br><span>المرتبط بالواتساب في دقائق!</span></h1>
+          <p>صممنا منصة MenuEgy 2030 لتمكين التجار والمطاعم وأصحاب الأعمال من إطلاق متاجرهم السحابية لعرض وتوصيل بضائعهم مع سلة مشتريات موبايل انزلاقية وتحويل فوري للمبيعات على الواتساب الشخصي!</p>
+          <div class="lp-cta-group">
+            <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20الاشتراك%20في%20منصة%20MenuEgy%20والحصول%20على%20متجر%20إلكتروني%20خاص%20بي" target="_blank" class="lp-btn lp-btn-whatsapp">
+              <i class="fa-brands fa-whatsapp"></i> تواصل معنا واشترك الآن
+            </a>
+            <a href="about.html" class="lp-btn lp-btn-secondary" style="border-color: var(--secondary-color); color: var(--secondary-color); background: rgba(212,138,55,0.05);">
+              <i class="fa-solid fa-calculator"></i> احسب أرباحك وتوفيرك
+            </a>
+            <a href="#features" class="lp-btn lp-btn-secondary">استكشف المزايا</a>
+          </div>
+        </div>
+        <div class="lp-hero-visual">
+          <div class="lp-hero-mockup">
+            <img src="images/landing/storefront.png" alt="شاشة واجهة المتجر للزبائن">
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- Section: Features -->
+    <section id="features" class="lp-section">
+      <div class="lp-section-title-container">
+        <h2 class="lp-section-title">لماذا تختار منصة <span>MenuEgy 2030</span>؟</h2>
+        <p class="lp-section-subtitle">نوفر لك كل الأدوات التي تحتاجها لإدارة مبيعاتك وعرض منتجاتك باحترافية وسرعة فائقة</p>
+      </div>
+      <div class="lp-features-grid">
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon"><i class="fa-solid fa-cloud-bolt"></i></div>
+          <h3>بيانات سحابية متكاملة</h3>
+          <p>ربط كامل مع قاعدة بيانات Supabase السحابية لضمان سرعة تصفح فائقة ومزامنة مستمرة لبيانات متجرك.</p>
+        </div>
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon"><i class="fa-brands fa-whatsapp"></i></div>
+          <h3>طلب فوري على الواتساب</h3>
+          <p>يصلك الطلب بالتفصيل وباسم المشتري وعنوانه ومحافظته وتكلفة الشحن ورابط المنتجات في رسالة واتساب منسقة بلمسة واحدة.</p>
+        </div>
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+          <h3>سلة موبايل تفاعلية</h3>
+          <p>سلة مشتريات Mobile Bottom Sheet منزلقة من الأسفل كالتطبيقات الأصلية لتحسين نسبة التحويل والمبيعات.</p>
+        </div>
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon"><i class="fa-solid fa-image"></i></div>
+          <h3>رفع الصور سحابياً</h3>
+          <p>ارفع صور منتجاتك بضغطة زر مباشرة من لوحة التحكم دون الحاجة لروابط خارجية عبر مخازن Supabase Storage.</p>
+        </div>
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon"><i class="fa-solid fa-tags"></i></div>
+          <h3>عروض الجملة والكمية</h3>
+          <p>حدد أسعار بيع بالتجزئة وأسعار جملة خاصة بناءً على الكمية التي يضيفها المشتري في السلة لتنشيط مبيعاتك.</p>
+        </div>
+        <div class="lp-feature-card">
+          <div class="lp-feature-icon"><i class="fa-solid fa-database"></i></div>
+          <h3>نسخ احتياطي واستعادة</h3>
+          <p>قم بتصدير منتجات متجرك بملف JSON كنسخة احتياطية، أو استيرادها لتعديل الأسعار دفعة واحدة بلمح البصر.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Inside the System -->
+    <section id="showcase" class="lp-section" style="background: rgba(30, 24, 20, 0.2); border-top: 1px solid rgba(212, 138, 55, 0.05); border-bottom: 1px solid rgba(212, 138, 55, 0.05);">
+      <div class="lp-section-title-container">
+        <h2 class="lp-section-title">لقطات حقيقية من <span>داخل النظام</span></h2>
+        <p class="lp-section-subtitle">شاهد كيف تبدو واجهات المتجر ولوحات التحكم سهلة الاستخدام للتاجر والعميل</p>
+      </div>
+      <div class="lp-showcase-grid">
+        <!-- Card 1 -->
+        <div class="lp-showcase-card">
+          <div class="lp-showcase-image-wrapper">
+            <img src="images/landing/storefront.png" class="lp-showcase-img" alt="واجهة المتجر">
+          </div>
+          <div class="lp-showcase-info">
+            <h3>1. واجهة المتجر للزبائن (Storefront)</h3>
+            <p>تصميم داكن فخم وجذاب يعرض الأقسام والمنتجات بوضوح مع شريط متحرك بالأعلى لأهم العروض المتاحة.</p>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="lp-showcase-card">
+          <div class="lp-showcase-image-wrapper">
+            <img src="images/landing/mobile_cart.png" class="lp-showcase-img" alt="سلة المشتريات موبايل">
+          </div>
+          <div class="lp-showcase-info">
+            <h3>2. سلة موبايل تفاعلية (Mobile Bottom Sheet)</h3>
+            <p>سلة شراء منزلقة بسلاسة وبشكل عصري للهواتف الذكية مع نموذج إدخال بيانات العميل والتحويل المباشر لواتساب المبيعات.</p>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="lp-showcase-card">
+          <div class="lp-showcase-image-wrapper">
+            <img src="images/landing/admin_dashboard.png" class="lp-showcase-img" alt="لوحة تحكم المتجر">
+          </div>
+          <div class="lp-showcase-info">
+            <h3>3. لوحة تحكم المتجر للتاجر (Merchant Admin)</h3>
+            <p>لوحة تحكم مخصصة لكل محل لمتابعة إحصائيات المنتجات وتعديل الأسعار وإضافتها ورفع صورها سحابياً وتصديرها بملفات.</p>
+          </div>
+        </div>
+        <!-- Card 4 -->
+        <div class="lp-showcase-card">
+          <div class="lp-showcase-image-wrapper">
+            <img src="images/landing/super_admin.png" class="lp-showcase-img" alt="لوحة السوبر أدمن">
+          </div>
+          <div class="lp-showcase-info">
+            <h3>4. لوحة الإدارة الرئيسية للمنصة (Super Admin)</h3>
+            <p>لوحة التحكم المركزية للمشرف العام على المنصة لإنشاء وإدارة وتفعيل المتاجر والتحكم بحدود المنتجات والأسعار بسهولة تامة.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: Pricing Plans -->
+    <section id="pricing" class="lp-section">
+      <div class="lp-section-title-container">
+        <h2 class="lp-section-title">باقات وأسعار <span>حنينة ومناسبة</span></h2>
+        <p class="lp-section-subtitle">اختر الباقة الأنسب لأعمالك وابدأ البيع واستقبال الأوردرات فوراً</p>
+      </div>
+      <div class="lp-pricing-grid">
+        <!-- Monthly Card -->
+        <div class="lp-pricing-card">
+          <h3 class="lp-pricing-name">الباقة الشهرية</h3>
+          <div class="lp-pricing-price">150 <span>ج.م</span></div>
+          <div class="lp-pricing-period">لكل شهر</div>
+          <ul class="lp-pricing-features">
+            <li><i class="fa-solid fa-circle-check"></i> متجر إلكتروني سحابي متكامل</li>
+            <li><i class="fa-solid fa-circle-check"></i> لوحة تحكم التاجر لإدارة منتجاتك</li>
+            <li><i class="fa-solid fa-circle-check"></i> رفع صور المنتجات سحابياً مجاناً</li>
+            <li><i class="fa-solid fa-circle-check"></i> سلة مشتريات موبايل تفاعلية</li>
+            <li><i class="fa-solid fa-circle-check"></i> استقبال طلبات لا نهائية على الواتساب</li>
+            <li><i class="fa-solid fa-circle-check"></i> دعم فني طوال فترة الاشتراك</li>
+          </ul>
+          <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20الاشتراك%20في%20منصة%20MenuEgy%20بالباقة%20الشهرية%20(150%20ج)" target="_blank" class="lp-btn lp-btn-whatsapp" style="width: 100%;">
+            <i class="fa-brands fa-whatsapp"></i> اشترك بالباقة الشهرية
+          </a>
+        </div>
+
+        <!-- Annual Card -->
+        <div class="lp-pricing-card featured">
+          <h3 class="lp-pricing-name">الباقة السنوية</h3>
+          <div class="lp-pricing-price">1200 <span>ج.م</span></div>
+          <div class="lp-pricing-period">لكل سنة (توفر 600 جنيه!)</div>
+          <ul class="lp-pricing-features">
+            <li><i class="fa-solid fa-circle-check"></i> كل ميزات الباقة الشهرية</li>
+            <li><i class="fa-solid fa-circle-check"></i> شهرين مجاناً كهدية من المنصة</li>
+            <li><i class="fa-solid fa-circle-check"></i> دعم ربط نطاق مخصص (Custom Domain)</li>
+            <li><i class="fa-solid fa-circle-check"></i> تهيئة ورفع منتجاتك الأولى مجاناً</li>
+            <li><i class="fa-solid fa-circle-check"></i> أولوية الدعم الفني المباشر</li>
+            <li><i class="fa-solid fa-circle-check"></i> نسخ احتياطي لبياناتك بلمسة واحدة</li>
+          </ul>
+          <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20الاشتراك%20في%20منصة%20MenuEgy%20بالباقة%20السنوية%20(1200%20ج)" target="_blank" class="lp-btn lp-btn-whatsapp" style="width: 100%;">
+            <i class="fa-brands fa-whatsapp"></i> اشترك بالباقة السنوية (وفر 33%)
+          </a>
+        </div>
+      </div>
+
+      <!-- Referral Offer Banner -->
+      <div class="lp-referral-box">
+        <div class="lp-referral-icon"><i class="fa-solid fa-gift"></i></div>
+        <h3>هات عميل جديد وخد شهر كامل مجاناً! 🎁</h3>
+        <p>عروض وخصومات ممتازة لشركائنا الحاليين. عندما ترشح تاجراً أو صديقاً للاشتراك في منصة <strong>MenuEgy 2030</strong> ويقوم بالاشتراك الفعلي في أي باقة، سنضيف شهراً مجانياً بالكامل إلى حسابك أنت وحساب صديقك الجديد كعربون شكر وتأكيد على شراكتنا المتميزة!</p>
+        <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20ترشيح%20عميل%20جديد%20للاشتراك%20في%20منصة%20MenuEgy" target="_blank" class="lp-btn lp-btn-secondary" style="padding: 0.6rem 1.5rem; font-size: 0.9rem;">
+          <i class="fa-solid fa-user-plus"></i> رشح عميل الآن
+        </a>
+      </div>
+    </section>
+
+    <!-- Section: Shops Directory (Partners of success) -->
+    <section id="shops" class="lp-section" style="border-top: 1px solid rgba(212, 138, 55, 0.1);">
+      <div class="lp-section-title-container">
+        <h2 class="lp-section-title">شركاء النجاح <span>(المتاجر النشطة)</span></h2>
+        <p class="lp-section-subtitle">تصفح وتسوق من المتاجر التي تثق في نظامنا لإدارة مبيعاتها السحابية</p>
+      </div>
+
+      <div class="lp-directory-container">
+        <div style="max-width: 450px; margin: 0 auto 40px auto; background: rgba(0,0,0,0.4); border-radius: 30px; border: 1px solid rgba(212,138,55,0.3); padding: 5px 20px; display: flex; align-items: center; box-sizing: border-box;">
+          <input type="text" id="directorySearchInput" placeholder="ابحث عن اسم متجر..." oninput="filterDirectoryShops()" style="background: none; border: none; color: #fff; width: 100%; padding: 10px; outline: none; font-family: inherit; font-size: 15px; text-align: right;">
+          <i class="fa-solid fa-magnifying-glass" style="color: #d48a37; font-size:18px;"></i>
+        </div>
+
+        <div id="directoryShopsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; box-sizing: border-box;">
+          <!-- Loading spinner -->
+          <div style="grid-column: 1/-1; text-align: center; padding: 40px; color:#c9ad93;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:32px; margin-bottom:10px;"></i>
+            <p>جاري تحميل المتاجر من قاعدة البيانات السحابية...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom CTA Bar -->
+    <section class="lp-section" style="padding-top: 2rem; padding-bottom: 6rem;">
+      <div class="lp-cta-bar">
+        <div class="lp-cta-bar-content">
+          <h2>ابدأ رحلتك الرقمية وضاعف مبيعاتك اليوم!</h2>
+          <p>تواصل مع المهندس عبدالرحمن عمرو مباشرة لإطلاق متجرك السحابي خلال دقائق قليلة</p>
+          <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20الاشتراك%20في%20منصة%20MenuEgy%20والحصول%20على%20متجر%20إلكتروني%20خاص%20بي" target="_blank" class="lp-btn lp-btn-whatsapp">
+            <i class="fa-brands fa-whatsapp"></i> اشترك وتواصل معنا فوراً
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="margin-top: 0; padding: 3rem 2rem; background: #000; border-top: 1px solid rgba(212, 138, 55, 0.1); text-align: center; color: #7a6e60;">
+      <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+        <h2 style="color: var(--white); font-weight: 800; font-size: 1.5rem; margin: 0;">MenuEgy 2030</h2>
+        <p style="color: #c9ad93; font-size: 0.9rem; margin: 0; max-width: 500px;">المنصة الذكية لإطلاق وإدارة المتاجر السحابية المتكاملة مع الواتساب وقاعدة بيانات سحابية متكاملة.</p>
+        <div style="font-size: 0.85rem; color: #7a6e60; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; width: 100%;">
+          &copy; 2026 جميع الحقوق محفوظة. 
+          تصميم وتطوير <a href="https://abdelrahman-amr1.github.io/AbdelrahmanAmr/#portfolio" target="_blank" style="color: var(--secondary-color); text-decoration: underline; font-weight: 700;">المهندس عبدالرحمن عمرو</a>.
+        </div>
+      </div>
+    </footer>
   </div>
 
   <!-- 2. Storefront App (Shown only when shop ?s= slug is provided) -->

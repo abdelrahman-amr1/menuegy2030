@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لماذا MenuEgy 2030؟ | أطلق متجرك السحابي ووفر آلاف الجنيهات</title>
+  
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Central Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    /* Premium overrides and custom styles for Marketing Page */
+    .about-wrapper {
+      background-color: #120e0c;
+      color: #f7ede2;
+      min-height: 100vh;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .about-header {
+      background: linear-gradient(135deg, #1e130f 0%, #0c0806 100%);
+      border-bottom: 1px solid rgba(212, 138, 55, 0.2);
+      padding: 15px 0;
+    }
+
+    .promo-badge {
+      background: rgba(212, 138, 55, 0.1);
+      border: 1px dashed #d48a37;
+      color: #d48a37;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .marketing-hero {
+      padding: 100px 20px;
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(212, 138, 55, 0.1) 0%, rgba(18, 14, 12, 0) 70%);
+      position: relative;
+    }
+
+    .marketing-hero h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .marketing-hero h1 span {
+      color: #d48a37;
+      position: relative;
+      display: inline-block;
+    }
+
+    .marketing-hero p {
+      font-size: 1.2rem;
+      color: #c9ad93;
+      max-width: 750px;
+      margin: 0 auto 35px auto;
+      line-height: 1.8;
+    }
+
+    .cta-glow-btn {
+      background: linear-gradient(135deg, #d48a37 0%, #b24a27 100%);
+      color: #fff;
+      font-weight: 800;
+      padding: 15px 35px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 25px rgba(212, 138, 55, 0.4);
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .cta-glow-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 35px rgba(212, 138, 55, 0.6);
+      background: linear-gradient(135deg, #b87328 0%, #963a1d 100%);
+    }
+
+    /* Calculator Section styles */
+    .calc-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(30, 24, 20, 0.95);
+      border: 1px solid rgba(212, 138, 55, 0.2);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    @media(min-width: 768px) {
+      .calc-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .calc-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .calc-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .calc-input-group label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #c9ad93;
+    }
+
+    .calc-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .calc-input-wrapper input {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(212, 138, 55, 0.3);
+      background: rgba(0, 0, 0, 0.4);
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      outline: none;
+      text-align: left;
+      direction: ltr;
+      padding-right: 50px;
+    }
+
+    .calc-input-wrapper input:focus {
+      border-color: #d48a37;
+      box-shadow: 0 0 10px rgba(212, 138, 55, 0.2);
+    }
+
+    .calc-input-wrapper .input-unit {
+      position: absolute;
+      right: 15px;
+      color: #7a6e60;
+      font-size: 0.85rem;
+      font-weight: 700;
+      pointer-events: none;
+    }
+
+    .calc-results {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(212, 138, 55, 0.15);
+      border-radius: 12px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed rgba(255,255,255,0.05);
+      padding-bottom: 10px;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .result-label {
+      font-size: 0.95rem;
+      color: #c9ad93;
+    }
+
+    .result-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .result-value.highlight {
+      color: #d48a37;
+      font-size: 1.8rem;
+      text-shadow: 0 0 10px rgba(212, 138, 55, 0.2);
+    }
+
+    .result-value.success-text {
+      color: #4cd964;
+    }
+
+    /* FAQ accordion styles */
+    .faq-section {
+      max-width: 800px;
+      margin: 80px auto;
+      padding: 0 20px;
+    }
+
+    .faq-item {
+      background: rgba(30, 24, 20, 0.6);
+      border: 1px solid rgba(212, 138, 55, 0.15);
+      border-radius: 10px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .faq-header {
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+      user-select: none;
+    }
+
+    .faq-header:hover {
+      background: rgba(212, 138, 55, 0.05);
+    }
+
+    .faq-icon {
+      font-size: 1.1rem;
+      color: #d48a37;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .faq-body-content {
+      padding: 20px;
+      color: #c9ad93;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      border-top: 1px solid rgba(255, 255, 255, 0.02);
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .faq-item.active .faq-body {
+      max-height: 300px;
+    }
+  </style>
+</head>
+<body class="about-wrapper">
+
+  <!-- Header -->
+  <header class="about-header">
+    <div class="header-container">
+      <a href="index.html" class="logo">
+        <i class="fa-solid fa-cubes"></i> MenuEgy <span>2030</span>
+      </a>
+      <nav class="lp-nav">
+        <a href="index.html" class="admin-link" style="border-color: rgba(212,138,55,0.3); color:#fff; background:none;">
+          <i class="fa-solid fa-house"></i> العودة للرئيسية
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="marketing-hero">
+    <div class="promo-badge">
+      <i class="fa-solid fa-percent"></i> وداعاً لعمولات تطبيقات الديليفري المرتفعة!
+    </div>
+    <h1>ابنِ متجرك السحابي ووفر <span>آلاف الجنيهات</span> شهرياً</h1>
+    <p>صُممت منصة MenuEgy 2030 لمساعدة التجار وأصحاب المطاعم ومحلات العطارة والملابس والمتاجر السحابية على إطلاق متاجرهم الذكية والبيع مباشرة لعملائهم وتوصيل الطلبات للواتساب دون دفع قرش واحد كعمولات مبيعات!</p>
+    <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20الاشتراك%20في%20منصة%20MenuEgy%20والحصول%20على%20متجر%20إلكتروني%20خاص%20بي" target="_blank" class="cta-glow-btn">
+      <i class="fa-brands fa-whatsapp"></i> تواصل معنا وابدأ متجرك الآن
+    </a>
+  </section>
+
+  <!-- Savings Calculator Section -->
+  <section class="lp-section" style="padding-top:0;">
+    <div class="lp-section-title-container" style="text-align: center; margin-bottom: 40px;">
+      <h2 class="lp-section-title" style="color:#fff;">احسب <span>أرباحك وتوفيرك</span> بنفسك</h2>
+      <p class="lp-section-subtitle">أدخل بيانات مبيعاتك الحالية وشاهد الفارق الضخم بين عمولات التطبيقات التقليدية والاشتراك الثابت في MenuEgy</p>
+    </div>
+
+    <div class="calc-container">
+      <div class="calc-grid">
+        <!-- Inputs -->
+        <div class="calc-inputs">
+          <div class="calc-input-group">
+            <label for="monthlyOrders">عدد الطلبات الشهري المتوقع:</label>
+            <div class="calc-input-wrapper">
+              <input type="number" id="monthlyOrders" value="300" min="1" oninput="calculateSavings()">
+              <span class="input-unit">أوردر / شهر</span>
+            </div>
+          </div>
+          
+          <div class="calc-input-group">
+            <label for="avgOrderValue">متوسط قيمة الطلب الواحد (ج.م):</label>
+            <div class="calc-input-wrapper">
+              <input type="number" id="avgOrderValue" value="150" min="10" oninput="calculateSavings()">
+              <span class="input-unit">جنيه</span>
+            </div>
+          </div>
+          
+          <div class="calc-input-group">
+            <label for="appCommission">نسبة عمولة تطبيقات التوصيل الأخرى (%):</label>
+            <div class="calc-input-wrapper">
+              <input type="number" id="appCommission" value="20" min="1" max="50" oninput="calculateSavings()">
+              <span class="input-unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Display -->
+        <div class="calc-results">
+          <div class="result-row">
+            <span class="result-label">إجمالي حجم مبيعاتك الشهري:</span>
+            <span class="result-value" id="resSalesTotal">45,000 ج</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">العمولات المهدرة شهرياً للتطبيقات (20%):</span>
+            <span class="result-value" style="color:#d9534f;" id="resCommissionLoss">9,000 ج</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">تكلفة اشتراكك الشهري في MenuEgy 2030:</span>
+            <span class="result-value" style="color:#d48a37;">150 ج فقط</span>
+          </div>
+          <div class="result-row" style="margin-top: 10px; border-top: 1px solid rgba(212,138,55,0.3); padding-top: 15px;">
+            <span class="result-label" style="font-weight: 700; color: #fff;">صافي توفيرك الشهري مع MenuEgy:</span>
+            <span class="result-value success-text highlight" id="resMonthlySavings">8,850 ج</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label" style="font-weight: 700;">التوفير الإجمالي السنوي:</span>
+            <span class="result-value success-text" style="font-size: 1.5rem;" id="resYearlySavings">106,200 ج</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step-by-Step Flow Section -->
+  <section class="lp-section" style="background: rgba(30, 24, 20, 0.2); border-top: 1px solid rgba(212,138,55,0.05); border-bottom: 1px solid rgba(212,138,55,0.05);">
+    <div class="lp-section-title-container" style="text-align: center;">
+      <h2 class="lp-section-title" style="color:#fff;">3 خطوات فقط <span>لتبدأ مبيعاتك</span></h2>
+      <p class="lp-section-subtitle">صممنا النظام ليعمل بأسهل وبأسرع طريقة ممكنة ودون تعقيدات تقنية</p>
+    </div>
+    
+    <div style="max-width: 900px; margin: 40px auto 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
+      <div class="lp-feature-card" style="background: rgba(30, 24, 20, 0.95); text-align: center; padding: 30px 20px;">
+        <div style="width: 50px; height: 50px; background: #d48a37; color: #000; font-size: 20px; font-weight: 800; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">١</div>
+        <h3 style="color:#fff; font-size:17px; margin-bottom:10px;">إنشاء المتجر وتخصيصه</h3>
+        <p style="color:#c9ad93; font-size:13px; line-height:1.6;">نقوم بحجز الرابط والاسم وتخصيص ألوان علامتك التجارية وتوصيله برقم الواتساب الخاص بك سحابياً في دقائق معدودة.</p>
+      </div>
+      
+      <div class="lp-feature-card" style="background: rgba(30, 24, 20, 0.95); text-align: center; padding: 30px 20px;">
+        <div style="width: 50px; height: 50px; background: #d48a37; color: #000; font-size: 20px; font-weight: 800; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">٢</div>
+        <h3 style="color:#fff; font-size:17px; margin-bottom:10px;">إضافة المنتجات والأسعار</h3>
+        <p style="color:#c9ad93; font-size:13px; line-height:1.6;">من خلال لوحة تحكم التاجر السهلة جداً، ترفع صور منتجاتك بضغطة زر وتكتب أسعارها ومواصفاتها وتفاصيل عروض الجملة والكمية.</p>
+      </div>
+
+      <div class="lp-feature-card" style="background: rgba(30, 24, 20, 0.95); text-align: center; padding: 30px 20px;">
+        <div style="width: 50px; height: 50px; background: #d48a37; color: #000; font-size: 20px; font-weight: 800; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">٣</div>
+        <h3 style="color:#fff; font-size:17px; margin-bottom:10px;">استقبال الطلبات والبيع</h3>
+        <p style="color:#c9ad93; font-size:13px; line-height:1.6;">يتصفح الزبائن متجرك، ويضيفون الأصناف لسلة الشراء، ويقومون بتأكيد الطلب لتصلك تفاصيله كاملة كرسالة واتساب منسقة فورياً.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section">
+    <div class="lp-section-title-container" style="text-align: center; margin-bottom: 40px;">
+      <h2 class="lp-section-title" style="color:#fff;">الأسئلة الشائعة <span>(FAQ)</span></h2>
+      <p class="lp-section-subtitle">إجابات واضحة عن كل استفساراتكم ومخاوفكم حول النظام</p>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header" onclick="toggleFaq(this)">
+        <span>هل توجد أي رسوم أو عمولات خفية على المبيعات؟</span>
+        <i class="fa-solid fa-chevron-down faq-icon"></i>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-content">
+          قطعاً لا. النظام يعتمد على نموذج الاشتراك السحابي الثابت (Monthly Subscription) فقط، ولا يتم اقتطاع أي نسبة أو عمولة من مبيعاتك أو أوردراتك مهما بلغت قيمتها. مبيعاتك وأرباحك لك بالكامل!
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header" onclick="toggleFaq(this)">
+        <span>هل يحتاج الزبون لتحميل أي تطبيقات ليتصفح ويشتري من متجري؟</span>
+        <i class="fa-solid fa-chevron-down faq-icon"></i>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-content">
+          لا، المتجر عبارة عن موقع ويب سريع جداً ومتجاوب بالكامل مع الموبايل. بلمسة واحدة يفتح الزبون الرابط الخاص بك من أي متصفح أو عبر مسح كود QR ويبدأ الشراء فوراً دون أي حاجة للتنزيل أو التسجيل المعقد.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header" onclick="toggleFaq(this)">
+        <span>كيف تصلني تفاصيل الأوردر وبيانات العميل؟</span>
+        <i class="fa-solid fa-chevron-down faq-icon"></i>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-content">
+          بمجرد قيام العميل بالضغط على "تأكيد الطلب"، يقوم النظام بتوليد رسالة منسقة باحترافية تحتوي على قائمة المشتريات، الأسعار، الإجمالي، وتفاصيل بيانات العميل (الاسم، الهاتف، المحافظة، والعنوان) ويتم فتح محادثة الواتساب الخاصة بمبيعاتك تلقائياً ليرسلها العميل لك بكبسة زر واحدة.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-header" onclick="toggleFaq(this)">
+        <span>هل تدعم المنصة رفع الصور سحابياً؟ وهل هناك حد أقصى؟</span>
+        <i class="fa-solid fa-chevron-down faq-icon"></i>
+      </div>
+      <div class="faq-body">
+        <div class="faq-body-content">
+          نعم! نوفر لك رفع صور المنتجات مباشرة من لوحة التحكم بضغطة زر سحابياً دون الحاجة لروابط خارجية. يعتمد الحد الأقصى للمنتجات على باقتك الحالية (الباقة القياسية تدعم حتى 50 منتجاً ويمكن ترقيتها بسهولة).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="lp-section" style="padding-bottom: 80px;">
+    <div class="lp-cta-bar" style="background: linear-gradient(135deg, #1e130f 0%, #000 100%); border: 1px solid rgba(212,138,55,0.2);">
+      <div class="lp-cta-bar-content">
+        <h2>ضاعف أرباحك ووفر عمولات الديليفري الآن!</h2>
+        <p>تواصل مع م. عبدالرحمن عمرو مباشرة لإطلاق متجرك السحابي المتكامل واستقبال أوردراتك اليوم</p>
+        <a href="https://wa.me/201128007078?text=السلام%20عليكم%20م.%20عبدالرحمن،%20أريد%20الاشتراك%20في%20منصة%20MenuEgy%20والحصول%20على%20متجر%20إلكتروني%20خاص%20بي" target="_blank" class="cta-glow-btn">
+          <i class="fa-brands fa-whatsapp"></i> اشترك وتواصل معنا فوراً
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="padding: 3rem 2rem; background: #000; border-top: 1px solid rgba(212, 138, 55, 0.1); text-align: center; color: #7a6e60;">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; align-items: center;">
+      <h2 style="color: #fff; font-weight: 800; font-size: 1.5rem; margin: 0;">MenuEgy 2030</h2>
+      <p style="color: #c9ad93; font-size: 0.9rem; margin: 0; max-width: 500px;">المنصة الذكية لإطلاق وإدارة المتاجر السحابية المتكاملة مع الواتساب وقاعدة بيانات سحابية متكاملة.</p>
+      <div style="font-size: 0.85rem; color: #7a6e60; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem; width: 100%;">
+        &copy; 2026 جميع الحقوق محفوظة. 
+        تصميم وتطوير <a href="https://abdelrahman-amr1.github.io/AbdelrahmanAmr/#portfolio" target="_blank" style="color: #d48a37; text-decoration: underline; font-weight: 700;">المهندس عبدالرحمن عمرو</a>.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Savings Calculator Logic
+    function calculateSavings() {
+      const orders = parseFloat(document.getElementById('monthlyOrders').value) || 0;
+      const valValue = parseFloat(document.getElementById('avgOrderValue').value) || 0;
+      const commPct = parseFloat(document.getElementById('appCommission').value) || 0;
+      
+      const salesTotal = orders * valValue;
+      const commissionLoss = salesTotal * (commPct / 100);
+      const subscriptionCost = 150;
+      
+      const monthlySavings = Math.max(0, commissionLoss - subscriptionCost);
+      const yearlySavings = monthlySavings * 12;
+      
+      // Update DOM
+      document.getElementById('resSalesTotal').textContent = salesTotal.toLocaleString('ar-EG') + ' ج';
+      document.getElementById('resCommissionLoss').textContent = commissionLoss.toLocaleString('ar-EG') + ' ج';
+      document.getElementById('resMonthlySavings').textContent = monthlySavings.toLocaleString('ar-EG') + ' ج';
+      document.getElementById('resYearlySavings').textContent = yearlySavings.toLocaleString('ar-EG') + ' ج';
+    }
+
+    // FAQ Accordion Toggle
+    function toggleFaq(header) {
+      const item = header.parentElement;
+      const isActive = item.classList.contains('active');
+      
+      // Close all items
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('active');
+        i.querySelector('.faq-body').style.maxHeight = null;
+      });
+      
+      if (!isActive) {
+        item.classList.add('active');
+        const body = item.querySelector('.faq-body');
+        body.style.maxHeight = body.scrollHeight + 'px';
+      }
+    }
+    
+    // Initial run
+    calculateSavings();
+  </script>
+</body>
+</html>

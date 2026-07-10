@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const shopSecondaryColor = document.getElementById("shopSecondaryColor");
   const shopFreeShipping = document.getElementById("shopFreeShipping");
   const shopMaxProducts = document.getElementById("shopMaxProducts");
+  const shopSubscriptionPlan = document.getElementById("shopSubscriptionPlan");
+  const shopSubscriptionExpiry = document.getElementById("shopSubscriptionExpiry");
   const shopIsActive = document.getElementById("shopIsActive");
   const shopAdminUser = document.getElementById("shopAdminUser");
   const shopAdminPass = document.getElementById("shopAdminPass");
@@ -89,6 +91,37 @@ document.addEventListener("DOMContentLoaded", () => {
     passInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") loginBtn.click();
     });
+  }
+
+  // Date formatter helper
+  function formatDate(date) {
+    if (!date) return "";
+    const d = new Date(date);
+    let month = '' + (d.getMonth() + 1);
+    let day = '' + d.getDate();
+    const year = d.getFullYear();
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+    return [year, month, day].join('-');
+  }
+
+  // Default expiry date calculator
+  function updateDefaultExpiry() {
+    if (editShopMode.value === "true") return;
+    const today = new Date();
+    if (shopSubscriptionPlan.value === "monthly") {
+      today.setDate(today.getDate() + 30);
+    } else if (shopSubscriptionPlan.value === "yearly") {
+      today.setDate(today.getDate() + 365);
+    } else if (shopSubscriptionPlan.value === "trial") {
+      today.setDate(today.getDate() + 7);
+    }
+    shopSubscriptionExpiry.value = formatDate(today);
+  }
+
+  if (shopSubscriptionPlan) {
+    shopSubscriptionPlan.addEventListener("change", updateDefaultExpiry);
+    updateDefaultExpiry();
   }
 
   // Load stats and shop list
@@ -161,6 +194,14 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="meta-label">الحد الأقصى للمنتجات:</span>
               <span class="meta-val" style="font-weight: 700; color: var(--super-accent);">${shop.max_products_limit !== undefined && shop.max_products_limit !== null ? shop.max_products_limit : 50} منتج</span>
             </div>
+            <div class="meta-row">
+              <span class="meta-label">باقة الاشتراك:</span>
+              <span class="meta-val" style="font-weight: 700;">${shop.subscription_plan === 'yearly' ? 'السنوية 🌟' : shop.subscription_plan === 'trial' ? 'فترة تجريبية 🎁' : 'الشهرية 💳'}</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">تاريخ الانتهاء:</span>
+              <span class="meta-val" style="font-weight: 700; color: ${new Date(shop.subscription_expiry) < new Date() ? '#d9534f' : '#4cd964'}">${shop.subscription_expiry ? new Date(shop.subscription_expiry).toLocaleDateString('ar-EG') : 'غير محدد'}</span>
+            </div>
             <div class="meta-row" style="margin-top: 5px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 5px;">
               <span class="meta-label">لوحة التحكم:</span>
               <span class="meta-val" style="color: #d48a37; font-size:12px;">user: ${shop.admin_username} | pass: ${shop.admin_password}</span>
@@ -230,6 +271,12 @@ document.addEventListener("DOMContentLoaded", () => {
     shopSecondaryColor.value = shop.secondary_color;
     shopFreeShipping.value = shop.free_shipping_limit;
     shopMaxProducts.value = shop.max_products_limit !== undefined && shop.max_products_limit !== null ? shop.max_products_limit : 50;
+    shopSubscriptionPlan.value = shop.subscription_plan || "monthly";
+    if (shop.subscription_expiry) {
+      shopSubscriptionExpiry.value = formatDate(shop.subscription_expiry);
+    } else {
+      shopSubscriptionExpiry.value = "";
+    }
     shopIsActive.checked = shop.is_active !== false;
     shopAdminUser.value = shop.admin_username;
     shopAdminPass.value = shop.admin_password;
@@ -254,6 +301,8 @@ document.addEventListener("DOMContentLoaded", () => {
     shopPrimaryColor.value = "#b24a27";
     shopSecondaryColor.value = "#d48a37";
     shopMaxProducts.value = "50";
+    shopSubscriptionPlan.value = "monthly";
+    updateDefaultExpiry();
     shopIsActive.checked = true;
     
     // Clear logo upload elements
@@ -294,6 +343,8 @@ document.addEventListener("DOMContentLoaded", () => {
       secondary_color: shopSecondaryColor.value,
       free_shipping_limit: parseFloat(shopFreeShipping.value) || 0,
       max_products_limit: parseInt(shopMaxProducts.value) || 50,
+      subscription_plan: shopSubscriptionPlan.value,
+      subscription_expiry: shopSubscriptionExpiry.value ? new Date(shopSubscriptionExpiry.value).toISOString() : null,
       is_active: shopIsActive.checked,
       admin_username: shopAdminUser.value.trim(),
       admin_password: shopAdminPass.value.trim()
