@@ -109,12 +109,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateDefaultExpiry() {
     if (editShopMode.value === "true") return;
     const today = new Date();
-    if (shopSubscriptionPlan.value === "monthly") {
+    if (shopSubscriptionPlan.value === "starter") {
       today.setDate(today.getDate() + 30);
-    } else if (shopSubscriptionPlan.value === "yearly") {
-      today.setDate(today.getDate() + 365);
+      shopMaxProducts.value = 50;
+    } else if (shopSubscriptionPlan.value === "pro") {
+      today.setDate(today.getDate() + 30);
+      shopMaxProducts.value = 200;
+    } else if (shopSubscriptionPlan.value === "business") {
+      today.setDate(today.getDate() + 30);
+      shopMaxProducts.value = 9999;
     } else if (shopSubscriptionPlan.value === "trial") {
       today.setDate(today.getDate() + 7);
+      shopMaxProducts.value = 10;
     }
     shopSubscriptionExpiry.value = formatDate(today);
   }
@@ -196,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
             <div class="meta-row">
               <span class="meta-label">باقة الاشتراك:</span>
-              <span class="meta-val" style="font-weight: 700;">${shop.subscription_plan === 'yearly' ? 'السنوية 🌟' : shop.subscription_plan === 'trial' ? 'فترة تجريبية 🎁' : 'الشهرية 💳'}</span>
+              <span class="meta-val" style="font-weight: 700;">${shop.subscription_plan === 'pro' ? 'الاحترافية 🌟' : shop.subscription_plan === 'business' ? 'الأعمال 💼' : shop.subscription_plan === 'trial' ? 'تجريبي 🎁' : 'الأساسية 💳'}</span>
             </div>
             <div class="meta-row">
               <span class="meta-label">تاريخ الانتهاء:</span>
@@ -271,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
     shopSecondaryColor.value = shop.secondary_color;
     shopFreeShipping.value = shop.free_shipping_limit;
     shopMaxProducts.value = shop.max_products_limit !== undefined && shop.max_products_limit !== null ? shop.max_products_limit : 50;
-    shopSubscriptionPlan.value = shop.subscription_plan || "monthly";
+    shopSubscriptionPlan.value = shop.subscription_plan || "starter";
     if (shop.subscription_expiry) {
       shopSubscriptionExpiry.value = formatDate(shop.subscription_expiry);
     } else {
@@ -301,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
     shopPrimaryColor.value = "#b24a27";
     shopSecondaryColor.value = "#d48a37";
     shopMaxProducts.value = "50";
-    shopSubscriptionPlan.value = "monthly";
+    shopSubscriptionPlan.value = "starter";
     updateDefaultExpiry();
     shopIsActive.checked = true;
     

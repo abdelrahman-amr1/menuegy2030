@@ -113,7 +113,7 @@ async function checkAuth() {
       const renewBtn = document.getElementById("renewSubscriptionWaBtn");
       if (subBanner && subText) {
         subBanner.style.display = "block";
-        const planName = shop.subscription_plan === 'yearly' ? 'الباقة السنوية 🌟' : shop.subscription_plan === 'trial' ? 'الفترة التجريبية 🎁' : 'الباقة الشهرية 💳';
+        const planName = shop.subscription_plan === 'pro' ? 'الباقة الاحترافية (Pro) 🌟' : shop.subscription_plan === 'business' ? 'باقة الأعمال (Business) 💼' : shop.subscription_plan === 'trial' ? 'الفترة التجريبية 🎁' : 'الباقة الأساسية (Starter) 💳';
         const expiryDate = shop.subscription_expiry ? new Date(shop.subscription_expiry) : null;
         
         let statusText = `باقة الاشتراك الحالية: <strong>${planName}</strong>. `;
@@ -437,6 +437,22 @@ async function saveProductForm(event) {
   const is_featured = document.getElementById("prodIsFeatured").checked;
   const wholesale_qty = parseFloat(document.getElementById("prodWholesaleQty").value) || null;
   const wholesale_price = parseFloat(document.getElementById("prodWholesalePrice").value) || null;
+  
+  // Enforce Starter plan wholesale feature restriction
+  let currentShopPlan = "starter";
+  try {
+    const shopProfile = await getShopProfile(activeShopSlug);
+    if (shopProfile && shopProfile.subscription_plan) {
+      currentShopPlan = shopProfile.subscription_plan;
+    }
+  } catch(err) {
+    console.error("Error checking shop plan:", err);
+  }
+
+  if (currentShopPlan === "starter" && (wholesale_qty > 0 || wholesale_price > 0)) {
+    showToast("عروض الجملة والكمية متوفرة فقط في الباقة الاحترافية (Pro) وباقة الأعمال (Business). يرجى ترقية باقتك لتفعيلها!", "danger");
+    return;
+  }
   
   if (!name || !category || isNaN(price) || !unit) {
     showToast("يرجى ملء جميع الحقول الإلزامية", "danger");

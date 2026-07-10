@@ -317,6 +317,17 @@
         <!-- Inputs -->
         <div class="calc-inputs">
           <div class="calc-input-group">
+            <label for="menuEgyPlan">باقة MenuEgy المستهدفة:</label>
+            <div class="calc-input-wrapper">
+              <select id="menuEgyPlan" onchange="calculateSavings()" style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(212, 138, 55, 0.3); background: rgba(0, 0, 0, 0.4); color: #fff; font-size: 1.1rem; font-weight: 700; outline: none; direction: rtl; appearance: none; -webkit-appearance: none;">
+                <option value="150" selected>الباقة الأساسية (Starter) — 150 ج/شهر</option>
+                <option value="300">الباقة الاحترافية (Pro) — 300 ج/شهر</option>
+                <option value="1200">باقة الأعمال (Business) — 1200 ج/شهر</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="calc-input-group">
             <label for="monthlyOrders">عدد الطلبات الشهري المتوقع:</label>
             <div class="calc-input-wrapper">
               <input type="number" id="monthlyOrders" value="300" min="1" oninput="calculateSavings()">
@@ -352,8 +363,8 @@
             <span class="result-value" style="color:#d9534f;" id="resCommissionLoss">9,000 ج</span>
           </div>
           <div class="result-row">
-            <span class="result-label">تكلفة اشتراكك الشهري في MenuEgy 2030:</span>
-            <span class="result-value" style="color:#d48a37;">150 ج فقط</span>
+            <span class="result-label">تكلفة اشتراكك في MenuEgy 2030:</span>
+            <span class="result-value" style="color:#d48a37;" id="resSubscriptionCost">150 ج</span>
           </div>
           <div class="result-row" style="margin-top: 10px; border-top: 1px solid rgba(212,138,55,0.3); padding-top: 15px;">
             <span class="result-label" style="font-weight: 700; color: #fff;">صافي توفيرك الشهري مع MenuEgy:</span>
@@ -446,7 +457,7 @@
       </div>
       <div class="faq-body">
         <div class="faq-body-content">
-          نعم! نوفر لك رفع صور المنتجات مباشرة من لوحة التحكم بضغطة زر سحابياً دون الحاجة لروابط خارجية. يعتمد الحد الأقصى للمنتجات على باقتك الحالية (الباقة القياسية تدعم حتى 50 منتجاً ويمكن ترقيتها بسهولة).
+          نعم! نوفر لك رفع صور المنتجات مباشرة من لوحة التحكم بضغطة زر سحابياً دون الحاجة لروابط خارجية. يعتمد الحد الأقصى للمنتجات على باقتك الحالية (الباقة الأساسية تدعم حتى 50 منتجاً، والباقة الاحترافية حتى 200 منتج، وباقة الأعمال تدعم عدداً غير محدود).
         </div>
       </div>
     </div>
@@ -484,10 +495,10 @@
       const orders = parseFloat(document.getElementById('monthlyOrders').value) || 0;
       const valValue = parseFloat(document.getElementById('avgOrderValue').value) || 0;
       const commPct = parseFloat(document.getElementById('appCommission').value) || 0;
+      const subscriptionCost = parseFloat(document.getElementById('menuEgyPlan').value) || 150;
       
       const salesTotal = orders * valValue;
       const commissionLoss = salesTotal * (commPct / 100);
-      const subscriptionCost = 150;
       
       const monthlySavings = Math.max(0, commissionLoss - subscriptionCost);
       const yearlySavings = monthlySavings * 12;
@@ -495,6 +506,7 @@
       // Update DOM
       document.getElementById('resSalesTotal').textContent = salesTotal.toLocaleString('ar-EG') + ' ج';
       document.getElementById('resCommissionLoss').textContent = commissionLoss.toLocaleString('ar-EG') + ' ج';
+      document.getElementById('resSubscriptionCost').textContent = subscriptionCost.toLocaleString('ar-EG') + ' ج';
       document.getElementById('resMonthlySavings').textContent = monthlySavings.toLocaleString('ar-EG') + ' ج';
       document.getElementById('resYearlySavings').textContent = yearlySavings.toLocaleString('ar-EG') + ' ج';
     }
