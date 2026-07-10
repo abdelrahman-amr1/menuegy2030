@@ -8,7 +8,7 @@ let allShops = []; // Stores platform shops in directory view
 
 // Active tenant states
 let activeShopSlug = "";
-let activeShopName = "متجر إلكتروني";
+let activeShopName = "منيو إلكتروني";
 let activeShopWhatsapp = "";
 let activeFreeShippingLimit = 1000;
 const DEFAULT_SHIPPING_COST = 50;
@@ -158,12 +158,12 @@ async function initTenantStorefront(slug) {
   document.documentElement.style.setProperty('--secondary-color', shop.secondary_color);
   
   // Set title & header labels
-  document.title = `${shop.name} | متجر إلكتروني أونلاين`;
+  document.title = `${shop.name} | منيو إلكتروني أونلاين`;
   document.getElementById("storeTitle").textContent = shop.name;
-  document.getElementById("storeSubtitle").textContent = shop.slogan || "متجر المنتجات الطبيعية والعطارة";
-  document.getElementById("storeSloganBadge").textContent = shop.slogan ? `شعارنا: ${shop.slogan}` : "أهلاً بكم في متجرنا";
+  document.getElementById("storeSubtitle").textContent = shop.slogan || "منيو المنتجات الطبيعية والعطارة";
+  document.getElementById("storeSloganBadge").textContent = shop.slogan ? `شعارنا: ${shop.slogan}` : "أهلاً بكم في منيو الخاص بنا";
   document.getElementById("storeHeroHeading").innerHTML = `منتجات طبيعية مميزة ذات جودة <span>فريدة وقوية</span>`;
-  document.getElementById("storeHeroDescription").textContent = `تصفح أرقى المجموعات المتاحة لدينا في متجر ${shop.name}. الجودة هي سر تميزنا ورضاكم غايتنا!`;
+  document.getElementById("storeHeroDescription").textContent = `تصفح أرقى المجموعات المتاحة لدينا في منيو ${shop.name}. الجودة هي سر تميزنا ورضاكم غايتنا!`;
   
   document.getElementById("storeFreeShippingMsg").textContent = `لأي طلب بقيمة تتجاوز ${activeFreeShippingLimit} جنيه`;
   
@@ -595,7 +595,7 @@ function handleCheckout(event) {
   
   // Format the WhatsApp message
   let message = `السلام عليكم ورحمة الله وبركاته،\n`;
-  message += `أود طلب المنتجات التالية من *متجر ${activeShopName}*:\n`;
+  message += `أود طلب المنتجات التالية من *منيو ${activeShopName}*:\n`;
   message += `---------------------------------\n`;
   
   cart.forEach((item, index) => {
