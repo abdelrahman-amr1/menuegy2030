@@ -322,7 +322,7 @@
               <select id="menuEgyPlan" onchange="calculateSavings()" style="width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(212, 138, 55, 0.3); background: rgba(0, 0, 0, 0.4); color: #fff; font-size: 1.1rem; font-weight: 700; outline: none; direction: rtl; appearance: none; -webkit-appearance: none;">
                 <option value="150" selected>الباقة الأساسية (Starter) — 150 ج/شهر</option>
                 <option value="300">الباقة الاحترافية (Pro) — 300 ج/شهر</option>
-                <option value="1200">باقة الأعمال (Business) — 1200 ج/شهر</option>
+                <option value="2500">باقة الأعمال (Business) — 2500 ج/سنة</option>
               </select>
             </div>
           </div>
@@ -495,7 +495,13 @@
       const orders = parseFloat(document.getElementById('monthlyOrders').value) || 0;
       const valValue = parseFloat(document.getElementById('avgOrderValue').value) || 0;
       const commPct = parseFloat(document.getElementById('appCommission').value) || 0;
-      const subscriptionCost = parseFloat(document.getElementById('menuEgyPlan').value) || 150;
+      const originalValue = parseFloat(document.getElementById('menuEgyPlan').value) || 150;
+      
+      let subscriptionCost = originalValue;
+      if (originalValue === 2500) {
+        // Business plan is 2500/year, so monthly cost is 2500/12
+        subscriptionCost = 2500 / 12;
+      }
       
       const salesTotal = orders * valValue;
       const commissionLoss = salesTotal * (commPct / 100);
@@ -506,9 +512,9 @@
       // Update DOM
       document.getElementById('resSalesTotal').textContent = salesTotal.toLocaleString('ar-EG') + ' ج';
       document.getElementById('resCommissionLoss').textContent = commissionLoss.toLocaleString('ar-EG') + ' ج';
-      document.getElementById('resSubscriptionCost').textContent = subscriptionCost.toLocaleString('ar-EG') + ' ج';
-      document.getElementById('resMonthlySavings').textContent = monthlySavings.toLocaleString('ar-EG') + ' ج';
-      document.getElementById('resYearlySavings').textContent = yearlySavings.toLocaleString('ar-EG') + ' ج';
+      document.getElementById('resSubscriptionCost').textContent = originalValue === 2500 ? "٢,٥٠٠ ج/سنة" : originalValue.toLocaleString('ar-EG') + ' ج';
+      document.getElementById('resMonthlySavings').textContent = Math.round(monthlySavings).toLocaleString('ar-EG') + ' ج';
+      document.getElementById('resYearlySavings').textContent = Math.round(yearlySavings).toLocaleString('ar-EG') + ' ج';
     }
 
     // FAQ Accordion Toggle

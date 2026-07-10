@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
       today.setDate(today.getDate() + 30);
       shopMaxProducts.value = 200;
     } else if (shopSubscriptionPlan.value === "business") {
-      today.setDate(today.getDate() + 30);
+      today.setDate(today.getDate() + 365);
       shopMaxProducts.value = 9999;
     } else if (shopSubscriptionPlan.value === "trial") {
       today.setDate(today.getDate() + 7);
