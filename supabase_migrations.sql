@@ -19,3 +19,10 @@ ALTER TABLE shops ADD COLUMN IF NOT EXISTS subscription_expiry TIMESTAMP WITH TI
 ALTER TABLE shops ADD COLUMN IF NOT EXISTS user_permissions JSONB DEFAULT '{}'::jsonb;
 ALTER TABLE shops ADD COLUMN IF NOT EXISTS system_settings JSONB DEFAULT '{}'::jsonb;
 
+-- Run this to add stock quantity, cost price, barcode, min stock alert, and main store to products:
+ALTER TABLE products ADD COLUMN IF NOT EXISTS quantity NUMERIC DEFAULT 100;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cost_price NUMERIC DEFAULT 0;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock NUMERIC DEFAULT 5;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS store_name TEXT DEFAULT 'المخزن الرئيسي';
+

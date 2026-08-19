@@ -307,7 +307,8 @@ function renderProducts() {
   }
   
   filtered.forEach(p => {
-    const isAvailable = p.available !== false;
+    const qty = p.quantity !== undefined ? parseFloat(p.quantity) : 100;
+    const isAvailable = p.available !== false && qty > 0;
     const icon = CATEGORY_ICONS[p.category] || "📦";
     
     const card = document.createElement("div");
@@ -329,7 +330,7 @@ function renderProducts() {
       <span class="product-category-badge">${CATEGORY_NAMES[p.category] || p.category}</span>
       <div class="product-image-container" onclick="openOfferDetails('${p.id}')" style="cursor: pointer;">
         ${imageContainerContent}
-        ${!isAvailable ? '<div class="out-of-stock-overlay">غير متوفر حالياً</div>' : ''}
+        ${!isAvailable ? `<div class="out-of-stock-overlay">${qty <= 0 ? 'نفدت الكمية من المخزن' : 'غير متوفر حالياً'}</div>` : ''}
       </div>
       <div class="product-details">
         <h3 class="product-title" onclick="openOfferDetails('${p.id}')" style="cursor: pointer;">${p.name}</h3>
@@ -347,7 +348,7 @@ function renderProducts() {
             </button>
           ` : `
             <button class="add-to-cart-btn" disabled style="background: var(--gray-300); cursor: not-allowed;">
-              <span>نفذ</span>
+              <span>نفدت الكمية</span>
             </button>
           `}
         </div>

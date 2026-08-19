@@ -98,11 +98,11 @@
       </button>
       
       <button onclick="openSystemSettingsModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
-        <i class="fa-solid fa-sliders" style="color: #fbbf24; margin-left: 6px;"></i> إعداد سهل / الفوترة وميزان الباركود
+        <i class="fa-solid fa-sliders" style="color: #fbbf24; margin-left: 6px;"></i> إعدادات المنصة والفوترة وميزان الباركود
       </button>
 
-      <button onclick="openSubscriptionModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
-        <i class="fa-solid fa-id-card" style="color: #4ade80; margin-left: 6px;"></i> بيانات المشترك والتراخيص
+      <button onclick="openPosTerminalModal()" class="btn" style="background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; border: 1px solid #22c55e; font-weight: 800; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(22,163,74,0.3); cursor: pointer; transition: all 0.3s ease;">
+        <i class="fa-solid fa-calculator" style="color: #86efac; margin-left: 6px;"></i> نقطة البيع وشاشة الكاشير (POS Terminal)
       </button>
     </div>
     <section class="admin-stats">
@@ -126,7 +126,7 @@
         <div class="stat-icon" style="color: var(--danger-color);"><i class="fa-solid fa-circle-xmark"></i></div>
         <div class="stat-info">
           <h3 id="statOutOfStock">0</h3>
-          <p>منتجات نفذت كميتها</p>
+          <p>منتجات نفذت كميتها بالمخزن</p>
         </div>
       </div>
     </section>
@@ -138,7 +138,7 @@
       <div class="admin-toolbar">
         <div style="display: flex; gap: 1rem; flex: 1; flex-wrap: wrap;">
           <div class="search-box" style="max-width: 320px;">
-            <input type="text" id="adminSearchInput" placeholder="ابحث باسم المنتج..." oninput="filterAdminProducts()">
+            <input type="text" id="adminSearchInput" placeholder="ابحث باسم المنتج أو الباركود..." oninput="filterAdminProducts()">
             <i class="fa-solid fa-magnifying-glass"></i>
           </div>
           
@@ -174,12 +174,14 @@
         <table class="admin-table">
           <thead>
             <tr>
-              <th style="width: 15%">القسم</th>
-              <th style="width: 35%">اسم المنتج</th>
-              <th style="width: 15%">السعر (ج)</th>
-              <th style="width: 15%">الوحدة</th>
-              <th style="width: 10% ;text-align: center;">التوافر للبيع</th>
-              <th style="width: 10%; text-align: center;">إجراءات</th>
+              <th style="width: 12%">القسم</th>
+              <th style="width: 25%">اسم المنتج ومواصفاته</th>
+              <th style="width: 12%">الباركود / SKU</th>
+              <th style="width: 15%; text-align: center;">الكمية بالمخزن الرئيسي</th>
+              <th style="width: 10%">سعر التكلفة</th>
+              <th style="width: 10%">سعر البيع (ج)</th>
+              <th style="width: 8%; text-align: center;">التوافر</th>
+              <th style="width: 8%; text-align: center;">إجراءات</th>
             </tr>
           </thead>
           <tbody id="adminProductsTableBody">
@@ -255,18 +257,50 @@
             </div>
             
             <div class="form-group">
-              <label for="prodUnit">الوحدة التسعيرية *</label>
-              <input type="text" id="prodUnit" required placeholder="مثال: 100 جرام، عبوة، كيلو">
-              <div class="quick-unit-tags" style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;">
-                <span class="unit-tag" onclick="setUnitQuick('كيلو')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">كيلو</span>
-                <span class="unit-tag" onclick="setUnitQuick('100 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">100 جرام</span>
-                <span class="unit-tag" onclick="setUnitQuick('250 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">250 جرام</span>
-                <span class="unit-tag" onclick="setUnitQuick('500 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">500 جرام</span>
-                <span class="unit-tag" onclick="setUnitQuick('قطعة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">قطعة</span>
-                <span class="unit-tag" onclick="setUnitQuick('عبوة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">عبوة</span>
-                <span class="unit-tag" onclick="setUnitQuick('علبة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">علبة</span>
-                <span class="unit-tag" onclick="setUnitQuick('زجاجة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">زجاجة</span>
-              </div>
+              <label for="prodCostPrice">سعر التكلفة / الشراء (ج)</label>
+              <input type="number" id="prodCostPrice" min="0" step="0.5" placeholder="مثال: 30">
+            </div>
+          </div>
+
+          <div class="modal-form-row-2">
+            <div class="form-group">
+              <label for="prodQty">الكمية المتاحة بالمخزن الرئيسي *</label>
+              <input type="number" id="prodQty" required min="0" placeholder="مثال: 100">
+            </div>
+
+            <div class="form-group">
+              <label for="prodMinStock">حد إعادة الطلب (تنبيه النقصان)</label>
+              <input type="number" id="prodMinStock" value="5" min="0" placeholder="مثال: 5">
+            </div>
+          </div>
+
+          <div class="modal-form-row-2">
+            <div class="form-group">
+              <label for="prodBarcode">كود الصنف / الباركود</label>
+              <input type="text" id="prodBarcode" placeholder="مثال: 2000100987" style="font-family: monospace; direction: ltr;">
+            </div>
+
+            <div class="form-group">
+              <label for="prodStoreName">اسم المخزن التابع له</label>
+              <select id="prodStoreName">
+                <option value="المخزن الرئيسي">المخزن الرئيسي</option>
+                <option value="مخزن المعرض / الفرع الثاني">مخزن المعرض / الفرع الثاني</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prodUnit">الوحدة التسعيرية *</label>
+            <input type="text" id="prodUnit" required placeholder="مثال: 100 جرام، عبوة، كيلو">
+            <div class="quick-unit-tags" style="margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap;">
+              <span class="unit-tag" onclick="setUnitQuick('كيلو')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">كيلو</span>
+              <span class="unit-tag" onclick="setUnitQuick('100 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">100 جرام</span>
+              <span class="unit-tag" onclick="setUnitQuick('250 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">250 جرام</span>
+              <span class="unit-tag" onclick="setUnitQuick('500 جرام')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">500 جرام</span>
+              <span class="unit-tag" onclick="setUnitQuick('قطعة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">قطعة</span>
+              <span class="unit-tag" onclick="setUnitQuick('عبوة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">عبوة</span>
+              <span class="unit-tag" onclick="setUnitQuick('علبة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">علبة</span>
+              <span class="unit-tag" onclick="setUnitQuick('زجاجة')" style="cursor:pointer; background:var(--gray-100); padding:3px 8px; border-radius:4px; font-size:11px; color:var(--dark-color); border:1px solid var(--gray-300);">زجاجة</span>
             </div>
           </div>
           
@@ -519,13 +553,13 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- 2. SYSTEM SETTINGS MODAL (إعداد سهل / الفوترة والميزان) -->
+  <!-- 2. SYSTEM SETTINGS MODAL (إعدادات المنصة والفوترة والميزان) -->
   <!-- ========================================== -->
   <div class="modal-overlay" id="systemSettingsModalOverlay" onclick="closeSystemSettingsModal()">
     <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 920px; width: 95%;">
       <div class="modal-header" style="background: #0f172a; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
         <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fbbf24;">
-          <i class="fa-solid fa-sliders"></i> إعداد سهل / إعدادات المنصة والفوترة وميزان الباركود
+          <i class="fa-solid fa-sliders"></i> إعدادات المنصة والفوترة وميزان الباركود
         </h3>
         <div style="display: flex; gap: 8px;">
           <button onclick="saveSystemSettingsForm()" class="btn" style="background: #10b981; color: #fff; border: none; padding: 5px 15px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
@@ -746,7 +780,7 @@
               </table>
 
               <div style="margin-top: 10px; background: #fffbebf8; border: 1px solid #fef08a; padding: 10px; border-radius: 6px; font-size: 11px; color: #a16207;">
-                💡 برنامج المطعم له تكلفة إضافية على اشتراك سهل الرئيسي لتسليم وتوجيه الطلبات عبر الشبكة المحلية أو السحابية.
+                💡 برنامج المطعم له تكلفة إضافية على اشتراك المنصة الرئيسي لتسليم وتوجيه الطلبات عبر الشبكة المحلية أو السحابية.
               </div>
             </div>
           </div>
@@ -763,7 +797,7 @@
     <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 880px; width: 95%;">
       <div class="modal-header" style="background: #166534; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
         <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #86efac;">
-          <i class="fa-solid fa-id-card"></i> شكراً لثقتكم في سهل - بيانات المشترك والتراخيص
+          <i class="fa-solid fa-id-card"></i> شكراً لثقتكم في منصة MenuEgy 2030 - بيانات المشترك والتراخيص
         </h3>
         <button onclick="closeSubscriptionModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
           <i class="fa-solid fa-xmark"></i> إغلاق
@@ -774,7 +808,7 @@
         
         <!-- Status Notification Box -->
         <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 8px; padding: 12px 15px; color: #14532d; font-size: 12px; line-height: 1.6; margin-bottom: 15px;">
-          عميلنا الهام ، لفحص هذا الاشتراك ومودته وتكلفته، وتأكد من دقة بيانات المشترك وأنها بيانات مالك المشروع فقط، وليست بيانات أي شخص آخر، ومن معرفتك لباسورد الاشتراك. إذا وجدت أي خطأ اتصل بنا. البيانات تعرض الاشتراك للإيقاف. قائمة موشري سهل المعتمدين حاليا يتم تحديثها باستمرار على موقع البرنامج، تأكد من اعتماد أي شركة أو شخص قبل التعامل معه، الشركة غير مسئولة عن التعامل مع أي جهة أو شخص ليس في هذه القائمة. لآية استفسارات يسعدنا خدمتكم.
+          عميلنا الهام ، لفحص هذا الاشتراك ومودته وتكلفته، وتأكد من دقة بيانات المشترك وأنها بيانات مالك المشروع فقط، وليست بيانات أي شخص آخر، ومن معرفتك لباسورد الاشتراك. إذا وجدت أي خطأ اتصل بنا. البيانات تعرض الاشتراك للإيقاف. قائمة موشري المنصة المعتمدين حاليا يتم تحديثها باستمرار على موقع البرنامج، تأكد من اعتماد أي شركة أو شخص قبل التعامل معه، الشركة غير مسئولة عن التعامل مع أي جهة أو شخص ليس في هذه القائمة. لآية استفسارات يسعدنا خدمتكم.
         </div>
 
         <!-- Plan Info Header Cards -->
@@ -945,6 +979,125 @@
       </div>
     </div>
   </div>
+
+  <!-- ========================================== -->
+  <!-- 5. POS CASHIER TERMINAL MODAL (نقطة البيع وشاشة الكاشير) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="posTerminalModalOverlay" onclick="closePosTerminalModal()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 1100px; width: 98%; height: 90vh;">
+      <div class="modal-header" style="background: #15803d; color: #fff; padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #86efac;">
+            <i class="fa-solid fa-calculator"></i> نقطة البيع وشاشة الكاشير (POS Terminal)
+          </h3>
+          <span style="background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 20px; font-size: 11px; color: #fff;">المخزن الرئيسي</span>
+        </div>
+        <button onclick="closePosTerminalModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i> إغلاق
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 1rem; height: calc(90vh - 60px); overflow-hidden; background: #f1f5f9; direction: rtl; display: grid; grid-template-columns: 1.2fr 1fr; gap: 15px;">
+        
+        <!-- Left Column: Barcode Scanner & Quick Products Grid -->
+        <div style="display: flex; flex-direction: column; gap: 10px; height: 100%; overflow: hidden;">
+          
+          <!-- Barcode Scanner Input Bar -->
+          <div style="background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; display: flex; gap: 10px; align-items: center;">
+            <i class="fa-solid fa-barcode" style="font-size: 1.5rem; color: #0284c7;"></i>
+            <input type="text" id="posBarcodeScanInput" placeholder="امسح الباركود بالماسح البصري أو اكتب الاسم..." onkeydown="handlePosBarcodeScan(event)" style="flex: 1; padding: 8px 12px; border: 1.5px solid #0284c7; border-radius: 6px; font-size: 0.95rem; outline: none;">
+            <button onclick="triggerPosBarcodeAdd()" class="btn" style="background: #0284c7; color: #fff; border: none; padding: 8px 15px; font-size: 0.85rem; font-weight: 700;">إضافة</button>
+          </div>
+
+          <!-- Quick Categories Bar -->
+          <div id="posCategoriesBar" style="display: flex; gap: 6px; overflow-x: auto; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1;">
+            <!-- Dynamically filled by JS -->
+          </div>
+
+          <!-- Quick Products Grid -->
+          <div id="posProductsGrid" style="flex: 1; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; overflow-y: auto; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+            <!-- Dynamically filled by JS -->
+          </div>
+        </div>
+
+        <!-- Right Column: Current POS Order & Payment Summary -->
+        <div style="display: flex; flex-direction: column; height: 100%; background: #fff; border-radius: 8px; border: 1px solid #cbd5e1; padding: 12px; overflow: hidden;">
+          
+          <!-- Customer & Order Meta -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            <div>
+              <label style="font-size: 11px; color: #64748b; display: block;">نوع العميل:</label>
+              <select id="posCustomerSelect" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
+                <option value="cash">عميل نقدي (كاشير)</option>
+                <option value="credit">عميل آجل (حساب)</option>
+                <option value="vip">عميل مميز (VIP)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="font-size: 11px; color: #64748b; display: block;">طريقة الدفع:</label>
+              <select id="posPaymentMethod" style="padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; font-weight: 700;">
+                <option value="cash">نقداً (Cash)</option>
+                <option value="card">بطاقة / فيزا (Card)</option>
+                <option value="credit">آجل (Credit)</option>
+                <option value="installment">تقسيط (Installment)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- POS Cart Table -->
+          <div style="flex: 1; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: right;">
+              <thead style="background: #f8fafc; position: sticky; top: 0; border-bottom: 1px solid #e2e8f0;">
+                <tr>
+                  <th style="padding: 6px;">الصنف</th>
+                  <th style="padding: 6px; text-align: center;">الكمية</th>
+                  <th style="padding: 6px; text-align: center;">السعر</th>
+                  <th style="padding: 6px; text-align: center;">الإجمالي</th>
+                  <th style="padding: 6px; text-align: center;">حذف</th>
+                </tr>
+              </thead>
+              <tbody id="posCartTableBody">
+                <!-- Dynamically filled by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Discounts & Totals Calculation Box -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span>المجموع الفرعي:</span>
+              <strong id="posSubTotalVal">0.00 ج</strong>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+              <span>الخصم (%):</span>
+              <input type="number" id="posDiscountPct" value="0" min="0" max="100" oninput="calculatePosTotals()" style="width: 60px; padding: 2px 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px;">
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+              <label><input type="checkbox" id="posVatActive" checked onchange="calculatePosTotals()"> إضافة ضريبة القيمة المضافة (14% VAT)</label>
+              <strong id="posVatVal" style="color: #0284c7;">0.00 ج</strong>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; border-top: 1.5px solid #cbd5e1; padding-top: 6px; color: #16a34a;">
+              <span>الإجمالي النهائي:</span>
+              <span id="posFinalTotalVal">0.00 ج</span>
+            </div>
+          </div>
+
+          <!-- POS Complete Order Button -->
+          <button onclick="completePosOrderAndPrint()" class="btn" style="margin-top: 10px; background: linear-gradient(135deg, #16a34a, #15803d); color: #fff; border: none; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; border-radius: 6px; box-shadow: 0 4px 12px rgba(22,163,74,0.3); width: 100%;">
+            <i class="fa-solid fa-print"></i> إصدار الفاتورة وطباعة الإيصال الحراري
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable Container for POS Thermal Receipt (Hidden on screen, active on print) -->
+  <div id="posReceiptPrintContainer"></div>
 
   <!-- Printable Area for Barcode Thermal Printer (Hidden on screen, active on print) -->
   <div id="barcodePrintContainer"></div>

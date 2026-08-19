@@ -267,6 +267,11 @@ async function saveAllProducts(shopSlug, productsList) {
       name: p.name,
       category: p.category,
       price: parseFloat(p.price) || 0,
+      cost_price: parseFloat(p.cost_price) || 0,
+      quantity: p.quantity !== undefined ? parseFloat(p.quantity) : 100,
+      min_stock: parseFloat(p.min_stock) || 5,
+      barcode: p.barcode || "200" + Math.floor(100000000 + Math.random() * 900000000),
+      store_name: p.store_name || "المخزن الرئيسي",
       unit: p.unit,
       available: p.available !== false,
       description: p.description || "",
@@ -515,7 +520,7 @@ async function getShopSystemSettings(shopSlug) {
     },
     // 4. Security & Passwords (كلمات السر)
     security: {
-      backup_protect_pass: "sahl123",
+      backup_protect_pass: "menu123",
       restricted_user_pass: "super999"
     },
     // 5. Scale Barcode & Other (ميزان الباركود وخيارات أخرى)

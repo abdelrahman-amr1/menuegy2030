@@ -288,7 +288,7 @@ function renderAdminTable() {
   if (filteredProducts.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align: center; color: var(--gray-600); padding: 3rem;">
+        <td colspan="8" style="text-align: center; color: var(--gray-600); padding: 3rem;">
           <i class="fa-solid fa-folder-open" style="font-size: 2.5rem; margin-bottom: 0.5rem; display: block; color: var(--gray-300)"></i>
           لا توجد منتجات مسجلة مطابقة للبحث حالياً
         </td>
@@ -304,21 +304,46 @@ function renderAdminTable() {
     const categoryBadgeClass = `product-row-badge badge-${p.category}`;
     const isAvailable = p.available !== false;
     
+    const qty = p.quantity !== undefined ? parseFloat(p.quantity) : 100;
+    const minStock = parseFloat(p.min_stock) || 5;
+    const costPrice = parseFloat(p.cost_price) || 0;
+    const barcodeStr = p.barcode || "200" + Math.floor(100000000 + Math.random() * 900000000);
+    const storeNameStr = p.store_name || "المخزن الرئيسي";
+
+    let qtyBadgeHtml = "";
+    if (qty <= 0) {
+      qtyBadgeHtml = `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;"><i class="fa-solid fa-triangle-exclamation"></i> نفدت الكمية (${qty})</span>`;
+    } else if (qty <= minStock) {
+      qtyBadgeHtml = `<span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;"><i class="fa-solid fa-battery-quarter"></i> مخزون منخفض (${qty})</span>`;
+    } else {
+      qtyBadgeHtml = `<span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;"><i class="fa-solid fa-boxes-stacked"></i> ${qty} ${p.unit}</span>`;
+    }
+
     tr.innerHTML = `
       <td>
         <span class="${categoryBadgeClass}">${categoryLabel}</span>
       </td>
       <td>
         <div style="display:flex; align-items:center; gap: 10px;">
-          ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:35px; height:35px; object-fit:cover; border-radius:5px;">` : `<div style="width:35px; height:35px; background:var(--gray-200); border-radius:5px; display:flex; align-items:center; justify-content:center; color:var(--gray-500);"><i class="fa-solid fa-image"></i></div>`}
+          ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}" style="width:38px; height:38px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0;">` : `<div style="width:38px; height:38px; background:var(--gray-200); border-radius:6px; display:flex; align-items:center; justify-content:center; color:var(--gray-500);"><i class="fa-solid fa-image"></i></div>`}
           <div>
-            <strong style="color: var(--dark-color);">${p.name}</strong>
-            ${p.description ? `<p style="font-size: 0.75rem; color: var(--gray-600); margin-top: 0.2rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">${p.description}</p>` : ''}
+            <strong style="color: var(--dark-color); font-size: 13px;">${p.name}</strong>
+            <div style="font-size: 10px; color: #64748b;"><i class="fa-solid fa-warehouse"></i> ${storeNameStr}</div>
           </div>
         </div>
       </td>
-      <td><span style="font-weight: 700; color: var(--primary-color);">${p.price} ج</span></td>
-      <td><span style="font-size: 0.85rem; color: var(--gray-600);">${p.unit}</span></td>
+      <td>
+        <code style="font-family: monospace; font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #0284c7;">${barcodeStr}</code>
+      </td>
+      <td style="text-align: center;">
+        ${qtyBadgeHtml}
+      </td>
+      <td>
+        <span style="font-size: 12px; color: #64748b;">${costPrice} ج</span>
+      </td>
+      <td>
+        <span style="font-weight: 800; color: var(--primary-color); font-size: 13px;">${p.price} ج</span>
+      </td>
       <td style="text-align: center;">
         <label class="switch">
           <input type="checkbox" ${isAvailable ? 'checked' : ''} onchange="toggleProductAvailability('${p.id}', this.checked)">
@@ -326,14 +351,14 @@ function renderAdminTable() {
         </label>
       </td>
       <td style="text-align: center;">
-        <div style="display: flex; gap: 0.5rem; justify-content: center;">
-          <button class="btn btn-outline" style="padding: 0.35rem 0.6rem;" onclick="openBarcodeModal('${p.id}')" title="طباعة ملصق الباركود والأسعار">
+        <div style="display: flex; gap: 0.35rem; justify-content: center;">
+          <button class="btn btn-outline" style="padding: 0.35rem 0.5rem;" onclick="openBarcodeModal('${p.id}')" title="طباعة ملصق الباركود والأسعار">
             <i class="fa-solid fa-barcode" style="color: #0284c7"></i>
           </button>
-          <button class="btn btn-outline" style="padding: 0.35rem 0.6rem;" onclick="openProductModal('${p.id}')" title="تعديل">
+          <button class="btn btn-outline" style="padding: 0.35rem 0.5rem;" onclick="openProductModal('${p.id}')" title="تعديل">
             <i class="fa-solid fa-pencil" style="color: var(--secondary-color)"></i>
           </button>
-          <button class="btn btn-outline" style="padding: 0.35rem 0.6rem;" onclick="deleteProduct('${p.id}')" title="حذف">
+          <button class="btn btn-outline" style="padding: 0.35rem 0.5rem;" onclick="deleteProduct('${p.id}')" title="حذف">
             <i class="fa-solid fa-trash-can" style="color: var(--danger-color)"></i>
           </button>
         </div>
@@ -391,13 +416,19 @@ function openProductModal(productId) {
     document.getElementById("prodWholesaleQty").value = "";
     document.getElementById("prodWholesalePrice").value = "";
     
+    document.getElementById("prodQty").value = "100";
+    document.getElementById("prodCostPrice").value = "";
+    document.getElementById("prodMinStock").value = "5";
+    document.getElementById("prodBarcode").value = "200" + Math.floor(100000000 + Math.random() * 900000000);
+    document.getElementById("prodStoreName").value = "المخزن الرئيسي";
+
     populateAdminCategorySelect("");
   } else {
     // Edit Mode
     const product = products.find(p => p.id === productId);
     if (!product) return;
     
-    modalTitle.textContent = "تعديل بيانات المنتج";
+    modalTitle.textContent = "تعديل بيانات المنتج والمخزن";
     saveBtn.textContent = "حفظ التعديلات";
     
     document.getElementById("modalProductId").value = product.id;
@@ -409,6 +440,12 @@ function openProductModal(productId) {
     document.getElementById("prodIsFeatured").checked = product.is_featured === true || product.is_featured === 'true';
     document.getElementById("prodWholesaleQty").value = product.wholesale_qty || "";
     document.getElementById("prodWholesalePrice").value = product.wholesale_price || "";
+    
+    document.getElementById("prodQty").value = product.quantity !== undefined ? product.quantity : 100;
+    document.getElementById("prodCostPrice").value = product.cost_price || "";
+    document.getElementById("prodMinStock").value = product.min_stock || "5";
+    document.getElementById("prodBarcode").value = product.barcode || ("200" + Math.floor(100000000 + Math.random() * 900000000));
+    document.getElementById("prodStoreName").value = product.store_name || "المخزن الرئيسي";
     
     prodImageUrl.value = product.image_url || "";
     if (product.image_url) {
@@ -444,6 +481,12 @@ async function saveProductForm(event) {
   }
   
   const price = parseFloat(document.getElementById("prodPrice").value);
+  const cost_price = parseFloat(document.getElementById("prodCostPrice").value) || 0;
+  const quantity = parseFloat(document.getElementById("prodQty").value) || 0;
+  const min_stock = parseFloat(document.getElementById("prodMinStock").value) || 5;
+  const barcode = document.getElementById("prodBarcode").value.trim() || ("200" + Math.floor(100000000 + Math.random() * 900000000));
+  const store_name = document.getElementById("prodStoreName").value || "المخزن الرئيسي";
+
   const unit = document.getElementById("prodUnit").value.trim();
   const image_url = document.getElementById("prodImageUrl").value.trim();
   const description = document.getElementById("prodDesc").value.trim();
@@ -1030,7 +1073,7 @@ async function openSystemSettingsModal() {
 
   // Tab 4: Passwords
   if (settings.security) {
-    document.getElementById("sys_backup_protect_pass").value = settings.security.backup_protect_pass || "sahl123";
+    document.getElementById("sys_backup_protect_pass").value = settings.security.backup_protect_pass || "menu123";
     document.getElementById("sys_restricted_user_pass").value = settings.security.restricted_user_pass || "super999";
   }
 
@@ -1333,4 +1376,336 @@ function printBarcodeStickersNow() {
     // Trigger Print
     window.print();
   }, 150);
+}
+
+/* ==================================================== */
+/* POS CASHIER TERMINAL & INVENTORY DEDUCTION SYSTEM */
+/* ==================================================== */
+
+let posCart = [];
+let posSelectedCat = "all";
+
+function openPosTerminalModal() {
+  const overlay = document.getElementById("posTerminalModalOverlay");
+  if (!overlay) return;
+  
+  posCart = [];
+  posSelectedCat = "all";
+  renderPosCategoriesBar();
+  renderPosProductsGrid("all");
+  renderPosCartTable();
+  calculatePosTotals();
+  
+  overlay.classList.add("open");
+  
+  const scanInput = document.getElementById("posBarcodeScanInput");
+  if (scanInput) {
+    scanInput.value = "";
+    setTimeout(() => scanInput.focus(), 200);
+  }
+}
+
+function closePosTerminalModal() {
+  const overlay = document.getElementById("posTerminalModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+function renderPosCategoriesBar() {
+  const bar = document.getElementById("posCategoriesBar");
+  if (!bar) return;
+
+  const categories = ["all", ...new Set(products.map(p => p.category))];
+  
+  bar.innerHTML = categories.map(cat => {
+    const label = cat === "all" ? "الكل" : (CATEGORY_LABELS[cat] || cat);
+    const activeStyle = cat === posSelectedCat ? 'background: #15803d; color: #fff; border-color: #15803d;' : 'background: #f8fafc; color: #334155; border-color: #cbd5e1;';
+    return `
+      <button onclick="filterPosCategory('${cat}')" class="btn" style="padding: 4px 10px; font-size: 11px; font-weight: 700; border-radius: 20px; border: 1px solid; cursor: pointer; white-space: nowrap; ${activeStyle}">
+        ${label}
+      </button>
+    `;
+  }).join("");
+}
+
+function filterPosCategory(cat) {
+  posSelectedCat = cat;
+  renderPosCategoriesBar();
+  renderPosProductsGrid(cat);
+}
+
+function renderPosProductsGrid(cat) {
+  const grid = document.getElementById("posProductsGrid");
+  if (!grid) return;
+
+  const list = products.filter(p => (cat === "all" || p.category === cat) && p.available !== false);
+  
+  if (list.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 2rem;">لا توجد منتجات متوفرة بالأرقام الحالية</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const qty = p.quantity !== undefined ? parseFloat(p.quantity) : 100;
+    const isOut = qty <= 0;
+    
+    return `
+      <div onclick="${isOut ? '' : `addToPosCart('${p.id}')`}" style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; text-align: center; cursor: ${isOut ? 'not-allowed' : 'pointer'}; background: ${isOut ? '#fff1f2' : '#ffffff'}; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: space-between; position: relative;">
+        ${p.image_url ? `<img src="${p.image_url}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; margin-bottom: 4px;">` : `<div style="width: 45px; height: 45px; background: #f1f5f9; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #94a3b8; margin-bottom: 4px;"><i class="fa-solid fa-box"></i></div>`}
+        <div style="font-size: 11px; font-weight: 700; color: #1e293b; line-height: 1.2; margin-bottom: 3px;">${p.name}</div>
+        <div style="font-size: 12px; font-weight: 800; color: #16a34a;">${p.price} ج</div>
+        <span style="font-size: 9px; padding: 1px 5px; border-radius: 3px; margin-top: 3px; ${isOut ? 'background: #fecdd3; color: #9f1239;' : 'background: #e2e8f0; color: #475569;'}">
+          ${isOut ? 'نفدت الكمية' : `مخزون: ${qty}`}
+        </span>
+      </div>
+    `;
+  }).join("");
+}
+
+function addToPosCart(productId) {
+  const product = products.find(p => p.id === productId);
+  if (!product) return;
+
+  const stockQty = product.quantity !== undefined ? parseFloat(product.quantity) : 100;
+  
+  const existing = posCart.find(item => item.id === productId);
+  if (existing) {
+    if (existing.qty + 1 > stockQty) {
+      showToast(`عذراً، الكمية المطلوبة تجاوزت المتاح بالرصيد بالمخزن الرئيسي (${stockQty})`, "warning");
+      return;
+    }
+    existing.qty += 1;
+  } else {
+    if (stockQty <= 0) {
+      showToast("عذراً، هذا المنتج نفذت كميته بالكامل بالمخزن الرئيسي", "danger");
+      return;
+    }
+    posCart.push({
+      id: product.id,
+      name: product.name,
+      price: parseFloat(product.price),
+      unit: product.unit || '',
+      qty: 1
+    });
+  }
+
+  renderPosCartTable();
+  calculatePosTotals();
+}
+
+function updatePosCartQty(productId, delta) {
+  const item = posCart.find(i => i.id === productId);
+  if (!item) return;
+
+  const product = products.find(p => p.id === productId);
+  const stockQty = product ? (product.quantity !== undefined ? parseFloat(product.quantity) : 100) : 999;
+
+  if (item.qty + delta > stockQty) {
+    showToast(`المتاح بالمخزن الرئيسي فقط هو ${stockQty}`, "warning");
+    return;
+  }
+
+  item.qty += delta;
+  if (item.qty <= 0) {
+    removePosCartItem(productId);
+    return;
+  }
+
+  renderPosCartTable();
+  calculatePosTotals();
+}
+
+function removePosCartItem(productId) {
+  posCart = posCart.filter(i => i.id !== productId);
+  renderPosCartTable();
+  calculatePosTotals();
+}
+
+function renderPosCartTable() {
+  const tbody = document.getElementById("posCartTableBody");
+  if (!tbody) return;
+
+  if (posCart.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">السلة فارغة، قم بمسح الباركود أو الضغط على المنتجات</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = posCart.map(item => {
+    const total = (item.price * item.qty).toFixed(2);
+    return `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="padding: 6px; font-weight: 700; color: #1e293b;">${item.name}</td>
+        <td style="padding: 6px; text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+            <button onclick="updatePosCartQty('${item.id}', -1)" style="border:1px solid #cbd5e1; background:#fff; width:22px; height:22px; border-radius:3px; cursor:pointer;">-</button>
+            <span style="font-weight: 800; min-width: 18px; text-align: center;">${item.qty}</span>
+            <button onclick="updatePosCartQty('${item.id}', 1)" style="border:1px solid #cbd5e1; background:#fff; width:22px; height:22px; border-radius:3px; cursor:pointer;">+</button>
+          </div>
+        </td>
+        <td style="padding: 6px; text-align: center; color: #475569;">${item.price} ج</td>
+        <td style="padding: 6px; text-align: center; font-weight: 800; color: #16a34a;">${total} ج</td>
+        <td style="padding: 6px; text-align: center;">
+          <button onclick="removePosCartItem('${item.id}')" style="border:none; background:none; color:#ef4444; cursor:pointer;"><i class="fa-solid fa-trash-can"></i></button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function calculatePosTotals() {
+  const subTotal = posCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  const discountPct = parseFloat(document.getElementById("posDiscountPct")?.value) || 0;
+  const isVatActive = document.getElementById("posVatActive")?.checked;
+
+  const discountVal = subTotal * (discountPct / 100);
+  const afterDiscount = Math.max(0, subTotal - discountVal);
+  const vatVal = isVatActive ? (afterDiscount * 0.14) : 0;
+  const finalTotal = afterDiscount + vatVal;
+
+  if (document.getElementById("posSubTotalVal")) document.getElementById("posSubTotalVal").textContent = `${subTotal.toFixed(2)} ج`;
+  if (document.getElementById("posVatVal")) document.getElementById("posVatVal").textContent = `${vatVal.toFixed(2)} ج`;
+  if (document.getElementById("posFinalTotalVal")) document.getElementById("posFinalTotalVal").textContent = `${finalTotal.toFixed(2)} ج`;
+}
+
+function handlePosBarcodeScan(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    triggerPosBarcodeAdd();
+  }
+}
+
+function triggerPosBarcodeAdd() {
+  const input = document.getElementById("posBarcodeScanInput");
+  if (!input || !input.value.trim()) return;
+
+  const query = input.value.trim().toLowerCase();
+  
+  // Match barcode or product name
+  const match = products.find(p => p.barcode === query || p.name.toLowerCase().includes(query));
+  
+  if (match) {
+    addToPosCart(match.id);
+    input.value = "";
+    showToast(`تمت إضافة "${match.name}" لسلة الفاتورة`);
+  } else {
+    showToast(`عذراً، لم يتم العثور على صنف بالباركود أو الاسم: ${query}`, "warning");
+  }
+}
+
+// Complete Order, Deduct Inventory Stock, and Print POS Receipt
+async function completePosOrderAndPrint() {
+  if (posCart.length === 0) {
+    showToast("سلة الفاتورة فارغة!", "danger");
+    return;
+  }
+
+  const shopNameText = document.getElementById("adminFooterShopName")?.textContent || "متجر MenuEgy";
+  const paymentMethod = document.getElementById("posPaymentMethod")?.value || "cash";
+  const paymentMethodText = paymentMethod === "cash" ? "نقداً (كاش)" : paymentMethod === "card" ? "بطاقة إلكترونية" : paymentMethod === "credit" ? "حساب آجل" : "تقسيط";
+
+  const subTotal = posCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  const discountPct = parseFloat(document.getElementById("posDiscountPct")?.value) || 0;
+  const isVatActive = document.getElementById("posVatActive")?.checked;
+  const discountVal = subTotal * (discountPct / 100);
+  const afterDiscount = Math.max(0, subTotal - discountVal);
+  const vatVal = isVatActive ? (afterDiscount * 0.14) : 0;
+  const finalTotal = afterDiscount + vatVal;
+
+  const now = new Date();
+  const invoiceNum = "INV-" + Math.floor(100000 + Math.random() * 900000);
+  const dateStr = now.toLocaleDateString("ar-EG") + " " + now.toLocaleTimeString("ar-EG");
+
+  // 1. Deduct Stock Quantity from DB & Local State
+  for (const cartItem of posCart) {
+    const pIndex = products.findIndex(p => p.id === cartItem.id);
+    if (pIndex !== -1) {
+      const currentQty = products[pIndex].quantity !== undefined ? parseFloat(products[pIndex].quantity) : 100;
+      const newQty = Math.max(0, currentQty - cartItem.qty);
+      products[pIndex].quantity = newQty;
+      
+      // Save updated product stock to Supabase DB
+      await saveShopProduct(products[pIndex]);
+    }
+  }
+
+  // Update Admin Stats & Table
+  updateStats();
+  applyFiltersAndRender();
+
+  // 2. Build POS Receipt HTML
+  let receiptHtml = `
+    <div class="pos-receipt-box">
+      <header>
+        <h2 style="margin:0 0 3px 0; font-size:14pt; font-weight:bold;">${shopNameText}</h2>
+        <div style="font-size:8pt;">منصة المتاجر والمنيو الإلكتروني الذكي</div>
+        <div style="font-size:8pt; margin-top:2mm;">رقم الفاتورة: <strong>${invoiceNum}</strong></div>
+        <div style="font-size:7pt; color:#444;">التاريخ: ${dateStr}</div>
+        <div style="font-size:8pt; font-weight:bold; margin-top:1mm;">طريقة الدفع: ${paymentMethodText}</div>
+      </header>
+
+      <table class="pos-receipt-table">
+        <thead>
+          <tr>
+            <th style="text-align:right;">الصنف</th>
+            <th style="text-align:center;">الكمية</th>
+            <th style="text-align:center;">السعر</th>
+            <th style="text-align:left;">الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${posCart.map(item => `
+            <tr>
+              <td style="text-align:right;">${item.name}</td>
+              <td style="text-align:center;">${item.qty}</td>
+              <td style="text-align:center;">${item.price}</td>
+              <td style="text-align:left;">${(item.price * item.qty).toFixed(2)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+
+      <div style="border-top:1px dashed #000; padding-top:2mm; margin-top:2mm; font-size:8pt;">
+        <div style="display:flex; justify-content:space-between;">
+          <span>المجموع الفرعي:</span>
+          <span>${subTotal.toFixed(2)} ج</span>
+        </div>
+        ${discountPct > 0 ? `
+          <div style="display:flex; justify-content:space-between; color:#b91c1c;">
+            <span>الخصم (${discountPct}%):</span>
+            <span>-${discountVal.toFixed(2)} ج</span>
+          </div>
+        ` : ''}
+        ${isVatActive ? `
+          <div style="display:flex; justify-content:space-between;">
+            <span>ضريبة القيمة المضافة (14% VAT):</span>
+            <span>${vatVal.toFixed(2)} ج</span>
+          </div>
+        ` : ''}
+        <div style="display:flex; justify-content:space-between; font-size:11pt; font-weight:bold; border-top:1px solid #000; margin-top:1.5mm; padding-top:1.5mm;">
+          <span>الإجمالي الكلي:</span>
+          <span>${finalTotal.toFixed(2)} ج</span>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-top:4mm; font-size:8pt; border-top:1px dashed #ccc; padding-top:3mm;">
+        <div>شكراً لتعاملكم معنا! نتمنى لكم يوماً سعيداً</div>
+        <div style="font-size:7pt; color:#666; margin-top:1mm;">تم خصم كمية المشتريات تلقائياً من المخزن الرئيسي</div>
+      </div>
+    </div>
+  `;
+
+  const receiptContainer = document.getElementById("posReceiptPrintContainer");
+  if (receiptContainer) {
+    receiptContainer.innerHTML = receiptHtml;
+  }
+
+  showToast(`تم حفظ الفاتورة بنجاح! وخصم الكميات من المخزن الرئيسي.`);
+  
+  // Reset Cart & Close Modal
+  posCart = [];
+  closePosTerminalModal();
+
+  // Trigger Print
+  setTimeout(() => {
+    window.print();
+  }, 100);
 }

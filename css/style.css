@@ -2226,12 +2226,12 @@ footer {
   accent-color: #d97706;
 }
 
-#barcodePrintContainer {
+#barcodePrintContainer, #posReceiptPrintContainer {
   display: none;
 }
 
 /* ==================================================== */
-/* Printable Barcode Thermal Sticker Styles */
+/* Printable Barcode & POS Thermal Receipt Styles */
 /* ==================================================== */
 
 @media print {
@@ -2239,8 +2239,8 @@ footer {
     margin: 0mm;
   }
 
-  /* Hide all UI elements except barcode print container */
-  body > *:not(#barcodePrintContainer) {
+  /* Hide all UI elements except barcode & POS print containers */
+  body > *:not(#barcodePrintContainer):not(#posReceiptPrintContainer) {
     display: none !important;
   }
 
@@ -2248,7 +2248,7 @@ footer {
     display: none !important;
   }
 
-  #barcodePrintContainer {
+  #barcodePrintContainer, #posReceiptPrintContainer {
     display: block !important;
     visibility: visible !important;
     position: absolute !important;
@@ -2259,6 +2259,39 @@ footer {
     padding: 0 !important;
     background: #ffffff !important;
     z-index: 99999999 !important;
+  }
+
+  /* POS Thermal Receipt Styles */
+  .pos-receipt-box {
+    width: 80mm !important;
+    padding: 4mm !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 9pt !important;
+    color: #000000 !important;
+    direction: rtl !important;
+    text-align: right !important;
+    background: #ffffff !important;
+    margin: 0 auto !important;
+  }
+
+  .pos-receipt-box header {
+    display: block !important;
+    text-align: center !important;
+    margin-bottom: 3mm !important;
+    border-bottom: 1px dashed #000 !important;
+    padding-bottom: 2mm !important;
+  }
+
+  .pos-receipt-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 8pt !important;
+    margin: 2mm 0 !important;
+  }
+
+  .pos-receipt-table th, .pos-receipt-table td {
+    padding: 1.5mm 0 !important;
+    border-bottom: 1px dashed #ccc !important;
   }
 
   /* Thermal Roll Printer Mode (Default - 1 Label Per Page on Roll) */
