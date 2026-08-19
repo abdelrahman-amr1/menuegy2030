@@ -13,7 +13,19 @@ const CATEGORY_LABELS = {
   herbs: "الأعشاب الطبيعية",
   oils: "الزيوت الخام",
   incense: "البخور المشكل",
-  famous: "الأشهر في أسوان"
+  famous: "الأشهر في أسوان",
+  "اللحوم والدواجن": "اللحوم والدواجن",
+  "الأسماك والمدخن": "الأسماك والمدخن",
+  "اللحوم الباردة": "اللحوم الباردة",
+  "الأجبان والدهون": "الأجبان والدهون",
+  "المخبوزات والعجائن": "المخبوزات والعجائن",
+  "البهارات والصلصات": "البهارات والصلصات",
+  meat_poultry: "اللحوم والدواجن",
+  seafood_smoked: "الأسماك والمدخن",
+  cold_cuts: "اللحوم الباردة",
+  cheese_fats: "الأجبان والدهون",
+  bakery_dough: "المخبوزات والعجائن",
+  spices_sauces: "البهارات والصلصات"
 };
 
 // Initialize Admin Interface
@@ -739,4 +751,385 @@ function populateAdminCategoryFilter() {
     filter.value = "all";
     selectedCategory = "all";
   }
+}
+
+// ====================================================
+// Sahl ERP Interactive Modals & Permissions Logic
+// ====================================================
+
+// --- 1. USER PERMISSIONS LOGIC ---
+function switchPermTab(tabId, btnElement) {
+  const contents = document.querySelectorAll("#userPermissionsModalOverlay .perm-tab-content");
+  contents.forEach(c => c.classList.remove("active"));
+  
+  const buttons = document.querySelectorAll("#userPermissionsModalOverlay .sahl-tab-btn");
+  buttons.forEach(b => b.classList.remove("active"));
+  
+  const targetContent = document.getElementById(tabId);
+  if (targetContent) targetContent.classList.add("active");
+  if (btnElement) btnElement.classList.add("active");
+}
+
+async function openUserPermissionsModal() {
+  const overlay = document.getElementById("userPermissionsModalOverlay");
+  if (!overlay) return;
+
+  const perms = await getShopUserPermissions(activeShopSlug);
+
+  // Tab 1: General
+  if (perms.general) {
+    document.getElementById("perm_admin_app").checked = perms.general.admin_app !== false;
+    document.getElementById("perm_backup_create").checked = perms.general.backup_create !== false;
+    document.getElementById("perm_backup_restore").checked = perms.general.backup_restore !== false;
+    document.getElementById("perm_edit_inv_number").checked = perms.general.edit_inv_number !== false;
+    document.getElementById("perm_view_today_invoices_only").checked = perms.general.view_today_invoices_only === true;
+    document.getElementById("perm_active_user").checked = perms.general.active_user !== false;
+  }
+
+  // Tab 2: Invoices
+  if (perms.invoices) {
+    document.getElementById("perm_view_sales_invoices").checked = perms.invoices.view_sales_invoices !== false;
+    document.getElementById("perm_sales_new").checked = perms.invoices.sales_new !== false;
+    document.getElementById("perm_sales_edit").checked = perms.invoices.sales_edit !== false;
+    document.getElementById("perm_sales_delete").checked = perms.invoices.sales_delete === true;
+
+    document.getElementById("perm_view_quotes").checked = perms.invoices.view_quotes !== false;
+    document.getElementById("perm_quote_new").checked = perms.invoices.quote_new !== false;
+    document.getElementById("perm_quote_edit").checked = perms.invoices.quote_edit !== false;
+    document.getElementById("perm_quote_delete").checked = perms.invoices.quote_delete === true;
+
+    document.getElementById("perm_view_purchases").checked = perms.invoices.view_purchases !== false;
+    document.getElementById("perm_purchase_new").checked = perms.invoices.purchase_new !== false;
+    document.getElementById("perm_purchase_edit").checked = perms.invoices.purchase_edit !== false;
+    document.getElementById("perm_purchase_delete").checked = perms.invoices.purchase_delete === true;
+
+    document.getElementById("perm_view_stocktake").checked = perms.invoices.view_stocktake !== false;
+    document.getElementById("perm_view_branch_transfers").checked = perms.invoices.view_branch_transfers !== false;
+    document.getElementById("perm_view_adjustments").checked = perms.invoices.view_adjustments !== false;
+
+    document.getElementById("perm_view_expenses").checked = perms.invoices.view_expenses !== false;
+    document.getElementById("perm_view_receipts").checked = perms.invoices.view_receipts !== false;
+    document.getElementById("perm_transfer_safe_other").checked = perms.invoices.transfer_safe_other !== false;
+    document.getElementById("perm_track_cheques").checked = perms.invoices.track_cheques !== false;
+
+    document.getElementById("perm_allow_sale_edit_price").checked = perms.invoices.allow_sale_edit_price !== false;
+    document.getElementById("perm_allow_invoice_discount").checked = perms.invoices.allow_invoice_discount !== false;
+    document.getElementById("perm_max_discount_pct").value = perms.invoices.max_discount_pct || 10;
+    document.getElementById("perm_allow_sale_below_cost").checked = perms.invoices.allow_sale_below_cost === true;
+    document.getElementById("perm_view_invoice_profit").checked = perms.invoices.view_invoice_profit !== false;
+    document.getElementById("perm_allow_credit_sales").checked = perms.invoices.allow_credit_sales !== false;
+  }
+
+  // Tab 3: Inventory
+  if (perms.inventory) {
+    document.getElementById("perm_view_items").checked = perms.inventory.view_items !== false;
+    document.getElementById("perm_item_new").checked = perms.inventory.item_new !== false;
+    document.getElementById("perm_item_edit").checked = perms.inventory.item_edit !== false;
+    document.getElementById("perm_item_delete").checked = perms.inventory.item_delete === true;
+    document.getElementById("perm_item_movement_report").checked = perms.inventory.item_movement_report !== false;
+    document.getElementById("perm_stock_report").checked = perms.inventory.stock_report !== false;
+    document.getElementById("perm_store_movement_report").checked = perms.inventory.store_movement_report !== false;
+    document.getElementById("perm_view_cost_price").checked = perms.inventory.view_cost_price !== false;
+    document.getElementById("perm_allow_negative_stock").checked = perms.inventory.allow_negative_stock === true;
+    document.getElementById("perm_print_barcode_labels").checked = perms.inventory.print_barcode_labels !== false;
+  }
+
+  // Tab 4: Accounts
+  if (perms.accounts) {
+    document.getElementById("perm_view_accounts").checked = perms.accounts.view_accounts !== false;
+    document.getElementById("perm_acc_new").checked = perms.accounts.acc_new !== false;
+    document.getElementById("perm_acc_edit").checked = perms.accounts.acc_edit !== false;
+    document.getElementById("perm_acc_delete").checked = perms.accounts.acc_delete === true;
+    document.getElementById("perm_view_account_balance").checked = perms.accounts.view_account_balance !== false;
+    document.getElementById("perm_view_account_statement").checked = perms.accounts.view_account_statement !== false;
+    document.getElementById("perm_allowed_customer").checked = perms.accounts.allowed_customer !== false;
+    document.getElementById("perm_allowed_supplier").checked = perms.accounts.allowed_supplier !== false;
+    document.getElementById("perm_allowed_rep").checked = perms.accounts.allowed_rep !== false;
+    document.getElementById("perm_allowed_other").checked = perms.accounts.allowed_other !== false;
+  }
+
+  // Tab 5: Treasury
+  if (perms.treasury) {
+    document.getElementById("perm_view_treasury_flow").checked = perms.treasury.view_treasury_flow !== false;
+    document.getElementById("perm_analyze_receipts").checked = perms.treasury.analyze_receipts !== false;
+    document.getElementById("perm_analyze_expenses").checked = perms.treasury.analyze_expenses !== false;
+  }
+
+  // Tab 6: Advanced Reports
+  if (perms.advanced_reports) {
+    document.getElementById("perm_advanced_reports_access").checked = perms.advanced_reports.advanced_reports_access !== false;
+    document.getElementById("perm_daily_flow_report").checked = perms.advanced_reports.daily_flow_report !== false;
+    document.getElementById("perm_sales_analysis_report").checked = perms.advanced_reports.sales_analysis_report !== false;
+    document.getElementById("perm_purchases_analysis_report").checked = perms.advanced_reports.purchases_analysis_report !== false;
+  }
+
+  // Tab 7: Installments
+  if (perms.installments) {
+    document.getElementById("perm_view_contracts").checked = perms.installments.view_contracts !== false;
+    document.getElementById("perm_contract_new").checked = perms.installments.contract_new !== false;
+    document.getElementById("perm_pay_installment").checked = perms.installments.pay_installment !== false;
+    document.getElementById("perm_due_overdue_installments").checked = perms.installments.due_overdue_installments !== false;
+  }
+
+  overlay.classList.add("open");
+}
+
+function closeUserPermissionsModal() {
+  const overlay = document.getElementById("userPermissionsModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+async function saveUserPermissionsForm() {
+  const permsObj = {
+    general: {
+      admin_app: document.getElementById("perm_admin_app").checked,
+      backup_create: document.getElementById("perm_backup_create").checked,
+      backup_restore: document.getElementById("perm_backup_restore").checked,
+      edit_inv_number: document.getElementById("perm_edit_inv_number").checked,
+      view_today_invoices_only: document.getElementById("perm_view_today_invoices_only").checked,
+      active_user: document.getElementById("perm_active_user").checked
+    },
+    invoices: {
+      view_sales_invoices: document.getElementById("perm_view_sales_invoices").checked,
+      sales_new: document.getElementById("perm_sales_new").checked,
+      sales_edit: document.getElementById("perm_sales_edit").checked,
+      sales_delete: document.getElementById("perm_sales_delete").checked,
+      view_quotes: document.getElementById("perm_view_quotes").checked,
+      quote_new: document.getElementById("perm_quote_new").checked,
+      quote_edit: document.getElementById("perm_quote_edit").checked,
+      quote_delete: document.getElementById("perm_quote_delete").checked,
+      view_purchases: document.getElementById("perm_view_purchases").checked,
+      purchase_new: document.getElementById("perm_purchase_new").checked,
+      purchase_edit: document.getElementById("perm_purchase_edit").checked,
+      purchase_delete: document.getElementById("perm_purchase_delete").checked,
+      view_stocktake: document.getElementById("perm_view_stocktake").checked,
+      view_branch_transfers: document.getElementById("perm_view_branch_transfers").checked,
+      view_adjustments: document.getElementById("perm_view_adjustments").checked,
+      view_expenses: document.getElementById("perm_view_expenses").checked,
+      view_receipts: document.getElementById("perm_view_receipts").checked,
+      transfer_safe_other: document.getElementById("perm_transfer_safe_other").checked,
+      track_cheques: document.getElementById("perm_track_cheques").checked,
+      allow_sale_edit_price: document.getElementById("perm_allow_sale_edit_price").checked,
+      allow_invoice_discount: document.getElementById("perm_allow_invoice_discount").checked,
+      max_discount_pct: parseFloat(document.getElementById("perm_max_discount_pct").value) || 0,
+      allow_sale_below_cost: document.getElementById("perm_allow_sale_below_cost").checked,
+      view_invoice_profit: document.getElementById("perm_view_invoice_profit").checked,
+      allow_credit_sales: document.getElementById("perm_allow_credit_sales").checked
+    },
+    inventory: {
+      view_items: document.getElementById("perm_view_items").checked,
+      item_new: document.getElementById("perm_item_new").checked,
+      item_edit: document.getElementById("perm_item_edit").checked,
+      item_delete: document.getElementById("perm_item_delete").checked,
+      item_movement_report: document.getElementById("perm_item_movement_report").checked,
+      stock_report: document.getElementById("perm_stock_report").checked,
+      store_movement_report: document.getElementById("perm_store_movement_report").checked,
+      view_cost_price: document.getElementById("perm_view_cost_price").checked,
+      allow_negative_stock: document.getElementById("perm_allow_negative_stock").checked,
+      print_barcode_labels: document.getElementById("perm_print_barcode_labels").checked
+    },
+    accounts: {
+      view_accounts: document.getElementById("perm_view_accounts").checked,
+      acc_new: document.getElementById("perm_acc_new").checked,
+      acc_edit: document.getElementById("perm_acc_edit").checked,
+      acc_delete: document.getElementById("perm_acc_delete").checked,
+      view_account_balance: document.getElementById("perm_view_account_balance").checked,
+      view_account_statement: document.getElementById("perm_view_account_statement").checked,
+      allowed_customer: document.getElementById("perm_allowed_customer").checked,
+      allowed_supplier: document.getElementById("perm_allowed_supplier").checked,
+      allowed_rep: document.getElementById("perm_allowed_rep").checked,
+      allowed_other: document.getElementById("perm_allowed_other").checked
+    },
+    treasury: {
+      view_treasury_flow: document.getElementById("perm_view_treasury_flow").checked,
+      analyze_receipts: document.getElementById("perm_analyze_receipts").checked,
+      analyze_expenses: document.getElementById("perm_analyze_expenses").checked
+    },
+    advanced_reports: {
+      advanced_reports_access: document.getElementById("perm_advanced_reports_access").checked,
+      daily_flow_report: document.getElementById("perm_daily_flow_report").checked,
+      sales_analysis_report: document.getElementById("perm_sales_analysis_report").checked,
+      purchases_analysis_report: document.getElementById("perm_purchases_analysis_report").checked
+    },
+    installments: {
+      view_contracts: document.getElementById("perm_view_contracts").checked,
+      contract_new: document.getElementById("perm_contract_new").checked,
+      pay_installment: document.getElementById("perm_pay_installment").checked,
+      due_overdue_installments: document.getElementById("perm_due_overdue_installments").checked
+    }
+  };
+
+  const success = await saveShopUserPermissions(activeShopSlug, permsObj);
+  if (success) {
+    showToast("تم حفظ صلاحيات المستخدم بنجاح!");
+    closeUserPermissionsModal();
+  } else {
+    showToast("حدث خطأ أثناء حفظ الصلاحيات بالسحابة", "danger");
+  }
+}
+
+// --- 2. SYSTEM SETTINGS LOGIC ---
+function switchSysTab(tabId, btnElement) {
+  const contents = document.querySelectorAll("#systemSettingsModalOverlay .sys-tab-content");
+  contents.forEach(c => c.classList.remove("active"));
+  
+  const buttons = document.querySelectorAll("#systemSettingsModalOverlay .sahl-tab-btn");
+  buttons.forEach(b => b.classList.remove("active"));
+  
+  const targetContent = document.getElementById(tabId);
+  if (targetContent) targetContent.classList.add("active");
+  if (btnElement) btnElement.classList.add("active");
+}
+
+async function openSystemSettingsModal() {
+  const overlay = document.getElementById("systemSettingsModalOverlay");
+  if (!overlay) return;
+
+  const settings = await getShopSystemSettings(activeShopSlug);
+
+  // Tab 1: General
+  if (settings.general) {
+    document.getElementById("sys_auto_deliver_sales").checked = settings.general.auto_deliver_sales !== false;
+    document.getElementById("sys_images_save_path").value = settings.general.images_save_path || "C:\\SAHL\\UserFiles\\";
+    document.getElementById("sys_invoice_print_copies").value = settings.general.invoice_print_copies || 1;
+    document.getElementById("sys_lock_invoice_edit_before").value = settings.general.lock_invoice_edit_before || "2000-01-01";
+  }
+
+  // Tab 2: Custom Fields
+  if (settings.custom_fields) {
+    document.getElementById("sys_item_field1").value = settings.custom_fields.item_field1 || "الماركة";
+    document.getElementById("sys_item_field2").value = settings.custom_fields.item_field2 || "الموديل";
+    document.getElementById("sys_item_field3").value = settings.custom_fields.item_field3 || "اسم المورد";
+
+    document.getElementById("sys_account_field1").value = settings.custom_fields.account_field1 || "المدينة";
+    document.getElementById("sys_account_field2").value = settings.custom_fields.account_field2 || "الدولة";
+    document.getElementById("sys_account_field3").value = settings.custom_fields.account_field3 || "التصنيف الفرعي";
+
+    document.getElementById("sys_invoice_field1").value = settings.custom_fields.invoice_field1 || "اسم المستلم";
+    document.getElementById("sys_invoice_field2").value = settings.custom_fields.invoice_field2 || "رقم السيارة";
+    document.getElementById("sys_invoice_field3").value = settings.custom_fields.invoice_field3 || "";
+
+    document.getElementById("sys_item_extra_label1").value = settings.custom_fields.item_extra_label1 || "اللون";
+    document.getElementById("sys_item_extra_label2").value = settings.custom_fields.item_extra_label2 || "الكرتونة";
+  }
+
+  // Tab 3: Taxes & E-invoicing
+  if (settings.taxes_einvoicing) {
+    document.getElementById("sys_tax_reg_number").value = settings.taxes_einvoicing.tax_reg_number || "100-200-300";
+    document.getElementById("sys_commercial_reg_number").value = settings.taxes_einvoicing.commercial_reg_number || "987654";
+    document.getElementById("sys_vat_name1").value = settings.taxes_einvoicing.vat_name1 || "ضريبة القيمة المضافة";
+    document.getElementById("sys_vat_pct1").value = settings.taxes_einvoicing.vat_pct1 || 14;
+    document.getElementById("sys_auto_add_sell1").checked = settings.taxes_einvoicing.auto_add_sell1 !== false;
+    document.getElementById("sys_auto_add_buy1").checked = settings.taxes_einvoicing.auto_add_buy1 === true;
+    document.getElementById("sys_einvoicing_active").checked = settings.taxes_einvoicing.einvoicing_active !== false;
+    document.getElementById("sys_einvoice_qr").checked = settings.taxes_einvoicing.einvoice_qr !== false;
+  }
+
+  // Tab 4: Passwords
+  if (settings.security) {
+    document.getElementById("sys_backup_protect_pass").value = settings.security.backup_protect_pass || "sahl123";
+    document.getElementById("sys_restricted_user_pass").value = settings.security.restricted_user_pass || "super999";
+  }
+
+  // Tab 5: Scale Barcode
+  if (settings.scale_barcode) {
+    document.getElementById("sys_enable_scale_barcode").checked = settings.scale_barcode.enable_scale_barcode !== false;
+    document.getElementById("sys_scale_prefix").value = settings.scale_barcode.scale_prefix || "00";
+    document.getElementById("sys_total_barcode_digits").value = settings.scale_barcode.total_barcode_digits || 13;
+    document.getElementById("sys_item_code_digits").value = settings.scale_barcode.item_code_digits || 5;
+    document.getElementById("sys_weight_digits").value = settings.scale_barcode.weight_digits || 5;
+  }
+
+  // Tab 6: Restaurant Setup
+  if (settings.restaurant_setup) {
+    document.getElementById("sys_enable_restaurant_mode").checked = settings.restaurant_setup.enable_restaurant_mode !== false;
+  }
+
+  overlay.classList.add("open");
+}
+
+function closeSystemSettingsModal() {
+  const overlay = document.getElementById("systemSettingsModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+async function saveSystemSettingsForm() {
+  const sysObj = {
+    general: {
+      auto_deliver_sales: document.getElementById("sys_auto_deliver_sales").checked,
+      images_save_path: document.getElementById("sys_images_save_path").value.trim(),
+      invoice_print_copies: parseInt(document.getElementById("sys_invoice_print_copies").value) || 1,
+      lock_invoice_edit_before: document.getElementById("sys_lock_invoice_edit_before").value
+    },
+    custom_fields: {
+      item_field1: document.getElementById("sys_item_field1").value.trim(),
+      item_field2: document.getElementById("sys_item_field2").value.trim(),
+      item_field3: document.getElementById("sys_item_field3").value.trim(),
+      account_field1: document.getElementById("sys_account_field1").value.trim(),
+      account_field2: document.getElementById("sys_account_field2").value.trim(),
+      account_field3: document.getElementById("sys_account_field3").value.trim(),
+      invoice_field1: document.getElementById("sys_invoice_field1").value.trim(),
+      invoice_field2: document.getElementById("sys_invoice_field2").value.trim(),
+      invoice_field3: document.getElementById("sys_invoice_field3").value.trim(),
+      item_extra_label1: document.getElementById("sys_item_extra_label1").value.trim(),
+      item_extra_label2: document.getElementById("sys_item_extra_label2").value.trim()
+    },
+    taxes_einvoicing: {
+      tax_reg_number: document.getElementById("sys_tax_reg_number").value.trim(),
+      commercial_reg_number: document.getElementById("sys_commercial_reg_number").value.trim(),
+      vat_name1: document.getElementById("sys_vat_name1").value.trim(),
+      vat_pct1: parseFloat(document.getElementById("sys_vat_pct1").value) || 14,
+      auto_add_sell1: document.getElementById("sys_auto_add_sell1").checked,
+      auto_add_buy1: document.getElementById("sys_auto_add_buy1").checked,
+      einvoicing_active: document.getElementById("sys_einvoicing_active").checked,
+      einvoice_qr: document.getElementById("sys_einvoice_qr").checked
+    },
+    security: {
+      backup_protect_pass: document.getElementById("sys_backup_protect_pass").value,
+      restricted_user_pass: document.getElementById("sys_restricted_user_pass").value
+    },
+    scale_barcode: {
+      enable_scale_barcode: document.getElementById("sys_enable_scale_barcode").checked,
+      scale_prefix: document.getElementById("sys_scale_prefix").value.trim(),
+      total_barcode_digits: parseInt(document.getElementById("sys_total_barcode_digits").value) || 13,
+      item_code_digits: parseInt(document.getElementById("sys_item_code_digits").value) || 5,
+      weight_digits: parseInt(document.getElementById("sys_weight_digits").value) || 5
+    },
+    restaurant_setup: {
+      enable_restaurant_mode: document.getElementById("sys_enable_restaurant_mode").checked
+    }
+  };
+
+  const success = await saveShopSystemSettings(activeShopSlug, sysObj);
+  if (success) {
+    showToast("تم حفظ إعدادات النظام والفوترة وطابعات المطعم بنجاح!");
+    closeSystemSettingsModal();
+  } else {
+    showToast("حدث خطأ أثناء حفظ الإعدادات بالسحابة", "danger");
+  }
+}
+
+// --- 3. SUBSCRIPTION MODAL LOGIC ---
+async function openSubscriptionModal() {
+  const overlay = document.getElementById("subscriptionModalOverlay");
+  if (!overlay) return;
+
+  try {
+    const shop = await getShopProfile(activeShopSlug);
+    if (shop) {
+      const subCompName = document.getElementById("subCompName");
+      const subMobile = document.getElementById("subMobile");
+      if (subCompName) subCompName.textContent = shop.name || "بيت الهدايا والتوريدات";
+      if (subMobile) subMobile.textContent = shop.whatsapp_number ? `+${shop.whatsapp_number}` : "+201061936565";
+    }
+  } catch (err) {
+    console.error("Error loading subscription modal info:", err);
+  }
+
+  overlay.classList.add("open");
+}
+
+function closeSubscriptionModal() {
+  const overlay = document.getElementById("subscriptionModalOverlay");
+  if (overlay) overlay.classList.remove("open");
 }

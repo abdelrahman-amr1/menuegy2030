@@ -357,3 +357,226 @@ async function clearShopProducts(shopSlug) {
     return false;
   }
 }
+
+// ----------------------------------------------------
+// Sahl ERP User Permissions & System Settings Operations
+// ----------------------------------------------------
+
+// Fetch Granular User Permissions
+async function getShopUserPermissions(shopSlug) {
+  const localKey = `menuegy_user_perms_${shopSlug}`;
+  let defaultPermissions = {
+    // 1. General Permissions (صلاحيات عامة)
+    general: {
+      admin_app: true,
+      backup_create: true,
+      backup_restore: true,
+      edit_inv_number: true,
+      view_today_invoices_only: false,
+      allowed_stores: ["المخزن الرئيسي"],
+      allowed_safes: ["درج النقدية"],
+      active_user: true
+    },
+    // 2. Invoices (الفواتير)
+    invoices: {
+      view_sales_invoices: true, sales_new: true, sales_edit: true, sales_delete: false,
+      view_quotes: true, quote_new: true, quote_edit: true, quote_delete: false,
+      view_purchases: true, purchase_new: true, purchase_edit: true, purchase_delete: false,
+      view_stocktake: true,
+      view_branch_transfers: true, transfer_new: true, transfer_edit: true, transfer_delete: false,
+      view_adjustments: true, adjustment_new: true, adjustment_edit: true, adjustment_delete: false,
+      view_expenses: true, expense_new: true, expense_edit: true, expense_delete: false,
+      view_receipts: true, receipt_new: true, receipt_edit: true, receipt_delete: false,
+      transfer_safe_other: true,
+      track_cheques: true,
+      cancel_safe_flow: false,
+      close_credit_invoices: false,
+      allow_sale_edit_price: true,
+      allow_invoice_discount: true, max_discount_pct: 10, max_discount_val: 0,
+      allow_sale_below_cost: false,
+      allow_credit_sales: true,
+      track_sales_invoices: true,
+      view_invoice_profit: true,
+      sales_return: true,
+      purchase_return: true,
+      allow_credit_purchase: true,
+      edit_tax_sales: false,
+      edit_tax_purchases: false
+    },
+    // 3. Inventory / Stock (البضاعة)
+    inventory: {
+      view_items: true, item_new: true, item_edit: true, item_delete: false,
+      item_movement_report: true,
+      stock_report: true,
+      store_movement_report: true,
+      view_cost_price: true,
+      allow_negative_stock: false,
+      print_barcode_labels: true
+    },
+    // 4. Accounts (الحسابات)
+    accounts: {
+      view_accounts: true, acc_new: true, acc_edit: true, acc_delete: false,
+      allowed_customer: true, allowed_supplier: true, allowed_rep: true, allowed_other: true,
+      view_account_balance: true,
+      view_account_statement: true
+    },
+    // 5. Treasury (الخزينة)
+    treasury: {
+      view_treasury_flow: true,
+      analyze_receipts: true,
+      analyze_expenses: true
+    },
+    // 6. Advanced Reports (تقارير متقدمة)
+    advanced_reports: {
+      advanced_reports_access: true,
+      daily_flow_report: true,
+      sales_analysis_report: true,
+      purchases_analysis_report: true
+    },
+    // 7. Installments (تقسيط)
+    installments: {
+      view_contracts: true, contract_new: true, contract_edit: true, contract_delete: false,
+      pay_installment: true,
+      due_overdue_installments: true
+    }
+  };
+
+  try {
+    const shop = await getShopProfile(shopSlug);
+    if (shop && shop.user_permissions && Object.keys(shop.user_permissions).length > 0) {
+      localStorage.setItem(localKey, JSON.stringify(shop.user_permissions));
+      return { ...defaultPermissions, ...shop.user_permissions };
+    }
+  } catch (e) {
+    console.error("Error fetching permissions from Supabase:", e);
+  }
+
+  // Fallback to localStorage
+  const savedLocal = localStorage.getItem(localKey);
+  if (savedLocal) {
+    try {
+      return { ...defaultPermissions, ...JSON.parse(savedLocal) };
+    } catch (err) {
+      console.error("Error parsing local perms:", err);
+    }
+  }
+
+  return defaultPermissions;
+}
+
+// Save Granular User Permissions
+async function saveShopUserPermissions(shopSlug, permissionsObj) {
+  const localKey = `menuegy_user_perms_${shopSlug}`;
+  localStorage.setItem(localKey, JSON.stringify(permissionsObj));
+
+  if (!isDbConnected()) return true;
+  try {
+    const { error } = await window.supabaseDb
+      .from("shops")
+      .update({ user_permissions: permissionsObj })
+      .eq("id", shopSlug);
+
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error("Error saving user permissions to Supabase:", e);
+    return false;
+  }
+}
+
+// Fetch System & POS Settings
+async function getShopSystemSettings(shopSlug) {
+  const localKey = `menuegy_sys_settings_${shopSlug}`;
+  let defaultSettings = {
+    // 1. General Settings (عام)
+    general: {
+      auto_deliver_sales: true,
+      images_save_path: "C:\\SAHL\\UserFiles\\",
+      invoice_print_copies: 1,
+      lock_invoice_edit_before: "2000-01-01"
+    },
+    // 2. Custom Fields (حقول إضافية)
+    custom_fields: {
+      item_field1: "الماركة", item_field2: "الموديل", item_field3: "اسم المورد",
+      account_field1: "المدينة", account_field2: "الدولة", account_field3: "التصنيف الفرعي",
+      invoice_field1: "اسم المستلم", invoice_field2: "رقم السيارة", invoice_field3: "",
+      invoice_calc_buy1: "تكلفة الشحن", invoice_calc_buy_val1: 0,
+      invoice_calc_sell1: "رسوم التوصيل", invoice_calc_sell_val1: 0,
+      item_extra_label1: "اللون", item_extra_label2: "الكرتونة"
+    },
+    // 3. Taxes & E-Invoicing (الضرائب والفوترة)
+    taxes_einvoicing: {
+      tax_reg_number: "100-200-300",
+      commercial_reg_number: "987654",
+      vat_name1: "ضريبة القيمة المضافة", vat_pct1: 14, auto_add_sell1: true, auto_add_buy1: false,
+      vat_name2: "ضريبة أرباح تجارية", vat_pct2: 1, auto_add_sell2: false, auto_add_buy2: false,
+      einvoicing_active: true,
+      einvoice_qr: true
+    },
+    // 4. Security & Passwords (كلمات السر)
+    security: {
+      backup_protect_pass: "sahl123",
+      restricted_user_pass: "super999"
+    },
+    // 5. Scale Barcode & Other (ميزان الباركود وخيارات أخرى)
+    scale_barcode: {
+      enable_scale_barcode: true,
+      scale_prefix: "00",
+      total_barcode_digits: 13,
+      item_code_digits: 5,
+      weight_digits: 5
+    },
+    // 6. Restaurant Setup (إعداد المطعم وطابعات المطبخ)
+    restaurant_setup: {
+      enable_restaurant_mode: true,
+      printers: [
+        { id: 1, printer_name: "طابعة المطبخ الرئيسي", filter_field: "القسم", filter_value: "اللحوم والدواجن", template: "نموذج تجهيز المطبخ" },
+        { id: 2, printer_name: "طابعة المشويات والأسماك", filter_field: "القسم", filter_value: "الأسماك والمدخن", template: "نموذج تجهيز المشويات" },
+        { id: 3, printer_name: "طابعة المخبوزات", filter_field: "القسم", filter_value: "المخبوزات والعجائن", template: "نموذج المعجنات" },
+        { id: 4, printer_name: "طابعة المشروبات والبار", filter_field: "القسم", filter_value: "المشروبات الطبيعية", template: "نموذج الكافيه والبار" }
+      ]
+    }
+  };
+
+  try {
+    const shop = await getShopProfile(shopSlug);
+    if (shop && shop.system_settings && Object.keys(shop.system_settings).length > 0) {
+      localStorage.setItem(localKey, JSON.stringify(shop.system_settings));
+      return { ...defaultSettings, ...shop.system_settings };
+    }
+  } catch (e) {
+    console.error("Error fetching system settings from Supabase:", e);
+  }
+
+  // Fallback to localStorage
+  const savedLocal = localStorage.getItem(localKey);
+  if (savedLocal) {
+    try {
+      return { ...defaultSettings, ...JSON.parse(savedLocal) };
+    } catch (err) {
+      console.error("Error parsing local sys settings:", err);
+    }
+  }
+
+  return defaultSettings;
+}
+
+// Save System & POS Settings
+async function saveShopSystemSettings(shopSlug, settingsObj) {
+  const localKey = `menuegy_sys_settings_${shopSlug}`;
+  localStorage.setItem(localKey, JSON.stringify(settingsObj));
+
+  if (!isDbConnected()) return true;
+  try {
+    const { error } = await window.supabaseDb
+      .from("shops")
+      .update({ system_settings: settingsObj })
+      .eq("id", shopSlug);
+
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error("Error saving system settings to Supabase:", e);
+    return false;
+  }
+}

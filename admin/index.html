@@ -91,7 +91,20 @@
       </div>
     </div>
 
-    <!-- Admin Stats Counter Grid -->
+    <!-- Sahl Quick Control Bar (User Permissions, System Settings, Subscription Info) -->
+    <div style="margin: -1rem 2rem 1.5rem 2rem; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: flex-start; direction: rtl;">
+      <button onclick="openUserPermissionsModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+        <i class="fa-solid fa-user-shield" style="color: #38bdf8; margin-left: 6px;"></i> بيانات وصلاحيات مستخدم
+      </button>
+      
+      <button onclick="openSystemSettingsModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+        <i class="fa-solid fa-sliders" style="color: #fbbf24; margin-left: 6px;"></i> إعداد سهل / الفوترة وميزان الباركود
+      </button>
+
+      <button onclick="openSubscriptionModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+        <i class="fa-solid fa-id-card" style="color: #4ade80; margin-left: 6px;"></i> بيانات المشترك والتراخيص
+      </button>
+    </div>
     <section class="admin-stats">
       <div class="stat-card primary">
         <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
@@ -296,6 +309,537 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-outline" onclick="closeProductModal()">إلغاء</button>
         <button type="submit" form="productForm" class="btn btn-primary" id="saveModalBtn">إضافة المنتج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. USER PERMISSIONS MODAL (بيانات وصلاحيات مستخدم) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="userPermissionsModalOverlay" onclick="closeUserPermissionsModal()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 900px; width: 95%;">
+      <div class="modal-header" style="background: #1e293b; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #38bdf8;">
+            <i class="fa-solid fa-user-shield"></i> بيانات وصلاحيات مستخدم
+          </h3>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem;">
+            <label style="color: #cbd5e1; margin: 0;">اسم المستخدم:</label>
+            <input type="text" id="permUsername" value="مدير النظام" style="padding: 4px 8px; width: 140px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #fff;">
+            <label style="color: #cbd5e1; margin: 0; margin-right: 10px;">كلمة السر:</label>
+            <input type="password" id="permUserpass" value="******" style="padding: 4px 8px; width: 120px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: #fff;">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px;">
+          <button onclick="saveUserPermissionsForm()" class="btn" style="background: #d97706; color: #fff; border: none; padding: 5px 15px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+            <i class="fa-solid fa-check"></i> حفظ
+          </button>
+          <button onclick="closeUserPermissionsModal()" class="btn" style="background: #64748b; color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+            <i class="fa-solid fa-xmark"></i> تراجع
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Navigation Headers (7 Tabs) -->
+      <div class="sahl-tabs-nav" style="display: flex; background: #e2e8f0; border-bottom: 2px solid #cbd5e1; overflow-x: auto; direction: rtl;">
+        <button class="sahl-tab-btn active" onclick="switchPermTab('permGeneral', this)">صلاحيات عامة</button>
+        <button class="sahl-tab-btn" onclick="switchPermTab('permInvoices', this)">الفواتير</button>
+        <button class="sahl-tab-btn" onclick="switchPermTab('permInventory', this)">البضاعة</button>
+        <button class="sahl-tab-btn" onclick="switchPermTab('permAccounts', this)">الحسابات</button>
+        <button class="sahl-tab-btn" onclick="switchPermTab('permTreasury', this)">الخزينة</button>
+        <button class="sahl-tab-btn" onclick="switchPermTab('permAdvanced', this)">تقارير متقدمة</button>
+        <button class="sahl-tab-btn" onclick="switchPermTab('permInstallments', this)">تقسيط</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
+        
+        <!-- Tab 1: General Permissions (صلاحيات عامة) -->
+        <div id="permGeneral" class="perm-tab-content active">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+            <label class="checkbox-card"><input type="checkbox" id="perm_admin_app" checked> <span>إدارة البرنامج والصلاحيات</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_backup_create" checked> <span>عمل نسخة احتياطية</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_backup_restore" checked> <span>استرجاع نسخة احتياطية</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_edit_inv_number" checked> <span>تعديل أرقام الفواتير</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_today_invoices_only"> <span>عرض فواتير اليوم فقط</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_active_user" checked> <span>مستخدم نشط</span></label>
+          </div>
+
+          <div style="margin-top: 20px; background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+            <h4 style="margin-top: 0; color: #1e293b; font-size: 14px; font-weight: 700;">المخازن والخزائن المسموح بها للمستخدم:</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+              <div>
+                <label style="font-size: 12px; font-weight: 600;">المخازن المسموح بها:</label>
+                <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; max-height: 100px; overflow-y: auto; background: #f1f5f9;">
+                  <label style="display: block; font-size: 13px;"><input type="checkbox" checked> المخزن الرئيسي</label>
+                  <label style="display: block; font-size: 13px;"><input type="checkbox" checked> مخزن المعرض / الفرع الثاني</label>
+                </div>
+              </div>
+              <div>
+                <label style="font-size: 12px; font-weight: 600;">الخزائن المسموح بها:</label>
+                <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; max-height: 100px; overflow-y: auto; background: #f1f5f9;">
+                  <label style="display: block; font-size: 13px;"><input type="checkbox" checked> درج النقدية الرئيسي</label>
+                  <label style="display: block; font-size: 13px;"><input type="checkbox" checked> خزينة الكاشير والتوصيل</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Invoices (الفواتير) -->
+        <div id="permInvoices" class="perm-tab-content">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+            <div class="perm-group-box">
+              <h5>فواتير المبيعات:</h5>
+              <label><input type="checkbox" id="perm_view_sales_invoices" checked> عرض فواتير المبيعات</label>
+              <label><input type="checkbox" id="perm_sales_new" checked> جديد (إضافة فاتورة بيع)</label>
+              <label><input type="checkbox" id="perm_sales_edit" checked> تعديل فاتورة بيع</label>
+              <label><input type="checkbox" id="perm_sales_delete"> حذف فاتورة بيع</label>
+            </div>
+
+            <div class="perm-group-box">
+              <h5>عروض الأسعار:</h5>
+              <label><input type="checkbox" id="perm_view_quotes" checked> عرض عروض الأسعار</label>
+              <label><input type="checkbox" id="perm_quote_new" checked> جديد</label>
+              <label><input type="checkbox" id="perm_quote_edit" checked> تعديل</label>
+              <label><input type="checkbox" id="perm_quote_delete"> حذف</label>
+            </div>
+
+            <div class="perm-group-box">
+              <h5>فواتير الشراء:</h5>
+              <label><input type="checkbox" id="perm_view_purchases" checked> عرض فواتير الشراء</label>
+              <label><input type="checkbox" id="perm_purchase_new" checked> جديد</label>
+              <label><input type="checkbox" id="perm_purchase_edit" checked> تعديل</label>
+              <label><input type="checkbox" id="perm_purchase_delete"> حذف</label>
+            </div>
+
+            <div class="perm-group-box">
+              <h5>الجرد والتصفيات:</h5>
+              <label><input type="checkbox" id="perm_view_stocktake" checked> عرض الجرد</label>
+              <label><input type="checkbox" id="perm_view_branch_transfers" checked> عرض تحويلات الفروع</label>
+              <label><input type="checkbox" id="perm_view_adjustments" checked> عرض التسويات</label>
+            </div>
+
+            <div class="perm-group-box">
+              <h5>المصروفات والمقبوضات:</h5>
+              <label><input type="checkbox" id="perm_view_expenses" checked> عرض المصروفات</label>
+              <label><input type="checkbox" id="perm_view_receipts" checked> عرض المقبوضات</label>
+              <label><input type="checkbox" id="perm_transfer_safe_other" checked> تحويل من خزينة لأخرى</label>
+              <label><input type="checkbox" id="perm_track_cheques" checked> متابعة سداد الشيكات والأقساط</label>
+            </div>
+
+            <div class="perm-group-box">
+              <h5>صلاحيات البيع المتقدمة والخصومات:</h5>
+              <label><input type="checkbox" id="perm_allow_sale_edit_price" checked> تعديل أسعار البيع بالفاتورة</label>
+              <label><input type="checkbox" id="perm_allow_invoice_discount" checked> إضافة خصم للفاتورة</label>
+              <div style="display: flex; gap: 5px; align-items: center; font-size: 11px; margin-top: 3px;">
+                <span>أعلى % خصم:</span>
+                <input type="number" id="perm_max_discount_pct" value="10" style="width: 50px; padding: 2px;">
+              </div>
+              <label><input type="checkbox" id="perm_allow_sale_below_cost"> البيع بأقل من سعر التكلفة/الشراء</label>
+              <label><input type="checkbox" id="perm_view_invoice_profit" checked> عرض ربح الفاتورة الحالية</label>
+              <label><input type="checkbox" id="perm_allow_credit_sales" checked> البيع بالأجل</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Inventory (البضاعة) -->
+        <div id="permInventory" class="perm-tab-content">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_items" checked> <span>عرض الأصناف والمنتجات</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_item_new" checked> <span>إضافة صنف جديد</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_item_edit" checked> <span>تعديل بيانات الصنف</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_item_delete"> <span>حذف صنف نهائياً</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_item_movement_report" checked> <span>تقرير حركة الصنف</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_stock_report" checked> <span>تقرير بضاعة مخزن</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_store_movement_report" checked> <span>تقرير حركة مخزن</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_cost_price" checked> <span>يمكنه معرفة تكلفة الأصناف</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_allow_negative_stock"> <span>يمكنه بيع أو تحويل كميات غير متاحة بالمخزن (البيع السلبي)</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_print_barcode_labels" checked> <span>طباعة ملصقات الباركود</span></label>
+          </div>
+        </div>
+
+        <!-- Tab 4: Accounts (الحسابات) -->
+        <div id="permAccounts" class="perm-tab-content">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_accounts" checked> <span>عرض الحسابات والعملاء والموردين</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_acc_new" checked> <span>إضافة حساب جديد</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_acc_edit" checked> <span>تعديل حساب</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_acc_delete"> <span>حذف حساب</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_account_balance" checked> <span>رصيد الحساب</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_account_statement" checked> <span>كشف حساب تفصيلي</span></label>
+          </div>
+
+          <div style="margin-top: 15px; background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+            <h5 style="margin: 0 0 8px 0; color: #1e293b;">أنواع الحسابات المسموح التعامل معها:</h5>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+              <label><input type="checkbox" id="perm_allowed_customer" checked> عميل</label>
+              <label><input type="checkbox" id="perm_allowed_supplier" checked> مورد</label>
+              <label><input type="checkbox" id="perm_allowed_rep" checked> مندوب بيع</label>
+              <label><input type="checkbox" id="perm_allowed_other" checked> أخرى</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: Treasury (الخزينة) -->
+        <div id="permTreasury" class="perm-tab-content">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_treasury_flow" checked> <span>عرض حركة الخزينة ورصيدها</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_analyze_receipts" checked> <span>تحليل المقبوضات وتصنيفها</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_analyze_expenses" checked> <span>تحليل المصروفات والتكاليف</span></label>
+          </div>
+        </div>
+
+        <!-- Tab 6: Advanced Reports (تقارير متقدمة) -->
+        <div id="permAdvanced" class="perm-tab-content">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
+            <label class="checkbox-card"><input type="checkbox" id="perm_advanced_reports_access" checked> <span>الوصول لشاشة وقائمة التقارير المتقدمة مثل التقرير الضريبي وغيره</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_daily_flow_report" checked> <span>تقرير الحركة اليومية الإجمالية</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_sales_analysis_report" checked> <span>تقرير تحليل المبيعات والربحية</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_purchases_analysis_report" checked> <span>تقرير تحليل المشتريات والموردين</span></label>
+          </div>
+        </div>
+
+        <!-- Tab 7: Installments (تقسيط) -->
+        <div id="permInstallments" class="perm-tab-content">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
+            <label class="checkbox-card"><input type="checkbox" id="perm_view_contracts" checked> <span>عرض عقود التقسيط</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_contract_new" checked> <span>إضافة عقد تقسيط جديد</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_pay_installment" checked> <span>سداد القسط الشهري</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_due_overdue_installments" checked> <span>متابعة الأقساط المستحقة والمتأخرة</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. SYSTEM SETTINGS MODAL (إعداد سهل / الفوترة والميزان) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="systemSettingsModalOverlay" onclick="closeSystemSettingsModal()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 920px; width: 95%;">
+      <div class="modal-header" style="background: #0f172a; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fbbf24;">
+          <i class="fa-solid fa-sliders"></i> إعداد سهل / إعدادات المنصة والفوترة وميزان الباركود
+        </h3>
+        <div style="display: flex; gap: 8px;">
+          <button onclick="saveSystemSettingsForm()" class="btn" style="background: #10b981; color: #fff; border: none; padding: 5px 15px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+            <i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات
+          </button>
+          <button onclick="closeSystemSettingsModal()" class="btn" style="background: #64748b; color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+            <i class="fa-solid fa-xmark"></i> إغلاق
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Navigation Headers (6 Tabs) -->
+      <div class="sahl-tabs-nav" style="display: flex; background: #e2e8f0; border-bottom: 2px solid #cbd5e1; overflow-x: auto; direction: rtl;">
+        <button class="sahl-tab-btn active" onclick="switchSysTab('sysGeneral', this)">عام</button>
+        <button class="sahl-tab-btn" onclick="switchSysTab('sysCustomFields', this)">حقول إضافية</button>
+        <button class="sahl-tab-btn" onclick="switchSysTab('sysTaxes', this)">الضرائب والفوترة</button>
+        <button class="sahl-tab-btn" onclick="switchSysTab('sysSecurity', this)">كلمات السر</button>
+        <button class="sahl-tab-btn" onclick="switchSysTab('sysScaleBarcode', this)">أخرى وميزان الباركود</button>
+        <button class="sahl-tab-btn" onclick="switchSysTab('sysRestaurant', this)">إعداد المطعم وطابعات المطبخ</button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
+        
+        <!-- Tab 1: General (عام) -->
+        <div id="sysGeneral" class="sys-tab-content active">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <label class="checkbox-card"><input type="checkbox" id="sys_auto_deliver_sales" checked> <span>تسليم فواتير البيع تلقائياً</span></label>
+            
+            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <h5 style="margin-top: 0; color: #1e293b;">مجلد حفظ الصور والتصاميم:</h5>
+              <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">حدد مجلد لحفظ الصور به... يمكنك تحديد مجلد مشاركة من الجهاز الرئيسي أو السيرفر لجميع الأجهزة.</p>
+              <div style="display: flex; gap: 10px;">
+                <input type="text" id="sys_images_save_path" value="C:\SAHL\UserFiles\" style="flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: monospace;">
+                <button type="button" class="btn btn-outline" style="padding: 4px 12px; font-size: 12px;">تصفح</button>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">عدد نسخ طباعة فاتورة البيع:</label>
+                <input type="number" id="sys_invoice_print_copies" value="1" min="1" max="10" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+              </div>
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">حظر تعديل الفواتير قبل تاريخ:</label>
+                <input type="date" id="sys_lock_invoice_edit_before" value="2000-01-01" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Custom Fields (حقول إضافية) -->
+        <div id="sysCustomFields" class="sys-tab-content">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b;">حقول إضافية للصنف (مثل الماركة، الموديل، المورد):</h5>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <input type="text" id="sys_item_field1" value="الماركة" placeholder="اسم الحقل 1" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="text" id="sys_item_field2" value="الموديل" placeholder="اسم الحقل 2" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="text" id="sys_item_field3" value="اسم المورد" placeholder="اسم الحقل 3" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+              </div>
+            </div>
+
+            <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b;">حقول إضافية للحساب (مثل المدينة، الدولة، التصنيف الفرعي):</h5>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <input type="text" id="sys_account_field1" value="المدينة" placeholder="اسم الحقل 1" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="text" id="sys_account_field2" value="الدولة" placeholder="اسم الحقل 2" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="text" id="sys_account_field3" value="التصنيف الفرعي" placeholder="اسم الحقل 3" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+              </div>
+            </div>
+
+            <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b;">حقول إضافية للفاتورة (تظهر أسفل شاشة الفاتورة مثل اسم المستلم ورقم السيارة):</h5>
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <input type="text" id="sys_invoice_field1" value="اسم المستلم" placeholder="اسم الحقل 1" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="text" id="sys_invoice_field2" value="رقم السيارة" placeholder="اسم الحقل 2" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="text" id="sys_invoice_field3" value="" placeholder="اسم الحقل 3" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+              </div>
+            </div>
+
+            <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b;">حقول إضافية لكل صنف بالفاتورة (مثل اللون أو الكرتونة):</h5>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" id="sys_item_extra_label1" value="اللون" placeholder="اسم الحقل 1" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="text" id="sys_item_extra_label2" value="الكرتونة" placeholder="اسم الحقل 2" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Taxes & E-Invoicing (الضرائب والفوترة) -->
+        <div id="sysTaxes" class="sys-tab-content">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">رقم التسجيل الضريبي:</label>
+                <input type="text" id="sys_tax_reg_number" value="100-200-300" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+              </div>
+              <div>
+                <label style="font-size: 13px; font-weight: 600;">رقم السجل التجاري:</label>
+                <input type="text" id="sys_commercial_reg_number" value="987654" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+              </div>
+            </div>
+
+            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <h5 style="margin: 0 0 10px 0; color: #1e293b;">ضبط نسبة ضريبة القيمة المضافة (VAT):</h5>
+              <div style="display: grid; grid-template-columns: 2fr 1fr 1.5fr 1.5fr; gap: 10px; align-items: center;">
+                <input type="text" id="sys_vat_name1" value="ضريبة القيمة المضافة" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <input type="number" id="sys_vat_pct1" value="14" style="padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <label style="font-size: 12px;"><input type="checkbox" id="sys_auto_add_sell1" checked> أضف الضريبة تلقائياً لفاتورة البيع</label>
+                <label style="font-size: 12px;"><input type="checkbox" id="sys_auto_add_buy1"> أضف الضريبة تلقائياً لفاتورة الشراء</label>
+              </div>
+            </div>
+
+            <div style="background: #eff6ff; border: 1px solid #93c5fd; padding: 15px; border-radius: 8px;">
+              <h5 style="margin: 0 0 8px 0; color: #1e40af;"><i class="fa-solid fa-qrcode"></i> الفوترة الإلكترونية ورمز الاستجابة السريعة (QR Code):</h5>
+              <label style="font-size: 13px; display: block; margin-bottom: 5px;"><input type="checkbox" id="sys_einvoicing_active" checked> تفعيل خصائص الفوترة الإلكترونية وفقاً للقوانين السارية بالبلاد</label>
+              <label style="font-size: 13px; display: block;"><input type="checkbox" id="sys_einvoice_qr" checked> طباعة رمز الاستجابة السريعة QR Code على جميع الفواتير</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: Passwords & Security (كلمات السر) -->
+        <div id="sysSecurity" class="sys-tab-content">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <h5 style="margin-top: 0; color: #1e293b;">كلمة سر حماية النسخ الاحتياطي:</h5>
+              <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">تُستخدم في تشفير ملفات النسخ الاحتياطية، بدونها لا يمكنك استرجاع ملفات النسخ الاحتياطية.</p>
+              <input type="password" id="sys_backup_protect_pass" value="sahl123" style="width: 250px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            </div>
+
+            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <h5 style="margin-top: 0; color: #1e293b;">كلمة سر المستخدم السوبر (تجاوز الصلاحيات):</h5>
+              <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">تفيد كلمة سر المستخدم السوبر في تجاوز بعض صلاحيات المستخدم المحدودة عند اللزوم (مثل حذف صنف من فاتورة).</p>
+              <input type="password" id="sys_restricted_user_pass" value="super999" style="width: 250px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: Scale Barcode & Other (ميزان الباركود) -->
+        <div id="sysScaleBarcode" class="sys-tab-content">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <h5 style="margin-top: 0; color: #1e293b; font-size: 15px;"><i class="fa-solid fa-scale-balanced" style="color: #d97706;"></i> خيارات ميزان الباركود الإلكتروني:</h5>
+              <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 12px;"><input type="checkbox" id="sys_enable_scale_barcode" checked> تفعيل باركود الميزان الإلكتروني</label>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                  <label style="font-size: 12px; color: #475569;">باركود الميزان يبدأ برقم:</label>
+                  <input type="text" id="sys_scale_prefix" value="00" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: #475569;">إجمالي عدد أرقام الباركود:</label>
+                  <input type="number" id="sys_total_barcode_digits" value="13" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: #475569;">عدد أرقام كود الصنف:</label>
+                  <input type="number" id="sys_item_code_digits" value="5" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+                </div>
+                <div>
+                  <label style="font-size: 12px; color: #475569;">عدد أرقام الوزن:</label>
+                  <input type="number" id="sys_weight_digits" value="5" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 4px;">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 6: Restaurant Setup & Kitchen Printers (إعداد المطعم وطابعات المطبخ) -->
+        <div id="sysRestaurant" class="sys-tab-content">
+          <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+              <h5 style="margin-top: 0; color: #1e293b; font-size: 15px;"><i class="fa-solid fa-utensils" style="color: #ef4444;"></i> إعداد المطاعم والمطابخ وطابعات التجهيز:</h5>
+              <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">هذه الصفحة خاصة بنشاط المطاعم والمقاهي فقط.. حدد الطابعات المستخدمة في المطعم ونموذج الطباعة لكل منها لفترة أصناف طابعة محدودة حسب قيمة التصنيف أو أحد الحقول الإضافية.</p>
+              
+              <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 15px;"><input type="checkbox" id="sys_enable_restaurant_mode" checked> تفعيل إعداد المطعم وتوجيه الطلبات للمطبخ</label>
+
+              <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: right;">
+                <thead>
+                  <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                    <th style="padding: 8px;">#</th>
+                    <th style="padding: 8px;">اسم الطابعة بالمطبخ</th>
+                    <th style="padding: 8px;">نموذج الطباعة</th>
+                    <th style="padding: 8px;">فلترة حسب القسم / الحقل</th>
+                    <th style="padding: 8px;">قيمة التصنيف الفعلي</th>
+                  </tr>
+                </thead>
+                <tbody id="restaurantPrintersTableBody">
+                  <tr>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">1</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="طابعة المطبخ الرئيسي" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="نموذج تجهيز المطبخ" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">القسم الرئيسي</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="اللحوم والدواجن" style="width: 90%; padding: 4px;"></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">2</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="طابعة المشويات والأسماك" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="نموذج تجهيز المشويات" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">القسم الرئيسي</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="الأسماك والمدخن" style="width: 90%; padding: 4px;"></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">3</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="طابعة المخبوزات" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="نموذج المعجنات" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">القسم الرئيسي</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="المخبوزات والعجائن" style="width: 90%; padding: 4px;"></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">4</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="طابعة المشروبات والبار" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="نموذج الكافيه والبار" style="width: 90%; padding: 4px;"></td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;">القسم الرئيسي</td>
+                    <td style="padding: 6px; border-bottom: 1px solid #e2e8f0;"><input type="text" value="المشروبات الطبيعية" style="width: 90%; padding: 4px;"></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div style="margin-top: 10px; background: #fffbebf8; border: 1px solid #fef08a; padding: 10px; border-radius: 6px; font-size: 11px; color: #a16207;">
+                💡 برنامج المطعم له تكلفة إضافية على اشتراك سهل الرئيسي لتسليم وتوجيه الطلبات عبر الشبكة المحلية أو السحابية.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. SUBSCRIPTION & LICENSING MODAL (بيانات المشترك والتراخيص) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="subscriptionModalOverlay" onclick="closeSubscriptionModal()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 880px; width: 95%;">
+      <div class="modal-header" style="background: #166534; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #86efac;">
+          <i class="fa-solid fa-id-card"></i> شكراً لثقتكم في سهل - بيانات المشترك والتراخيص
+        </h3>
+        <button onclick="closeSubscriptionModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i> إغلاق
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.5rem; max-height: 75vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
+        
+        <!-- Status Notification Box -->
+        <div style="background: #dcfce7; border: 1px solid #86efac; border-radius: 8px; padding: 12px 15px; color: #14532d; font-size: 12px; line-height: 1.6; margin-bottom: 15px;">
+          عميلنا الهام ، لفحص هذا الاشتراك ومودته وتكلفته، وتأكد من دقة بيانات المشترك وأنها بيانات مالك المشروع فقط، وليست بيانات أي شخص آخر، ومن معرفتك لباسورد الاشتراك. إذا وجدت أي خطأ اتصل بنا. البيانات تعرض الاشتراك للإيقاف. قائمة موشري سهل المعتمدين حاليا يتم تحديثها باستمرار على موقع البرنامج، تأكد من اعتماد أي شركة أو شخص قبل التعامل معه، الشركة غير مسئولة عن التعامل مع أي جهة أو شخص ليس في هذه القائمة. لآية استفسارات يسعدنا خدمتكم.
+        </div>
+
+        <!-- Plan Info Header Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 15px;">
+          <div style="background: #fef3c7; border: 1px solid #fde047; padding: 10px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 11px; color: #78350f;">نوع الاشتراك</div>
+            <strong style="color: #92400e; font-size: 14px;">اشتراك شهري / سنوي</strong>
+          </div>
+          <div style="background: #fee2e2; border: 1px solid #fca5a5; padding: 10px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 11px; color: #991b1b;">تاريخ نهاية الاشتراك</div>
+            <strong style="color: #b91c1c; font-size: 14px;">2028-12-28 (باقي 650 يوم)</strong>
+          </div>
+          <div style="background: #e0e7ff; border: 1px solid #a5b4fc; padding: 10px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 11px; color: #3730a3;">عدد الأجهزة</div>
+            <strong style="color: #4338ca; font-size: 14px;">1 جهاز نشط</strong>
+          </div>
+          <div style="background: #dcfce7; border: 1px solid #86efac; padding: 10px; border-radius: 6px; text-align: center;">
+            <div style="font-size: 11px; color: #166534;">تكلفة الاشتراك</div>
+            <strong style="color: #15803d; font-size: 14px;">100.00 جنيه مصري</strong>
+          </div>
+        </div>
+
+        <!-- Two Columns: Subscriber Info & Distributor Info -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <!-- Subscriber Info -->
+          <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+            <h4 style="margin-top: 0; color: #1d4ed8; font-size: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">بيانات المشترك:</h4>
+            <table style="width: 100%; font-size: 12px; line-height: 2;">
+              <tr><td style="color: #64748b; width: 40%;">رقم الاشتراك:</td><td><strong id="subNumber">49865</strong></td></tr>
+              <tr><td style="color: #64748b;">موبايل الاشتراك:</td><td><strong id="subMobile">+201061936565</strong></td></tr>
+              <tr><td style="color: #64748b;">إيميل الاشتراك:</td><td id="subEmail">ms4754025@gmail.com</td></tr>
+              <tr><td style="color: #64748b;">اسم الشركة/المحل:</td><td><strong id="subCompName">بيت الهدايا والتوريدات</strong></td></tr>
+              <tr><td style="color: #64748b;">المالك:</td><td id="subOwner">حامد عفيفي حامد</td></tr>
+              <tr><td style="color: #64748b;">المسئول:</td><td id="subManager">حامد عفيفي حامد</td></tr>
+              <tr><td style="color: #64748b;">الدولة:</td><td>Egypt</td></tr>
+            </table>
+          </div>
+
+          <!-- Distributor Info -->
+          <div style="background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+            <h4 style="margin-top: 0; color: #0284c7; font-size: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">بيانات الموزع المعتمد:</h4>
+            <table style="width: 100%; font-size: 12px; line-height: 2;">
+              <tr><td style="color: #64748b; width: 40%;">رقم الموزع:</td><td><strong>197</strong></td></tr>
+              <tr><td style="color: #64748b;">اسم الشركة:</td><td><strong>مدرب حر - M.S</strong></td></tr>
+              <tr><td style="color: #64748b;">المسئول المعتمد:</td><td>محمود سامي</td></tr>
+              <tr><td style="color: #64748b;">الدولة / المدينة:</td><td>Egypt / القاهرة</td></tr>
+              <tr><td style="color: #64748b;">الموبايل:</td><td>01092973513 | 01001302155</td></tr>
+              <tr><td style="color: #64748b;">إيميل الدعم:</td><td>ms4754025@gmail.com</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- License Code Bar -->
+        <div style="margin-top: 15px; background: #e0f2fe; border: 1px solid #7dd3fc; padding: 12px; border-radius: 8px; text-align: center;">
+          <span style="font-size: 12px; color: #0369a1;">كود الجهاز والترخيص الحالي:</span>
+          <div style="font-family: monospace; font-size: 14px; font-weight: 700; color: #0c4a6e; letter-spacing: 1px; margin-top: 4px;">
+            361C0A4FF5348725781BFD00063D8FEC
+          </div>
+        </div>
+
+        <!-- Actions Buttons List -->
+        <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+          <a href="https://wa.me/201128007078" target="_blank" class="btn" style="background: #0284c7; color: #fff; font-size: 12px;"><i class="fa-solid fa-headset"></i> خدمة العملاء</a>
+          <button class="btn" style="background: #475569; color: #fff; font-size: 12px;"><i class="fa-solid fa-users"></i> الموزعين المعتمدين</button>
+          <button class="btn" style="background: #d97706; color: #fff; font-size: 12px;"><i class="fa-solid fa-lock"></i> الدخول لإشتراككم</button>
+          <button class="btn" style="background: #16a34a; color: #fff; font-size: 12px;"><i class="fa-solid fa-circle-check"></i> تأكيد الاشتراك</button>
+          <button class="btn" style="background: #dc2626; color: #fff; font-size: 12px;"><i class="fa-solid fa-rectangle-xmark"></i> إلغاء ترخيص هذا الجهاز</button>
+        </div>
+
       </div>
     </div>
   </div>

@@ -15,3 +15,7 @@ ALTER TABLE shops ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;
 ALTER TABLE shops ADD COLUMN IF NOT EXISTS subscription_plan TEXT DEFAULT 'monthly';
 ALTER TABLE shops ADD COLUMN IF NOT EXISTS subscription_expiry TIMESTAMP WITH TIME ZONE;
 
+-- Run this to add granular user permissions and Sahl ERP system settings:
+ALTER TABLE shops ADD COLUMN IF NOT EXISTS user_permissions JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE shops ADD COLUMN IF NOT EXISTS system_settings JSONB DEFAULT '{}'::jsonb;
+

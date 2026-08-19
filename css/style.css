@@ -2124,3 +2124,104 @@ footer {
   50% { transform: scale(1.08); text-shadow: 0 0 15px rgba(37, 211, 102, 0.8); }
   100% { transform: scale(1); text-shadow: 0 0 0 rgba(37, 211, 102, 0.4); }
 }
+
+/* ==================================================== */
+/* Sahl ERP Modals & Granular Tab System Styles */
+/* ==================================================== */
+
+.sahl-tab-btn {
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.sahl-tab-btn:hover {
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sahl-tab-btn.active {
+  color: #0284c7;
+  border-bottom-color: #0284c7;
+  background: #ffffff;
+}
+
+.perm-tab-content, .sys-tab-content {
+  display: none;
+}
+
+.perm-tab-content.active, .sys-tab-content.active {
+  display: block;
+  animation: fadeInSahlTab 0.3s ease;
+}
+
+@keyframes fadeInSahlTab {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.checkbox-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checkbox-card:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.checkbox-card input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #0284c7;
+  cursor: pointer;
+}
+
+.perm-group-box {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perm-group-box h5 {
+  margin: 0 0 6px 0;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 1px dashed #cbd5e1;
+  padding-bottom: 4px;
+}
+
+.perm-group-box label {
+  font-size: 12px;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.perm-group-box input[type="checkbox"] {
+  accent-color: #d97706;
+}
