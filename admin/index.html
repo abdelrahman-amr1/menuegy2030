@@ -882,6 +882,14 @@
               <input type="text" id="barcodeValueInput" oninput="renderLiveBarcodeSvg()" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: monospace; direction: ltr; margin-top: 3px;">
             </div>
 
+            <div>
+              <label style="font-size: 12px; font-weight: 600; color: #475569;">نوع الطابعة والورق:</label>
+              <select id="barcodePrinterType" style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-top: 3px; font-weight: 600;">
+                <option value="roll">طابعة استيكر حراري (رول - ملصق منفصل لكل صفحة)</option>
+                <option value="a4">طابعة ورق A4 (شبكة ملصقات على صفحة واحدة)</option>
+              </select>
+            </div>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
               <div>
                 <label style="font-size: 12px; font-weight: 600; color: #475569;">عدد الملصقات:</label>

@@ -1279,6 +1279,7 @@ function printBarcodeStickersNow() {
 
   const copies = parseInt(document.getElementById("barcodePrintCopies").value) || 1;
   const labelSize = document.getElementById("barcodeLabelSize").value || "38x25";
+  const printerType = document.getElementById("barcodePrinterType") ? document.getElementById("barcodePrinterType").value : "roll";
   const barcodeVal = document.getElementById("barcodeValueInput").value.trim() || "200000000001";
 
   const showShop = document.getElementById("bc_show_shop").checked;
@@ -1286,8 +1287,8 @@ function printBarcodeStickersNow() {
   const showPrice = document.getElementById("bc_show_price").checked;
   const shopNameText = document.getElementById("prevShopName") ? document.getElementById("prevShopName").textContent : "متجر MenuEgy";
 
-  // Build print grid
-  let stickersHtml = `<div class="printable-stickers-grid size-${labelSize}">`;
+  // Build print grid (mode-roll for thermal roll printer, mode-a4 for A4 paper)
+  let stickersHtml = `<div class="printable-stickers-grid mode-${printerType} size-${labelSize}">`;
 
   for (let i = 0; i < copies; i++) {
     stickersHtml += `

@@ -2235,6 +2235,10 @@ footer {
 /* ==================================================== */
 
 @media print {
+  @page {
+    margin: 0mm;
+  }
+
   /* Hide all UI elements except barcode print container */
   body > *:not(#barcodePrintContainer) {
     display: none !important;
@@ -2252,22 +2256,46 @@ footer {
     top: 0 !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 5mm !important;
+    padding: 0 !important;
     background: #ffffff !important;
     z-index: 99999999 !important;
   }
 
-  .printable-stickers-grid {
+  /* Thermal Roll Printer Mode (Default - 1 Label Per Page on Roll) */
+  .printable-stickers-grid.mode-roll {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .printable-stickers-grid.mode-roll .printable-sticker-item {
+    page-break-after: always !important;
+    break-after: page !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    padding: 1.5mm !important;
+    text-align: center !important;
+    background: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+  }
+
+  /* A4 Sheet Paper Mode (Grid layout on single/multiple A4 sheets) */
+  .printable-stickers-grid.mode-a4 {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 4mm !important;
-    padding: 2mm !important;
+    gap: 3mm !important;
+    padding: 4mm !important;
     direction: rtl !important;
     background: #ffffff !important;
   }
 
-  .printable-sticker-item {
-    border: 1px solid #000000 !important;
+  .printable-stickers-grid.mode-a4 .printable-sticker-item {
+    border: 1px dashed #000000 !important;
     box-sizing: border-box !important;
     padding: 2mm !important;
     text-align: center !important;
