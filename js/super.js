@@ -277,6 +277,10 @@ document.addEventListener("DOMContentLoaded", () => {
     shopSecondaryColor.value = shop.secondary_color;
     shopFreeShipping.value = shop.free_shipping_limit;
     shopMaxProducts.value = shop.max_products_limit !== undefined && shop.max_products_limit !== null ? shop.max_products_limit : 50;
+    if (document.getElementById("shopPosEnabled")) document.getElementById("shopPosEnabled").checked = shop.pos_enabled !== false;
+    if (document.getElementById("shopMaxMainUsers")) document.getElementById("shopMaxMainUsers").value = shop.max_main_users || 1;
+    if (document.getElementById("shopMaxSubUsers")) document.getElementById("shopMaxSubUsers").value = shop.max_sub_users !== undefined ? shop.max_sub_users : 3;
+
     shopSubscriptionPlan.value = shop.subscription_plan || "starter";
     if (shop.subscription_expiry) {
       shopSubscriptionExpiry.value = formatDate(shop.subscription_expiry);
@@ -351,6 +355,9 @@ document.addEventListener("DOMContentLoaded", () => {
       max_products_limit: parseInt(shopMaxProducts.value) || 50,
       subscription_plan: shopSubscriptionPlan.value,
       subscription_expiry: shopSubscriptionExpiry.value ? new Date(shopSubscriptionExpiry.value).toISOString() : null,
+      pos_enabled: document.getElementById("shopPosEnabled") ? document.getElementById("shopPosEnabled").checked : true,
+      max_main_users: parseInt(document.getElementById("shopMaxMainUsers")?.value) || 1,
+      max_sub_users: parseInt(document.getElementById("shopMaxSubUsers")?.value) || 3,
       is_active: shopIsActive.checked,
       admin_username: shopAdminUser.value.trim(),
       admin_password: shopAdminPass.value.trim()

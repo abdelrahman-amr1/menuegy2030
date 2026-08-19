@@ -521,7 +521,23 @@
                         <input type="date" id="shopSubscriptionExpiry" class="form-control" required>
                     </div>
 
-                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 15px;">
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; margin-bottom: 10px;">
+                        <input type="checkbox" id="shopPosEnabled" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="shopPosEnabled" style="cursor: pointer; margin: 0; font-weight: 700; color: #86efac;">تفعيل ميزة شاشة الكاشير ونقطة البيع (POS Terminal)</label>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div class="form-group" style="margin: 0;">
+                            <label>أقصى عدد مستخدمين رئيسيين</label>
+                            <input type="number" id="shopMaxMainUsers" class="form-control" value="1" min="1" required>
+                        </div>
+                        <div class="form-group" style="margin: 0;">
+                            <label>أقصى عدد كاشير/مستخدمين فرعيين</label>
+                            <input type="number" id="shopMaxSubUsers" class="form-control" value="3" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-top: 5px; margin-bottom: 15px;">
                         <input type="checkbox" id="shopIsActive" checked style="width: 18px; height: 18px; cursor: pointer;">
                         <label for="shopIsActive" style="cursor: pointer; margin: 0; font-weight: 700; color: var(--white);">حالة المتجر نشط (متاح للجمهور)</label>
                     </div>

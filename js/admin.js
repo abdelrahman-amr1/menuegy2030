@@ -111,13 +111,31 @@ async function checkAuth() {
     // Load shop branding
     const shop = await getShopProfile(activeShopSlug);
     if (shop) {
+      activeShopProfile = shop;
+      
       // Set admin document title
       document.title = `لوحة تحكم | ${shop.name}`;
       
       // Update page labels
       document.getElementById("adminHeaderTitle").textContent = `لوحة إدارة | ${shop.name}`;
-      document.getElementById("adminHeaderSubtitle").textContent = shop.slogan || "لوحة تحكم المتجر وإدارة الأسعار";
+      document.getElementById("adminHeaderSubtitle").textContent = shop.slogan || "لوحة تحكم المتجر وإدارة الأسعار والمخزن";
       document.getElementById("adminFooterShopName").textContent = shop.name;
+
+      // Manage POS Terminal button visibility based on Super Admin toggle
+      const posBtn = document.getElementById("posTerminalMainBtn");
+      if (posBtn) {
+        if (shop.pos_enabled === false || shop.pos_enabled === 'false') {
+          posBtn.style.opacity = "0.5";
+          posBtn.title = "ميزة POS غير مفعلة باشتراكك، تواصل مع إداره المنصة لترقيتها وتفعيلها";
+          posBtn.onclick = function() {
+            showToast("عذراً، ميزة شاشة الكاشير (POS) غير مفعلة باشتراك هذا المتجر، تواصل مع إدارة المنصة لتفعيلها", "warning");
+          };
+        } else {
+          posBtn.style.opacity = "1";
+          posBtn.title = "";
+          posBtn.onclick = function() { openPosTerminalModal(); };
+        }
+      }
 
       // Display subscription information
       const subBanner = document.getElementById("subscriptionAlertBanner");
@@ -185,7 +203,7 @@ async function checkAuth() {
   }
 }
 
-// Handle Login Form Submission
+// Handle Login Form Submission (Main Admin or Sub-Users / Cashiers)
 async function handleAdminLogin(event) {
   event.preventDefault();
   
@@ -211,15 +229,33 @@ async function handleAdminLogin(event) {
       return;
     }
 
+    // 1. Check Main Shop Admin Credentials
+    let authenticated = false;
+    let userRole = "owner";
+
     if (shop.admin_username === user && shop.admin_password === pass) {
+      authenticated = true;
+      userRole = "owner";
+    } else {
+      // 2. Check Sub-Users / Cashiers Accounts
+      const subUsers = shop.sub_users || [];
+      const match = subUsers.find(u => u.username === user && u.password === pass);
+      if (match) {
+        authenticated = true;
+        userRole = match.role || "cashier";
+      }
+    }
+
+    if (authenticated) {
       sessionStorage.setItem("tenant_admin_auth", "true");
       sessionStorage.setItem("tenant_admin_shop_id", shopSlug);
+      sessionStorage.setItem("tenant_user_role", userRole);
       activeShopSlug = shopSlug;
       
       await checkAuth();
-      showToast("تم تسجيل الدخول بنجاح! مرحباً بك.");
+      showToast(`تم تسجيل الدخول بنجاح! مرحباً بك (${userRole === 'cashier' ? 'الكاشير' : 'مدير المتجر'}).`);
     } else {
-      errorMsg.textContent = "خطأ في اسم المستخدم أو كلمة المرور الخاصة بالمتجر!";
+      errorMsg.textContent = "خطأ في اسم المستخدم أو كلمة المرور الخاصة بالمتجر أو الكاشير!";
       errorMsg.style.display = "block";
       showToast("خطأ في البيانات المُدخلة!", "danger");
     }
@@ -1708,4 +1744,153 @@ async function completePosOrderAndPrint() {
   setTimeout(() => {
     window.print();
   }, 100);
+}
+
+/* ==================================================== */
+/* SHOP SUB-USERS & CASHIERS MANAGEMENT SYSTEM */
+/* ==================================================== */
+
+let activeShopProfile = null;
+
+async function openShopUsersModal() {
+  const overlay = document.getElementById("shopUsersModalOverlay");
+  if (!overlay) return;
+
+  if (!activeShopProfile) {
+    activeShopProfile = await getShopProfile(activeShopSlug);
+  }
+
+  // Update Quota labels
+  const maxMain = activeShopProfile ? (activeShopProfile.max_main_users || 1) : 1;
+  const maxSub = activeShopProfile ? (activeShopProfile.max_sub_users !== undefined ? activeShopProfile.max_sub_users : 3) : 3;
+  const currentSubUsers = activeShopProfile && activeShopProfile.sub_users ? activeShopProfile.sub_users.length : 0;
+
+  if (document.getElementById("quotaMainUsersVal")) document.getElementById("quotaMainUsersVal").textContent = maxMain;
+  if (document.getElementById("quotaSubUsersVal")) document.getElementById("quotaSubUsersVal").textContent = maxSub;
+  if (document.getElementById("quotaCurrentUsageBadge")) {
+    document.getElementById("quotaCurrentUsageBadge").textContent = `المستخدمين الفرعيين المضافين: ${currentSubUsers} / ${maxSub}`;
+    document.getElementById("quotaCurrentUsageBadge").style.background = currentSubUsers >= maxSub ? '#fecdd3' : '#dbeafe';
+    document.getElementById("quotaCurrentUsageBadge").style.color = currentSubUsers >= maxSub ? '#9f1239' : '#1e40af';
+  }
+
+  // Reset form
+  document.getElementById("subUserIdInput").value = "";
+  document.getElementById("subUserUsernameInput").value = "";
+  document.getElementById("subUserPasswordInput").value = "";
+  document.getElementById("subUserFullNameInput").value = "";
+
+  renderSubUsersTable();
+  overlay.classList.add("open");
+}
+
+function closeShopUsersModal() {
+  const overlay = document.getElementById("shopUsersModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+function renderSubUsersTable() {
+  const tbody = document.getElementById("subUsersTableBody");
+  if (!tbody) return;
+
+  const subUsers = activeShopProfile && activeShopProfile.sub_users ? activeShopProfile.sub_users : [];
+
+  if (subUsers.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 1.5rem;">لا يوجد مستخدمين أو كاشير مضافين حالياً</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = subUsers.map(user => {
+    const roleLabel = user.role === 'cashier' ? 'كاشير نقطة بيع (POS)' : user.role === 'manager' ? 'مدير فرع' : 'محاسب';
+    const roleBadgeColor = user.role === 'cashier' ? 'background:#dcfce7; color:#166534;' : 'background:#e0f2fe; color:#0369a1;';
+
+    return `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="padding: 8px; font-weight: 700; color: #1e293b;">${user.full_name}</td>
+        <td style="padding: 8px;"><code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace;">${user.username}</code></td>
+        <td style="padding: 8px;"><span style="padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; ${roleBadgeColor}">${roleLabel}</span></td>
+        <td style="padding: 8px; text-align: center;">
+          <button onclick="deleteSubUser('${user.id}')" style="border: none; background: none; color: #ef4444; cursor: pointer;" title="حذف المستخدم"><i class="fa-solid fa-trash-can"></i></button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function saveSubUserForm(event) {
+  event.preventDefault();
+
+  if (!activeShopProfile) {
+    activeShopProfile = await getShopProfile(activeShopSlug);
+  }
+
+  const maxSub = activeShopProfile ? (activeShopProfile.max_sub_users !== undefined ? activeShopProfile.max_sub_users : 3) : 3;
+  const currentSubUsers = activeShopProfile && activeShopProfile.sub_users ? activeShopProfile.sub_users : [];
+
+  const username = document.getElementById("subUserUsernameInput").value.trim().toLowerCase();
+  const password = document.getElementById("subUserPasswordInput").value.trim();
+  const full_name = document.getElementById("subUserFullNameInput").value.trim();
+  const role = document.getElementById("subUserRoleInput").value;
+
+  if (!username || !password || !full_name) {
+    showToast("يرجى ملء كافة حقول بيانات الكاشير!", "danger");
+    return;
+  }
+
+  // Check quota on addition
+  if (currentSubUsers.length >= maxSub) {
+    showToast(`وصلت للحد الأقصى المسموح به للمستخدمين الكاشير باشتراكك (${maxSub} مستخدم)! تواصل مع الإدارة لزيادة الكوتا.`, "danger");
+    return;
+  }
+
+  // Check username collision
+  if (currentSubUsers.some(u => u.username === username)) {
+    showToast("اسم الدخول هذا مستخدم بالفعل لكاشير آخر!", "warning");
+    return;
+  }
+
+  const newUser = {
+    id: "user_" + Math.random().toString(36).substr(2, 9),
+    username,
+    password,
+    full_name,
+    role,
+    created_at: new Date().toISOString()
+  };
+
+  currentSubUsers.push(newUser);
+  activeShopProfile.sub_users = currentSubUsers;
+
+  showToast("جاري حفظ حساب الكاشير الجديد...", "info");
+
+  // Save to Supabase DB
+  const res = await saveShopProfile(activeShopProfile);
+  if (res.success) {
+    showToast(`تمت إضافة حساب الكاشير (${full_name}) بنجاح!`);
+    document.getElementById("subUserForm").reset();
+    openShopUsersModal();
+  } else {
+    showToast("حدث خطأ أثناء حفظ المستخدم في السحابة.", "danger");
+  }
+}
+
+async function deleteSubUser(userId) {
+  if (!confirm("هل أنت متأكد من رغبتك في حذف حساب الكاشير هذا؟")) return;
+
+  if (!activeShopProfile) {
+    activeShopProfile = await getShopProfile(activeShopSlug);
+  }
+
+  let currentSubUsers = activeShopProfile && activeShopProfile.sub_users ? activeShopProfile.sub_users : [];
+  currentSubUsers = currentSubUsers.filter(u => u.id !== userId);
+  activeShopProfile.sub_users = currentSubUsers;
+
+  showToast("جاري حذف الحساب...", "info");
+
+  const res = await saveShopProfile(activeShopProfile);
+  if (res.success) {
+    showToast("تم حذف الحساب بنجاح.");
+    openShopUsersModal();
+  } else {
+    showToast("فشل الحذف من السحابة.", "danger");
+  }
 }

@@ -26,3 +26,9 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS barcode TEXT;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS min_stock NUMERIC DEFAULT 5;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS store_name TEXT DEFAULT 'المخزن الرئيسي';
 
+-- Run this to add POS module toggle per shop and cashier sub-users quota limits:
+ALTER TABLE shops ADD COLUMN IF NOT EXISTS pos_enabled BOOLEAN DEFAULT TRUE;
+ALTER TABLE shops ADD COLUMN IF NOT EXISTS max_main_users INTEGER DEFAULT 1;
+ALTER TABLE shops ADD COLUMN IF NOT EXISTS max_sub_users INTEGER DEFAULT 3;
+ALTER TABLE shops ADD COLUMN IF NOT EXISTS sub_users JSONB DEFAULT '[]'::jsonb;
+
