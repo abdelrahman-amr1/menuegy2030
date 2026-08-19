@@ -2225,3 +2225,90 @@ footer {
 .perm-group-box input[type="checkbox"] {
   accent-color: #d97706;
 }
+
+/* ==================================================== */
+/* Printable Barcode Thermal Sticker Styles */
+/* ==================================================== */
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #barcodePrintContainer, #barcodePrintContainer * {
+    visibility: visible;
+  }
+  
+  #barcodePrintContainer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .printable-stickers-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4mm;
+    padding: 2mm;
+    direction: rtl;
+  }
+
+  .printable-sticker-item {
+    border: 1px solid #000;
+    box-sizing: border-box;
+    padding: 2mm;
+    text-align: center;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Size Options */
+  .printable-stickers-grid.size-38x25 .printable-sticker-item {
+    width: 38mm;
+    height: 25mm;
+  }
+
+  .printable-stickers-grid.size-50x25 .printable-sticker-item {
+    width: 50mm;
+    height: 25mm;
+  }
+
+  .printable-stickers-grid.size-40x30 .printable-sticker-item {
+    width: 40mm;
+    height: 30mm;
+  }
+
+  .printable-sticker-item .p-shop {
+    font-size: 7pt;
+    font-weight: bold;
+    color: #000;
+  }
+
+  .printable-sticker-item .p-name {
+    font-size: 8pt;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 1mm;
+  }
+
+  .printable-sticker-item .p-barcode-svg {
+    max-width: 95%;
+    height: 12mm;
+  }
+
+  .printable-sticker-item .p-price {
+    font-size: 8pt;
+    font-weight: bold;
+    color: #000;
+    margin-top: 1mm;
+  }
+}

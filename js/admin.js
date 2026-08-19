@@ -327,6 +327,9 @@ function renderAdminTable() {
       </td>
       <td style="text-align: center;">
         <div style="display: flex; gap: 0.5rem; justify-content: center;">
+          <button class="btn btn-outline" style="padding: 0.35rem 0.6rem;" onclick="openBarcodeModal('${p.id}')" title="طباعة ملصق الباركود والأسعار">
+            <i class="fa-solid fa-barcode" style="color: #0284c7"></i>
+          </button>
           <button class="btn btn-outline" style="padding: 0.35rem 0.6rem;" onclick="openProductModal('${p.id}')" title="تعديل">
             <i class="fa-solid fa-pencil" style="color: var(--secondary-color)"></i>
           </button>
@@ -1132,4 +1135,192 @@ async function openSubscriptionModal() {
 function closeSubscriptionModal() {
   const overlay = document.getElementById("subscriptionModalOverlay");
   if (overlay) overlay.classList.remove("open");
+}
+
+// --- 4. BARCODE LABEL PRINTING LOGIC ---
+async function openBarcodeModal(productId = null) {
+  const overlay = document.getElementById("barcodeModalOverlay");
+  if (!overlay) return;
+
+  // Populate product dropdown
+  populateBarcodeProductSelect(productId);
+  updateBarcodePreview();
+
+  overlay.classList.add("open");
+}
+
+function closeBarcodeModal() {
+  const overlay = document.getElementById("barcodeModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+function populateBarcodeProductSelect(selectedId = null) {
+  const select = document.getElementById("barcodeProductSelect");
+  if (!select) return;
+
+  if (products.length === 0) {
+    select.innerHTML = `<option value="">لا توجد منتجات مسجلة</option>`;
+    return;
+  }
+
+  let optionsHtml = "";
+  products.forEach(p => {
+    const isSelected = selectedId && p.id === selectedId ? "selected" : "";
+    optionsHtml += `<option value="${p.id}" ${isSelected}>${p.name} (${p.price} ج)</option>`;
+  });
+
+  select.innerHTML = optionsHtml;
+}
+
+async function updateBarcodePreview() {
+  const select = document.getElementById("barcodeProductSelect");
+  if (!select) return;
+
+  const targetId = select.value;
+  const product = products.find(p => p.id === targetId) || products[0];
+
+  const shopNameEl = document.getElementById("prevShopName");
+  const prodNameEl = document.getElementById("prevProdName");
+  const priceValEl = document.getElementById("prevPriceVal");
+  const unitValEl = document.getElementById("prevUnitVal");
+  const barcodeInput = document.getElementById("barcodeValueInput");
+
+  // Fetch shop name
+  try {
+    const shop = await getShopProfile(activeShopSlug);
+    if (shopNameEl) shopNameEl.textContent = shop ? shop.name : "متجر MenuEgy";
+  } catch (e) {
+    if (shopNameEl) shopNameEl.textContent = "متجر MenuEgy";
+  }
+
+  if (product) {
+    if (prodNameEl) prodNameEl.textContent = product.name;
+    if (priceValEl) priceValEl.textContent = product.price;
+    if (unitValEl) unitValEl.textContent = product.unit || "قطعة";
+
+    // Standard numeric/alphanumeric code for barcode
+    if (barcodeInput && (!barcodeInput.value || barcodeInput.dataset.prodId !== product.id)) {
+      // Create a deterministic numeric code if no SKU exists
+      const cleanNum = product.id.replace(/[^0-9]/g, '');
+      const barcodeVal = "200" + (cleanNum ? cleanNum.padStart(9, '0').slice(-9) : "123456789");
+      barcodeInput.value = barcodeVal;
+      barcodeInput.dataset.prodId = product.id;
+    }
+  }
+
+  // Toggle visible elements based on checkboxes
+  const showShop = document.getElementById("bc_show_shop").checked;
+  const showName = document.getElementById("bc_show_name").checked;
+  const showPrice = document.getElementById("bc_show_price").checked;
+
+  if (shopNameEl) shopNameEl.style.display = showShop ? "block" : "none";
+  if (prodNameEl) prodNameEl.style.display = showName ? "block" : "none";
+  const priceTag = document.getElementById("prevPriceTag");
+  if (priceTag) priceTag.style.display = showPrice ? "block" : "none";
+
+  renderLiveBarcodeSvg();
+}
+
+function renderLiveBarcodeSvg() {
+  const barcodeInput = document.getElementById("barcodeValueInput");
+  const barcodeCanvas = document.getElementById("barcodeCanvas");
+  if (!barcodeInput || !barcodeCanvas) return;
+
+  const codeVal = barcodeInput.value.trim() || "200000000001";
+
+  if (typeof JsBarcode !== "undefined") {
+    try {
+      JsBarcode("#barcodeCanvas", codeVal, {
+        format: "CODE128",
+        lineColor: "#0f172a",
+        width: 1.5,
+        height: 35,
+        displayValue: true,
+        fontSize: 11,
+        margin: 2
+      });
+    } catch (e) {
+      console.warn("JsBarcode error, using fallback SVG:", e);
+      renderSvgBarcodeFallback(barcodeCanvas, codeVal);
+    }
+  } else {
+    renderSvgBarcodeFallback(barcodeCanvas, codeVal);
+  }
+}
+
+// Pure SVG Barcode Generator Fallback (No External Library Dependency)
+function renderSvgBarcodeFallback(svgElement, codeStr) {
+  let barsHtml = `<rect x="0" y="0" width="100%" height="100%" fill="#fff"/>`;
+  let currentX = 5;
+  
+  for (let i = 0; i < codeStr.length; i++) {
+    const charCode = codeStr.charCodeAt(i);
+    const width1 = (charCode % 3) + 1;
+    const width2 = (charCode % 2) + 1;
+
+    barsHtml += `<rect x="${currentX}" y="2" width="${width1}" height="30" fill="#0f172a"/>`;
+    currentX += width1 + width2;
+  }
+  
+  barsHtml += `<text x="50%" y="42" font-size="10" font-weight="bold" text-anchor="middle" fill="#0f172a">${codeStr}</text>`;
+  svgElement.innerHTML = barsHtml;
+}
+
+// Print Barcode Stickers for Thermal Printer
+function printBarcodeStickersNow() {
+  const select = document.getElementById("barcodeProductSelect");
+  const product = products.find(p => p.id === select.value) || products[0];
+  if (!product) return;
+
+  const copies = parseInt(document.getElementById("barcodePrintCopies").value) || 1;
+  const labelSize = document.getElementById("barcodeLabelSize").value;
+  const barcodeVal = document.getElementById("barcodeValueInput").value.trim() || "200000000001";
+
+  const showShop = document.getElementById("bc_show_shop").checked;
+  const showName = document.getElementById("bc_show_name").checked;
+  const showPrice = document.getElementById("bc_show_price").checked;
+  const shopNameText = document.getElementById("prevShopName") ? document.getElementById("prevShopName").textContent : "متجر MenuEgy";
+
+  // Build print grid
+  let stickersHtml = `<div class="printable-stickers-grid size-${labelSize}">`;
+
+  for (let i = 0; i < copies; i++) {
+    stickersHtml += `
+      <div class="printable-sticker-item">
+        ${showShop ? `<div class="p-shop">${shopNameText}</div>` : ''}
+        ${showName ? `<div class="p-name">${product.name}</div>` : ''}
+        <svg class="p-barcode-svg" id="p_bc_${i}"></svg>
+        ${showPrice ? `<div class="p-price">السعر: ${product.price} ج / ${product.unit}</div>` : ''}
+      </div>
+    `;
+  }
+  stickersHtml += `</div>`;
+
+  const printContainer = document.getElementById("barcodePrintContainer");
+  printContainer.innerHTML = stickersHtml;
+  printContainer.style.display = "block";
+
+  // Render SVG barcode for each sticker item
+  setTimeout(() => {
+    for (let i = 0; i < copies; i++) {
+      const svgId = `#p_bc_${i}`;
+      if (typeof JsBarcode !== "undefined") {
+        try {
+          JsBarcode(svgId, barcodeVal, {
+            format: "CODE128",
+            lineColor: "#000",
+            width: 1.2,
+            height: 28,
+            displayValue: true,
+            fontSize: 9,
+            margin: 1
+          });
+        } catch (err) {}
+      }
+    }
+
+    // Trigger Print
+    window.print();
+    printContainer.style.display = "none";
+  }, 100);
 }
