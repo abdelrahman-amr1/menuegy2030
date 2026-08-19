@@ -1269,11 +1269,16 @@ function renderSvgBarcodeFallback(svgElement, codeStr) {
 // Print Barcode Stickers for Thermal Printer
 function printBarcodeStickersNow() {
   const select = document.getElementById("barcodeProductSelect");
+  if (!select || !select.value) {
+    showToast("يرجى اختيار منتج لطباعة الباركود", "danger");
+    return;
+  }
+
   const product = products.find(p => p.id === select.value) || products[0];
   if (!product) return;
 
   const copies = parseInt(document.getElementById("barcodePrintCopies").value) || 1;
-  const labelSize = document.getElementById("barcodeLabelSize").value;
+  const labelSize = document.getElementById("barcodeLabelSize").value || "38x25";
   const barcodeVal = document.getElementById("barcodeValueInput").value.trim() || "200000000001";
 
   const showShop = document.getElementById("bc_show_shop").checked;
@@ -1290,7 +1295,7 @@ function printBarcodeStickersNow() {
         ${showShop ? `<div class="p-shop">${shopNameText}</div>` : ''}
         ${showName ? `<div class="p-name">${product.name}</div>` : ''}
         <svg class="p-barcode-svg" id="p_bc_${i}"></svg>
-        ${showPrice ? `<div class="p-price">السعر: ${product.price} ج / ${product.unit}</div>` : ''}
+        ${showPrice ? `<div class="p-price">السعر: ${product.price} ج / ${product.unit || ''}</div>` : ''}
       </div>
     `;
   }
@@ -1298,29 +1303,33 @@ function printBarcodeStickersNow() {
 
   const printContainer = document.getElementById("barcodePrintContainer");
   printContainer.innerHTML = stickersHtml;
-  printContainer.style.display = "block";
 
   // Render SVG barcode for each sticker item
   setTimeout(() => {
     for (let i = 0; i < copies; i++) {
-      const svgId = `#p_bc_${i}`;
-      if (typeof JsBarcode !== "undefined") {
-        try {
-          JsBarcode(svgId, barcodeVal, {
-            format: "CODE128",
-            lineColor: "#000",
-            width: 1.2,
-            height: 28,
-            displayValue: true,
-            fontSize: 9,
-            margin: 1
-          });
-        } catch (err) {}
+      const svgEl = document.getElementById(`p_bc_${i}`);
+      if (svgEl) {
+        if (typeof JsBarcode !== "undefined") {
+          try {
+            JsBarcode(`#p_bc_${i}`, barcodeVal, {
+              format: "CODE128",
+              lineColor: "#000000",
+              width: 1.2,
+              height: 28,
+              displayValue: true,
+              fontSize: 9,
+              margin: 1
+            });
+          } catch (err) {
+            renderSvgBarcodeFallback(svgEl, barcodeVal);
+          }
+        } else {
+          renderSvgBarcodeFallback(svgEl, barcodeVal);
+        }
       }
     }
 
     // Trigger Print
     window.print();
-    printContainer.style.display = "none";
-  }, 100);
+  }, 150);
 }
