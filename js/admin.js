@@ -219,6 +219,13 @@ async function handleAdminLogin(event) {
     return;
   }
 
+  // Cloudflare Turnstile Validation
+  const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
+  if (turnstileResponse && !turnstileResponse.value) {
+    showToast("يرجى اجتياز التحقق الأمني (الكابتشا) أولاً!", "danger");
+    return;
+  }
+
   // --- BRUTE FORCE PROTECTION ---
   const attemptKey = `login_attempts_${shopSlug}_${user}`;
   let attempts = JSON.parse(localStorage.getItem(attemptKey)) || { count: 0, lockoutTime: 0 };
@@ -929,16 +936,16 @@ async function openUserPermissionsModal() {
 
   // Tab 3: Inventory
   if (perms.inventory) {
-    document.getElementById("perm_view_items").checked = perms.inventory.view_items !== false;
-    document.getElementById("perm_item_new").checked = perms.inventory.item_new !== false;
-    document.getElementById("perm_item_edit").checked = perms.inventory.item_edit !== false;
-    document.getElementById("perm_item_delete").checked = perms.inventory.item_delete === true;
-    document.getElementById("perm_item_movement_report").checked = perms.inventory.item_movement_report !== false;
-    document.getElementById("perm_stock_report").checked = perms.inventory.stock_report !== false;
-    document.getElementById("perm_store_movement_report").checked = perms.inventory.store_movement_report !== false;
-    document.getElementById("perm_view_cost_price").checked = perms.inventory.view_cost_price !== false;
-    document.getElementById("perm_allow_negative_stock").checked = perms.inventory.allow_negative_stock === true;
-    document.getElementById("perm_print_barcode_labels").checked = perms.inventory.print_barcode_labels !== false;
+    document.getElementById("perm_inv_view_items").checked = perms.inventory.view_items !== false;
+    document.getElementById("perm_inv_item_new").checked = perms.inventory.item_new !== false;
+    document.getElementById("perm_inv_item_edit").checked = perms.inventory.item_edit !== false;
+    document.getElementById("perm_inv_item_delete").checked = perms.inventory.item_delete === true;
+    document.getElementById("perm_inv_item_movement").checked = perms.inventory.item_movement !== false;
+    document.getElementById("perm_inv_store_items").checked = perms.inventory.store_items !== false;
+    document.getElementById("perm_inv_store_movement").checked = perms.inventory.store_movement !== false;
+    document.getElementById("perm_inv_view_cost").checked = perms.inventory.view_cost !== false;
+    document.getElementById("perm_inv_negative_sale").checked = perms.inventory.negative_sale === true;
+    document.getElementById("perm_inv_print_barcode").checked = perms.inventory.print_barcode !== false;
   }
 
   // Tab 4: Accounts
@@ -1024,16 +1031,16 @@ async function saveUserPermissionsForm() {
       allow_credit_sales: document.getElementById("perm_allow_credit_sales").checked
     },
     inventory: {
-      view_items: document.getElementById("perm_view_items").checked,
-      item_new: document.getElementById("perm_item_new").checked,
-      item_edit: document.getElementById("perm_item_edit").checked,
-      item_delete: document.getElementById("perm_item_delete").checked,
-      item_movement_report: document.getElementById("perm_item_movement_report").checked,
-      stock_report: document.getElementById("perm_stock_report").checked,
-      store_movement_report: document.getElementById("perm_store_movement_report").checked,
-      view_cost_price: document.getElementById("perm_view_cost_price").checked,
-      allow_negative_stock: document.getElementById("perm_allow_negative_stock").checked,
-      print_barcode_labels: document.getElementById("perm_print_barcode_labels").checked
+      view_items: document.getElementById("perm_inv_view_items").checked,
+      item_new: document.getElementById("perm_inv_item_new").checked,
+      item_edit: document.getElementById("perm_inv_item_edit").checked,
+      item_delete: document.getElementById("perm_inv_item_delete").checked,
+      item_movement: document.getElementById("perm_inv_item_movement").checked,
+      store_items: document.getElementById("perm_inv_store_items").checked,
+      store_movement: document.getElementById("perm_inv_store_movement").checked,
+      view_cost: document.getElementById("perm_inv_view_cost").checked,
+      negative_sale: document.getElementById("perm_inv_negative_sale").checked,
+      print_barcode: document.getElementById("perm_inv_print_barcode").checked
     },
     accounts: {
       view_accounts: document.getElementById("perm_view_accounts").checked,

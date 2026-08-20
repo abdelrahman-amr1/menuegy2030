@@ -10,6 +10,9 @@
   
   <!-- Central Stylesheet -->
   <link rel="stylesheet" href="../css/style.css">
+  
+  <!-- Cloudflare Turnstile -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -63,6 +66,9 @@
             <label for="loginPass"><i class="fa-solid fa-key"></i> كلمة المرور</label>
             <input type="password" id="loginPass" required placeholder="أدخل كلمة المرور" style="width: 100%; padding: 0.6rem 0.8rem;">
           </div>
+
+          <!-- Cloudflare Turnstile Widget -->
+          <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" style="display: flex; justify-content: center;"></div>
           
           <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.75rem; font-size: 1rem; margin-top: 0.5rem;">
             دخول النظام
@@ -499,17 +505,22 @@
 
         <!-- Tab 3: Inventory (البضاعة) -->
         <div id="permInventory" class="perm-tab-content">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
-            <label class="checkbox-card"><input type="checkbox" id="perm_view_items" checked> <span>عرض الأصناف والمنتجات</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_item_new" checked> <span>إضافة صنف جديد</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_item_edit" checked> <span>تعديل بيانات الصنف</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_item_delete"> <span>حذف صنف نهائياً</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_item_movement_report" checked> <span>تقرير حركة الصنف</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_stock_report" checked> <span>تقرير بضاعة مخزن</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_store_movement_report" checked> <span>تقرير حركة مخزن</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_view_cost_price" checked> <span>يمكنه معرفة تكلفة الأصناف</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_allow_negative_stock"> <span>يمكنه بيع أو تحويل كميات غير متاحة بالمخزن (البيع السلبي)</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_print_barcode_labels" checked> <span>طباعة ملصقات الباركود</span></label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <label class="checkbox-card" style="font-weight: bold; margin-bottom: 5px;"><input type="checkbox" id="perm_inv_view_items" checked> <span>عرض الأصناف</span></label>
+              <div style="display: flex; gap: 15px; padding-right: 25px; font-size: 13px;">
+                <label><input type="checkbox" id="perm_inv_item_new" checked> جديد</label>
+                <label><input type="checkbox" id="perm_inv_item_edit" checked> تعديل</label>
+                <label><input type="checkbox" id="perm_inv_item_delete"> حذف</label>
+              </div>
+            </div>
+            
+            <label class="checkbox-card"><input type="checkbox" id="perm_inv_item_movement" checked> <span>تقرير حركة الصنف</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_inv_store_items" checked> <span>تقرير بضاعة مخزن</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_inv_store_movement" checked> <span>تقرير حركة مخزن</span></label>
+            <label class="checkbox-card" style="color: #b91c1c;"><input type="checkbox" id="perm_inv_view_cost"> <span>يمكنه معرفة تكلفة الأصناف</span></label>
+            <label class="checkbox-card" style="color: #b91c1c;"><input type="checkbox" id="perm_inv_negative_sale"> <span>يمكنه بيع أو تحويل كميات غير متاحة بالمخزن</span></label>
+            <label class="checkbox-card"><input type="checkbox" id="perm_inv_print_barcode" checked> <span>طباعة ملصقات الباركود</span></label>
           </div>
         </div>
 
