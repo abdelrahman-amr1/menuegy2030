@@ -86,3 +86,16 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     sale_price NUMERIC NOT NULL,
     total_price NUMERIC NOT NULL
 );
+
+-- Run this to create the money_transfers table for InstaPay/Vodafone Cash services:
+CREATE TABLE IF NOT EXISTS money_transfers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    type TEXT NOT NULL, -- 'send' (إرسال) or 'receive' (استقبال)
+    phone_number TEXT NOT NULL,
+    amount NUMERIC NOT NULL,
+    fee NUMERIC DEFAULT 0,
+    net_amount NUMERIC NOT NULL,
+    user_id TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);

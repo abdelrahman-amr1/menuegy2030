@@ -2307,3 +2307,142 @@ async function confirmCloseShift() {
     showToast("فشل في إقفال الوردية. يرجى المحاولة مرة أخرى.", "danger");
   }
 }
+
+// ==========================================
+// MONEY TRANSFERS LOGIC
+// ==========================================
+
+function openMoneyTransfersModal() {
+  const overlay = document.getElementById("moneyTransfersModalOverlay");
+  if (overlay) overlay.classList.add("open");
+  resetTransferForm();
+  renderTransfersTable();
+}
+
+function closeMoneyTransfersModal() {
+  const overlay = document.getElementById("moneyTransfersModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+function resetTransferForm() {
+  document.getElementById("transferType").value = "send";
+  document.getElementById("transferPhone").value = "";
+  document.getElementById("transferAmount").value = "0";
+  document.getElementById("transferFee").value = "10";
+  calculateTransferTotals();
+}
+
+function calculateTransferTotals() {
+  const type = document.getElementById("transferType").value;
+  const amount = parseFloat(document.getElementById("transferAmount").value) || 0;
+  const fee = parseFloat(document.getElementById("transferFee").value) || 0;
+  
+  const textEl = document.getElementById("transferNetText");
+  const valueEl = document.getElementById("transferNetValue");
+  const hintEl = document.getElementById("transferTypeHint");
+  
+  if (type === "send") {
+    // Customer wants to send money. They pay us Amount + Fee.
+    textEl.textContent = "المطلوب استلامه من العميل (كاش):";
+    valueEl.textContent = (amount + fee).toFixed(2) + " ج";
+    valueEl.style.color = "#16a34a"; // Green (Income to drawer)
+    hintEl.textContent = "تستلم كاش من العميل لترسله إلكترونياً (زيادة في الخزينة).";
+  } else {
+    // Customer wants to receive money. We pay them Amount, but we deduct our Fee.
+    textEl.textContent = "المطلوب تسليمه للعميل (كاش):";
+    valueEl.textContent = (amount - fee).toFixed(2) + " ج";
+    valueEl.style.color = "#dc2626"; // Red (Expense from drawer)
+    hintEl.textContent = "تسلم العميل كاش مقابل رصيد إلكتروني أرسله لك (سحب من الخزينة).";
+  }
+}
+
+async function submitMoneyTransfer() {
+  const type = document.getElementById("transferType").value;
+  const phone = document.getElementById("transferPhone").value.trim();
+  const amount = parseFloat(document.getElementById("transferAmount").value) || 0;
+  const fee = parseFloat(document.getElementById("transferFee").value) || 0;
+  
+  if (!phone) {
+    showToast("يرجى إدخال رقم الهاتف!", "warning");
+    return;
+  }
+  
+  if (amount <= 0) {
+    showToast("يرجى إدخال مبلغ صحيح للتحويل!", "warning");
+    return;
+  }
+  
+  const net = type === "send" ? amount + fee : amount - fee;
+  
+  // 1. Save Transfer Record
+  const user = sessionStorage.getItem("tenant_user_name") || "Cashier";
+  const success = await saveMoneyTransferData({
+    shop_id: activeShopSlug,
+    type: type,
+    phone_number: phone,
+    amount: amount,
+    fee: fee,
+    net_amount: net,
+    user_id: user
+  });
+  
+  if (!success) {
+    showToast("حدث خطأ أثناء حفظ التحويل", "danger");
+    return;
+  }
+  
+  // 2. Add to Treasury
+  if (type === "send") {
+    // We received (Amount + Fee) Cash
+    await addTreasuryTransaction(activeShopSlug, "income", amount, "تحويل وارد (إرسال)", `استلام نقدي لتحويل لـ ${phone}`, user);
+    if (fee > 0) await addTreasuryTransaction(activeShopSlug, "income", fee, "إيراد رسوم خدمة", `عمولة تحويل لـ ${phone}`, user);
+  } else {
+    // We paid out (Amount - Fee) Cash
+    // Note: We received electronic money equal to 'amount', but the drawer pays out 'net'.
+    // So we record an expense of 'amount' and an income of 'fee' to balance it, or just one expense of 'net'.
+    // Since we are tracking the physical cash drawer:
+    await addTreasuryTransaction(activeShopSlug, "expense", amount, "تحويل منصرف (استقبال)", `تسليم نقدي لحوالة من ${phone}`, user);
+    if (fee > 0) await addTreasuryTransaction(activeShopSlug, "income", fee, "إيراد رسوم خدمة", `عمولة استقبال من ${phone}`, user);
+  }
+  
+  showToast("تم تنفيذ العملية وتسجيلها بالخزينة بنجاح", "success");
+  resetTransferForm();
+  renderTransfersTable();
+  if (typeof updateTreasuryBalanceDisplay === "function") {
+    updateTreasuryBalanceDisplay();
+  }
+}
+
+async function renderTransfersTable() {
+  const tbody = document.getElementById("transfersTableBody");
+  if (!tbody) return;
+  
+  const data = await getRecentMoneyTransfers(activeShopSlug, 20);
+  
+  if (!data || data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px; color:#64748b;">لا توجد تحويلات حديثة</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = data.map(t => {
+    const isSend = t.type === "send";
+    const typeLabel = isSend ? 
+      `<span style="background: #dcfce3; color: #16a34a; padding: 3px 8px; border-radius: 12px;"><i class="fa-solid fa-arrow-up"></i> إرسال</span>` : 
+      `<span style="background: #fee2e2; color: #dc2626; padding: 3px 8px; border-radius: 12px;"><i class="fa-solid fa-arrow-down"></i> استقبال</span>`;
+    
+    const d = new Date(t.created_at);
+    const timeStr = d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    
+    return `
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${typeLabel}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${t.phone_number}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">
+          <div>${parseFloat(t.amount).toFixed(0)} ج</div>
+          <div style="font-size: 0.7rem; color: #64748b;">الرسوم: ${parseFloat(t.fee).toFixed(0)} ج</div>
+        </td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b;">${timeStr}</td>
+      </tr>
+    `;
+  }).join("");
+}

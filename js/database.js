@@ -825,3 +825,40 @@ async function getAdvancedReportsData(shopId, period = 'today') {
     return null;
   }
 }
+
+// ==========================================
+// MONEY TRANSFERS MODULE (تحويلات الأموال)
+// ==========================================
+
+async function saveMoneyTransferData(transferData) {
+  if (!isDbConnected()) return false;
+  try {
+    const { error } = await window.supabaseDb
+      .from("money_transfers")
+      .insert([transferData]);
+      
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error("Error saving money transfer:", e);
+    return false;
+  }
+}
+
+async function getRecentMoneyTransfers(shopId, limit = 50) {
+  if (!isDbConnected()) return [];
+  try {
+    const { data, error } = await window.supabaseDb
+      .from("money_transfers")
+      .select("*")
+      .eq("shop_id", shopId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+      
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Error fetching money transfers:", e);
+    return [];
+  }
+}
