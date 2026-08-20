@@ -59,3 +59,30 @@ CREATE TABLE IF NOT EXISTS shifts (
     variance NUMERIC DEFAULT 0,
     status TEXT DEFAULT 'open' -- 'open' or 'closed'
 );
+
+-- Run this to create the invoices table for tracking sales and calculating profit:
+CREATE TABLE IF NOT EXISTS invoices (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    invoice_num TEXT NOT NULL,
+    type TEXT DEFAULT 'sales', -- 'sales' or 'purchases' or 'returns'
+    payment_method TEXT DEFAULT 'cash',
+    subtotal NUMERIC DEFAULT 0,
+    discount NUMERIC DEFAULT 0,
+    vat NUMERIC DEFAULT 0,
+    final_total NUMERIC DEFAULT 0,
+    user_id TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- Run this to create the invoice items table to track exact cost/sale prices per item:
+CREATE TABLE IF NOT EXISTS invoice_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    invoice_id UUID REFERENCES invoices(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL,
+    product_name TEXT NOT NULL,
+    qty NUMERIC NOT NULL,
+    cost_price NUMERIC DEFAULT 0,
+    sale_price NUMERIC NOT NULL,
+    total_price NUMERIC NOT NULL
+);

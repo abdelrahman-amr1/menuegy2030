@@ -1711,10 +1711,14 @@ async function completePosOrderAndPrint() {
   const invoiceNum = "INV-" + Math.floor(100000 + Math.random() * 900000);
   const dateStr = now.toLocaleDateString("ar-EG") + " " + now.toLocaleTimeString("ar-EG");
 
-  // 1. Deduct Stock Quantity from DB & Local State
+  // 1. Deduct Stock Quantity from DB & Local State and Build Invoice Items
+  const invoiceItemsArr = [];
   for (const cartItem of posCart) {
     const pIndex = products.findIndex(p => p.id === cartItem.id);
+    let costPrice = 0;
+    
     if (pIndex !== -1) {
+      costPrice = parseFloat(products[pIndex].cost_price) || 0;
       const currentQty = products[pIndex].quantity !== undefined ? parseFloat(products[pIndex].quantity) : 100;
       const newQty = Math.max(0, currentQty - cartItem.qty);
       products[pIndex].quantity = newQty;
@@ -1722,7 +1726,32 @@ async function completePosOrderAndPrint() {
       // Save updated product stock to Supabase DB
       await saveShopProduct(products[pIndex]);
     }
+    
+    invoiceItemsArr.push({
+      product_id: cartItem.id,
+      product_name: cartItem.name,
+      qty: cartItem.qty,
+      cost_price: costPrice,
+      sale_price: cartItem.price,
+      total_price: cartItem.qty * cartItem.price
+    });
   }
+  
+  // Save Invoice Header to DB
+  const user = sessionStorage.getItem("tenant_user_name") || "Cashier";
+  const invoiceHeader = {
+    shop_id: activeShopSlug,
+    invoice_num: invoiceNum,
+    type: "sales",
+    payment_method: paymentMethod,
+    subtotal: subTotal,
+    discount: discountPct,
+    vat: vatVal,
+    final_total: finalTotal,
+    user_id: user
+  };
+  
+  await saveInvoiceData(invoiceHeader, invoiceItemsArr);
 
   // Update Admin Stats & Table
   updateStats();
@@ -1966,13 +1995,60 @@ async function deleteSubUser(userId) {
 /* NEW ERP SYSTEMS MODALS CONTROLLERS */
 /* ==================================================== */
 
-function openReportsModal() {
+async function openReportsModal() {
   const overlay = document.getElementById("reportsModalOverlay");
   if (overlay) overlay.classList.add("open");
+  
+  // Set default to today
+  const periodSelect = document.getElementById("reportPeriodSelect");
+  if (periodSelect) periodSelect.value = "today";
+  
+  await renderAdvancedReports();
 }
+
 function closeReportsModal() {
   const overlay = document.getElementById("reportsModalOverlay");
   if (overlay) overlay.classList.remove("open");
+}
+
+async function renderAdvancedReports() {
+  const loading = document.getElementById("reportsLoadingSpinner");
+  const content = document.getElementById("reportsContentWrapper");
+  const period = document.getElementById("reportPeriodSelect")?.value || "today";
+  
+  if (loading) loading.style.display = "block";
+  if (content) content.style.display = "none";
+  
+  const data = await getAdvancedReportsData(activeShopSlug, period);
+  
+  if (loading) loading.style.display = "none";
+  if (content) content.style.display = "block";
+  
+  if (!data) return;
+  
+  document.getElementById("repTotalSales").textContent = `${data.totalSales.toFixed(2)} ج`;
+  document.getElementById("repTotalCost").textContent = `${data.totalCost.toFixed(2)} ج`;
+  document.getElementById("repTotalProfit").textContent = `${data.totalProfit.toFixed(2)} ج`;
+  document.getElementById("repInvoicesCount").textContent = data.invoicesCount;
+  
+  const tbody = document.getElementById("repTopProductsBody");
+  if (tbody) {
+    if (data.sortedProducts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#64748b;">لا توجد مبيعات في هذه الفترة</td></tr>`;
+    } else {
+      tbody.innerHTML = data.sortedProducts.map(p => `
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; text-align: right; font-weight: bold; color: #1e293b;">${p.name}</td>
+          <td style="padding: 12px; text-align: center;">
+            <span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 12px; font-size: 0.85rem;">
+              ${p.qty} وحدة
+            </span>
+          </td>
+          <td style="padding: 12px; text-align: left; color: #16a34a; font-weight: bold;">${p.revenue.toFixed(2)} ج</td>
+        </tr>
+      `).join("");
+    }
+  }
 }
 
 

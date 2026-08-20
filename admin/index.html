@@ -1257,24 +1257,81 @@
   <!-- ========================================== -->
   <!-- 7. REPORTS & ANALYTICS MODAL (التقارير والأرباح) -->
   <!-- ========================================== -->
+  
   <div class="modal-overlay" id="reportsModalOverlay" onclick="closeReportsModal()">
-    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 800px; width: 95%;">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 900px; width: 95%;">
       <div class="modal-header" style="background: #1e293b; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
         <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #c084fc;">
           <i class="fa-solid fa-chart-pie"></i> التقارير والأرباح وتحليل المبيعات
         </h3>
-        <button onclick="closeReportsModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
-          <i class="fa-solid fa-xmark"></i> إغلاق
-        </button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <select id="reportPeriodSelect" onchange="renderAdvancedReports()" style="padding: 5px 10px; border-radius: 4px; border: 1px solid #475569; background: #334155; color: white; outline: none;">
+            <option value="today">اليوم</option>
+            <option value="week">هذا الأسبوع</option>
+            <option value="month">هذا الشهر</option>
+            <option value="all">كل الأوقات</option>
+          </select>
+          <button onclick="closeReportsModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+            <i class="fa-solid fa-xmark"></i> إغلاق
+          </button>
+        </div>
       </div>
-      <div class="modal-body" style="padding: 1.5rem; background: #f8fafc; direction: rtl; text-align: center;">
-        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 30px; color: #475569;">
-          <i class="fa-solid fa-chart-line" style="font-size: 3rem; color: #c084fc; margin-bottom: 15px;"></i>
-          <h2 style="margin: 0 0 10px 0; color: #1e293b;">جاري معالجة بيانات التقارير...</h2>
-          <p>هذه الشاشة ستعرض قريباً إجمالي المبيعات، الأرباح الصافية، والمنتجات الأكثر مبيعاً بناءً على فواتير الـ POS.</p>
+      
+      <div class="modal-body" style="padding: 1.5rem; max-height: 75vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
+        
+        <div id="reportsLoadingSpinner" style="text-align: center; padding: 40px; display: none;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: #c084fc;"></i>
+          <p style="margin-top: 10px; color: #64748b;">جاري جلب وتحليل البيانات...</p>
+        </div>
+
+        <div id="reportsContentWrapper">
+          <!-- KPI Cards -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+            <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-right: 4px solid #3b82f6; text-align: right;">
+              <p style="margin: 0; font-size: 0.9rem; color: #64748b;"><i class="fa-solid fa-file-invoice" style="color:#3b82f6;"></i> إجمالي الفواتير</p>
+              <h2 id="repInvoicesCount" style="margin: 5px 0 0 0; color: #0f172a;">0</h2>
+            </div>
+            
+            <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-right: 4px solid #16a34a; text-align: right;">
+              <p style="margin: 0; font-size: 0.9rem; color: #64748b;"><i class="fa-solid fa-money-bill-wave" style="color:#16a34a;"></i> إجمالي المبيعات</p>
+              <h2 id="repTotalSales" style="margin: 5px 0 0 0; color: #0f172a;">0.00 ج</h2>
+            </div>
+            
+            <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-right: 4px solid #f59e0b; text-align: right;">
+              <p style="margin: 0; font-size: 0.9rem; color: #64748b;"><i class="fa-solid fa-box-open" style="color:#f59e0b;"></i> إجمالي تكلفة البضاعة</p>
+              <h2 id="repTotalCost" style="margin: 5px 0 0 0; color: #0f172a;">0.00 ج</h2>
+            </div>
+            
+            <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; border-right: 4px solid #c084fc; text-align: right; box-shadow: 0 4px 6px -1px rgba(192, 132, 252, 0.1);">
+              <p style="margin: 0; font-size: 0.95rem; font-weight: bold; color: #c084fc;"><i class="fa-solid fa-sack-dollar"></i> صافي الربح التقديري</p>
+              <h2 id="repTotalProfit" style="margin: 5px 0 0 0; color: #0f172a; font-size: 1.8rem;">0.00 ج</h2>
+            </div>
+          </div>
+
+          <!-- Top Selling Products Table -->
+          <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">
+            <h4 style="margin: 0 0 15px 0; color: #334155;"><i class="fa-solid fa-ranking-star" style="color: #fbbf24;"></i> المنتجات الأكثر مبيعاً (Top 10)</h4>
+            <div style="overflow-x: auto;">
+              <table class="admin-table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead style="background: #f1f5f9;">
+                  <tr>
+                    <th style="padding: 12px; text-align: right;">المنتج</th>
+                    <th style="padding: 12px; text-align: center;">الكمية المباعة</th>
+                    <th style="padding: 12px; text-align: left;">إجمالي إيرادات المنتج</th>
+                  </tr>
+                </thead>
+                <tbody id="repTopProductsBody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
+  </div>
+
   </div>
 
   <!-- ========================================== -->

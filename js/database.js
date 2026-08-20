@@ -693,3 +693,135 @@ async function closeCurrentShift(shopId, userId, expectedAmount, actualAmount, f
     return false;
   }
 }
+
+// ==========================================
+// INVOICES & REPORTS MODULE (الفواتير والتقارير)
+// ==========================================
+
+async function saveInvoiceData(invoiceHeader, invoiceItems) {
+  if (!isDbConnected()) return false;
+  try {
+    // 1. Save Header
+    const { data: headerData, error: headerError } = await window.supabaseDb
+      .from("invoices")
+      .insert([invoiceHeader])
+      .select();
+      
+    if (headerError) throw headerError;
+    
+    if (headerData && headerData.length > 0) {
+      const invoiceId = headerData[0].id;
+      
+      // 2. Prepare items with invoice_id
+      const itemsToInsert = invoiceItems.map(item => ({
+        invoice_id: invoiceId,
+        product_id: item.product_id,
+        product_name: item.product_name,
+        qty: item.qty,
+        cost_price: item.cost_price || 0,
+        sale_price: item.sale_price,
+        total_price: item.total_price
+      }));
+      
+      // 3. Save Items
+      if (itemsToInsert.length > 0) {
+        const { error: itemsError } = await window.supabaseDb
+          .from("invoice_items")
+          .insert(itemsToInsert);
+          
+        if (itemsError) throw itemsError;
+      }
+    }
+    
+    return true;
+  } catch (e) {
+    console.error("Error saving invoice:", e);
+    return false;
+  }
+}
+
+async function getAdvancedReportsData(shopId, period = 'today') {
+  if (!isDbConnected()) return null;
+  try {
+    // Build time filter
+    const now = new Date();
+    let startDate = new Date();
+    
+    if (period === 'today') {
+      startDate.setHours(0,0,0,0);
+    } else if (period === 'week') {
+      const day = startDate.getDay();
+      const diff = startDate.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+      startDate = new Date(startDate.setDate(diff));
+      startDate.setHours(0,0,0,0);
+    } else if (period === 'month') {
+      startDate.setDate(1);
+      startDate.setHours(0,0,0,0);
+    } else if (period === 'all') {
+      startDate = new Date('2000-01-01');
+    }
+    
+    // Fetch Invoices
+    const { data: invoices, error: invError } = await window.supabaseDb
+      .from("invoices")
+      .select(`
+        id, created_at, type, final_total,
+        invoice_items (
+          qty, cost_price, sale_price, total_price, product_name
+        )
+      `)
+      .eq("shop_id", shopId)
+      .eq("type", "sales")
+      .gte("created_at", startDate.toISOString());
+      
+    if (invError) throw invError;
+    
+    let totalSales = 0;
+    let totalCost = 0;
+    let totalProfit = 0;
+    let invoicesCount = invoices ? invoices.length : 0;
+    let topProducts = {};
+    
+    if (invoices) {
+      invoices.forEach(inv => {
+        totalSales += parseFloat(inv.final_total);
+        if (inv.invoice_items) {
+          inv.invoice_items.forEach(item => {
+            const itemQty = parseFloat(item.qty);
+            const itemCost = parseFloat(item.cost_price) * itemQty;
+            const itemSale = parseFloat(item.total_price); // final after discount normally, but using item total here
+            
+            totalCost += itemCost;
+            
+            // Collect top products
+            if (!topProducts[item.product_name]) {
+              topProducts[item.product_name] = { qty: 0, revenue: 0 };
+            }
+            topProducts[item.product_name].qty += itemQty;
+            topProducts[item.product_name].revenue += itemSale;
+          });
+        }
+      });
+    }
+    
+    totalProfit = totalSales - totalCost;
+    
+    // Sort top products
+    const sortedProducts = Object.entries(topProducts)
+      .map(([name, data]) => ({ name, ...data }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 10);
+      
+    return {
+      totalSales,
+      totalCost,
+      totalProfit,
+      invoicesCount,
+      sortedProducts
+    };
+    
+  } catch (e) {
+    console.error("Error fetching reports:", e);
+    return null;
+  }
+}
