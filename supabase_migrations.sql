@@ -32,3 +32,30 @@ ALTER TABLE shops ADD COLUMN IF NOT EXISTS max_main_users INTEGER DEFAULT 1;
 ALTER TABLE shops ADD COLUMN IF NOT EXISTS max_sub_users INTEGER DEFAULT 3;
 ALTER TABLE shops ADD COLUMN IF NOT EXISTS sub_users JSONB DEFAULT '[]'::jsonb;
 
+
+-- Run this to create the treasury and expenses tracking table:
+CREATE TABLE IF NOT EXISTS treasury_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    type TEXT NOT NULL, -- 'income' or 'expense'
+    amount NUMERIC NOT NULL,
+    category TEXT NOT NULL,
+    description TEXT,
+    user_id TEXT NOT NULL,
+    shift_id UUID,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- Run this to create the shifts management table:
+CREATE TABLE IF NOT EXISTS shifts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    start_time TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
+    end_time TIMESTAMP WITH TIME ZONE,
+    starting_balance NUMERIC DEFAULT 0,
+    expected_amount NUMERIC DEFAULT 0,
+    actual_amount NUMERIC DEFAULT 0,
+    variance NUMERIC DEFAULT 0,
+    status TEXT DEFAULT 'open' -- 'open' or 'closed'
+);

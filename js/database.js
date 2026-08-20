@@ -585,3 +585,111 @@ async function saveShopSystemSettings(shopSlug, settingsObj) {
     return false;
   }
 }
+
+// ==========================================
+// TREASURY & SHIFTS MODULE (الخزينة والورديات)
+// ==========================================
+
+async function addTreasuryTransaction(shopId, type, amount, category, description, userId) {
+  if (!isDbConnected()) return false;
+  try {
+    const { error } = await window.supabaseDb
+      .from("treasury_transactions")
+      .insert([{
+        shop_id: shopId,
+        type: type,
+        amount: parseFloat(amount),
+        category: category,
+        description: description,
+        user_id: userId
+      }]);
+    
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error("Error adding treasury transaction:", e);
+    return false;
+  }
+}
+
+async function getTreasuryTransactions(shopId, limit = 100) {
+  if (!isDbConnected()) return [];
+  try {
+    const { data, error } = await window.supabaseDb
+      .from("treasury_transactions")
+      .select("*")
+      .eq("shop_id", shopId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+      
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Error fetching treasury transactions:", e);
+    return [];
+  }
+}
+
+async function getTreasuryBalanceSinceLastShift(shopId) {
+  // Simplification for now: get all transactions. 
+  // In a full implementation, you'd filter by shift_id or time after last shift.
+  if (!isDbConnected()) return 0;
+  try {
+    const { data, error } = await window.supabaseDb
+      .from("treasury_transactions")
+      .select("type, amount")
+      .eq("shop_id", shopId);
+      
+    if (error) throw error;
+    
+    let balance = 0;
+    if (data) {
+      data.forEach(t => {
+        if (t.type === "income") balance += parseFloat(t.amount);
+        else if (t.type === "expense") balance -= parseFloat(t.amount);
+      });
+    }
+    return balance;
+  } catch (e) {
+    console.error("Error calculating treasury balance:", e);
+    return 0;
+  }
+}
+
+async function closeCurrentShift(shopId, userId, expectedAmount, actualAmount, floatAmount) {
+  if (!isDbConnected()) return false;
+  try {
+    // 1. Record the shift closing
+    const variance = parseFloat(actualAmount) - parseFloat(expectedAmount);
+    const { error: shiftError } = await window.supabaseDb
+      .from("shifts")
+      .insert([{
+        shop_id: shopId,
+        user_id: userId,
+        end_time: new Date().toISOString(),
+        expected_amount: expectedAmount,
+        actual_amount: actualAmount,
+        variance: variance,
+        status: 'closed'
+      }]);
+      
+    if (shiftError) throw shiftError;
+    
+    // 2. Optional: "Empty the drawer" logic. We can do this by adding an "expense" transaction 
+    // to zero out the drawer, and an "income" transaction for the new float amount.
+    // For simplicity, we just add the 'floatAmount' as a new 'income' (رصيد افتتاحي) to mark the new shift start.
+    
+    // First, remove the actual cash from drawer (transfer to safe/owner)
+    await addTreasuryTransaction(shopId, 'expense', actualAmount, 'إقفال وردية وتسليم نقدية', `تسليم نقدية الوردية من ${userId}`, userId);
+    
+    // Then, add the float amount for the next shift if > 0
+    if (parseFloat(floatAmount) > 0) {
+      await addTreasuryTransaction(shopId, 'income', floatAmount, 'رصيد افتتاحي', `فكة متبقية في الدرج للوردية الجديدة`, userId);
+    }
+
+    return true;
+  } catch (e) {
+    console.error("Error closing shift:", e);
+    return false;
+  }
+}

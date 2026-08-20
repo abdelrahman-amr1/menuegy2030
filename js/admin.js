@@ -1794,6 +1794,12 @@ async function completePosOrderAndPrint() {
   if (receiptContainer) {
     receiptContainer.innerHTML = receiptHtml;
   }
+  
+  // 3. Add to Treasury if payment is cash
+  if (paymentMethod === "cash" && finalTotal > 0) {
+    const user = sessionStorage.getItem("tenant_user_name") || "Cashier";
+    await addTreasuryTransaction(activeShopSlug, "income", finalTotal, "مبيعات نقدية POS", `فاتورة رقم ${invoiceNum}`, user);
+  }
 
   showToast(`تم حفظ الفاتورة بنجاح! وخصم الكميات من المخزن الرئيسي.`);
   
@@ -1969,10 +1975,16 @@ function closeReportsModal() {
   if (overlay) overlay.classList.remove("open");
 }
 
-function openTreasuryModal() {
+
+async function openTreasuryModal() {
   const overlay = document.getElementById("treasuryModalOverlay");
   if (overlay) overlay.classList.add("open");
+  
+  // Refresh data whenever opened
+  await updateTreasuryBalanceDisplay();
+  await loadTreasuryTransactions();
 }
+
 function closeTreasuryModal() {
   const overlay = document.getElementById("treasuryModalOverlay");
   if (overlay) overlay.classList.remove("open");
@@ -2042,9 +2054,180 @@ function applyUserPermissions() {
         discountInput.title = "غير مصرح لك بعمل خصم";
       }
     }
+
+    // Specific Treasury Tabs
+    if (perms.treasury) {
+      if (perms.treasury.receipt_new === false) hideEl("tabBtnTreasuryIncome");
+      if (perms.treasury.expense_new === false) hideEl("tabBtnTreasuryExpense");
+      if (perms.treasury.view_flow === false) hideEl("tabBtnTreasuryLogs");
+      if (perms.treasury.close_shift === false) hideEl("tabBtnTreasuryShift");
+    }
     window.currentSubUserPermissions = perms;
 
   } catch (e) {
     console.error("Failed to parse user permissions", e);
+  }
+}
+
+// ==========================================
+// TREASURY & SHIFTS UI LOGIC
+// ==========================================
+
+function switchTreasuryTab(tabId, btnElement) {
+  // Hide all tabs
+  document.querySelectorAll('.treasury-tab-content').forEach(el => el.style.display = 'none');
+  // Remove active class from all buttons
+  document.querySelectorAll('.menuegy-tab-btn').forEach(btn => btn.classList.remove('active'));
+  
+  // Show selected tab
+  document.getElementById(tabId).style.display = 'block';
+  btnElement.classList.add('active');
+  
+  if (tabId === 'treasuryLogs') {
+    loadTreasuryTransactions();
+  } else if (tabId === 'treasuryBalance' || tabId === 'treasuryShift') {
+    updateTreasuryBalanceDisplay();
+  }
+}
+
+async function updateTreasuryBalanceDisplay() {
+  const balance = await getTreasuryBalanceSinceLastShift(activeShopSlug);
+  const formatted = balance.toFixed(2) + " ج";
+  
+  if (document.getElementById("treasuryCurrentBalanceVal")) {
+    document.getElementById("treasuryCurrentBalanceVal").textContent = formatted;
+  }
+  if (document.getElementById("shiftExpectedBalance")) {
+    document.getElementById("shiftExpectedBalance").textContent = formatted;
+    // Auto populate actual to match expected by default to save time, can be overridden
+    const actualInput = document.getElementById("shiftActualBalance");
+    if (actualInput && !actualInput.value) {
+      actualInput.value = balance.toFixed(2);
+      calculateShiftVariance();
+    }
+  }
+}
+
+async function loadTreasuryTransactions() {
+  const tbody = document.getElementById("treasuryLogsTableBody");
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...</td></tr>';
+  
+  const txs = await getTreasuryTransactions(activeShopSlug);
+  
+  if (txs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">لا توجد حركات مسجلة حالياً.</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = txs.map(tx => {
+    const isIncome = tx.type === 'income';
+    const color = isIncome ? '#16a34a' : '#dc2626';
+    const icon = isIncome ? '<i class="fa-solid fa-arrow-down" style="color:#16a34a"></i>' : '<i class="fa-solid fa-arrow-up" style="color:#dc2626"></i>';
+    const typeLabel = isIncome ? 'وارد' : 'منصرف';
+    
+    const dateStr = new Date(tx.created_at).toLocaleString('ar-EG');
+    
+    return `
+      <tr>
+        <td style="padding: 10px; font-weight: bold; color: ${color};">${icon} ${typeLabel}</td>
+        <td style="padding: 10px; font-weight: bold;">${parseFloat(tx.amount).toFixed(2)} ج</td>
+        <td style="padding: 10px;">${tx.category}</td>
+        <td style="padding: 10px;">${tx.description || '-'}</td>
+        <td style="padding: 10px; font-size: 0.85rem; color: #64748b;">${tx.user_id}</td>
+        <td style="padding: 10px; font-size: 0.85rem; color: #64748b;" dir="ltr">${dateStr}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function handleTreasuryTransaction(event, type) {
+  event.preventDefault();
+  
+  const prefix = type === 'income' ? 'inc' : 'exp';
+  const amount = document.getElementById(prefix + "Amount").value;
+  const category = document.getElementById(prefix + "Category").value;
+  const notes = document.getElementById(prefix + "Notes").value;
+  const user = sessionStorage.getItem("tenant_user_name") || "Manager";
+  
+  if (!amount || amount <= 0) {
+    showToast("يرجى إدخال مبلغ صحيح", "danger");
+    return;
+  }
+  
+  const success = await addTreasuryTransaction(activeShopSlug, type, amount, category, notes, user);
+  if (success) {
+    showToast(`تم تسجيل حركة ال${type === 'income' ? 'وارد' : 'منصرف'} بنجاح!`);
+    event.target.reset();
+    await updateTreasuryBalanceDisplay();
+    // Switch to balance tab
+    switchTreasuryTab('treasuryBalance', document.getElementById('tabBtnTreasuryBalance'));
+  } else {
+    showToast("حدث خطأ أثناء التسجيل. حاول مرة أخرى.", "danger");
+  }
+}
+
+function calculateShiftVariance() {
+  const expectedText = document.getElementById("shiftExpectedBalance").textContent.replace(' ج', '');
+  const expected = parseFloat(expectedText) || 0;
+  
+  const actualInput = document.getElementById("shiftActualBalance").value;
+  const actual = parseFloat(actualInput) || 0;
+  
+  const variance = actual - expected;
+  const varianceBox = document.getElementById("shiftVarianceBox");
+  
+  if (!varianceBox) return;
+  
+  varianceBox.style.display = 'block';
+  
+  if (variance === 0) {
+    varianceBox.style.background = '#f0fdf4';
+    varianceBox.style.color = '#166534';
+    varianceBox.style.border = '1px solid #86efac';
+    varianceBox.innerHTML = '<i class="fa-solid fa-check-circle"></i> العهدة مطابقة تماماً (العجز/الزيادة: 0.00 ج)';
+  } else if (variance > 0) {
+    varianceBox.style.background = '#eff6ff';
+    varianceBox.style.color = '#1d4ed8';
+    varianceBox.style.border = '1px solid #93c5fd';
+    varianceBox.innerHTML = `<i class="fa-solid fa-arrow-up"></i> يوجد زيادة في العهدة بمقدار: ${variance.toFixed(2)} ج`;
+  } else {
+    varianceBox.style.background = '#fef2f2';
+    varianceBox.style.color = '#b91c1c';
+    varianceBox.style.border = '1px solid #fca5a5';
+    varianceBox.innerHTML = `<i class="fa-solid fa-arrow-down"></i> يوجد عجز في العهدة بمقدار: ${Math.abs(variance).toFixed(2)} ج`;
+  }
+}
+
+async function confirmCloseShift() {
+  const expectedText = document.getElementById("shiftExpectedBalance").textContent.replace(' ج', '');
+  const expected = parseFloat(expectedText) || 0;
+  
+  const actualInput = document.getElementById("shiftActualBalance").value;
+  if (!actualInput) {
+    showToast("يرجى إدخال النقدية الفعلية أولاً", "warning");
+    return;
+  }
+  const actual = parseFloat(actualInput);
+  
+  const floatInput = document.getElementById("shiftFloatAmount").value;
+  const floatAmount = parseFloat(floatInput) || 0;
+  
+  if (floatAmount > actual) {
+    showToast("عفواً، لا يمكن أن تكون العهدة المتبقية أكبر من النقدية الفعلية بالدرج!", "danger");
+    return;
+  }
+  
+  const confirmMsg = `هل أنت متأكد من إقفال الوردية؟\nالنقدية الفعلية: ${actual} ج\nسيتم ترحيل مبلغ ${floatAmount} ج للوردية القادمة.`;
+  if (!confirm(confirmMsg)) return;
+  
+  const user = sessionStorage.getItem("tenant_user_name") || "Manager";
+  
+  const success = await closeCurrentShift(activeShopSlug, user, expected, actual, floatAmount);
+  if (success) {
+    showToast("تم إقفال الوردية وتسليم العهدة بنجاح!");
+    closeTreasuryModal();
+  } else {
+    showToast("فشل في إقفال الوردية. يرجى المحاولة مرة أخرى.", "danger");
   }
 }
