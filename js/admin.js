@@ -2309,12 +2309,16 @@ async function confirmCloseShift() {
 }
 
 // ==========================================
-// MONEY TRANSFERS LOGIC
+// E-WALLETS & MONEY TRANSFERS UI LOGIC
 // ==========================================
 
-function openMoneyTransfersModal() {
+let activeWallets = [];
+
+async function openMoneyTransfersModal() {
   const overlay = document.getElementById("moneyTransfersModalOverlay");
   if (overlay) overlay.classList.add("open");
+  switchWalletTab('transfer'); // Default tab
+  await loadWalletsIntoUI();
   resetTransferForm();
   renderTransfersTable();
 }
@@ -2324,11 +2328,101 @@ function closeMoneyTransfersModal() {
   if (overlay) overlay.classList.remove("open");
 }
 
+function switchWalletTab(tab) {
+  document.getElementById("walletTabTransfer").style.display = tab === 'transfer' ? 'grid' : 'none';
+  document.getElementById("walletTabManage").style.display = tab === 'manage' ? 'block' : 'none';
+  
+  document.getElementById("btnTabTransfer").style.background = tab === 'transfer' ? '#0ea5e9' : '#e2e8f0';
+  document.getElementById("btnTabTransfer").style.color = tab === 'transfer' ? '#fff' : '#475569';
+  
+  document.getElementById("btnTabManage").style.background = tab === 'manage' ? '#0ea5e9' : '#e2e8f0';
+  document.getElementById("btnTabManage").style.color = tab === 'manage' ? '#fff' : '#475569';
+}
+
+async function loadWalletsIntoUI() {
+  activeWallets = await getEWallets(activeShopSlug);
+  
+  // Populate Select Dropdown in Transfer Tab
+  const select = document.getElementById("walletSelect");
+  if (select) {
+    select.innerHTML = '<option value="">-- اختر المحفظة --</option>';
+    activeWallets.forEach(w => {
+      select.innerHTML += `<option value="${w.id}">${w.wallet_name} (${parseFloat(w.electronic_balance).toFixed(0)} ج)</option>`;
+    });
+  }
+  
+  // Populate Manage Table
+  const tbody = document.getElementById("walletsManageTableBody");
+  if (tbody) {
+    if (activeWallets.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px;">لا توجد محافظ مسجلة</td></tr>`;
+    } else {
+      tbody.innerHTML = activeWallets.map(w => `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${w.wallet_name}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${w.network.toUpperCase()}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #0284c7;">${parseFloat(w.electronic_balance).toFixed(2)} ج</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">
+             <button onclick="promptChargeWallet('${w.id}', '${w.wallet_name}')" class="btn" style="background:#16a34a; color:#fff; padding:4px 8px; font-size:0.8rem; border-radius:4px;"><i class="fa-solid fa-bolt"></i> شحن الرصيد</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+}
+
+async function createNewWallet() {
+  const name = document.getElementById("newWalletName").value.trim();
+  const network = document.getElementById("newWalletNetwork").value;
+  const initBal = parseFloat(document.getElementById("newWalletBalance").value) || 0;
+  
+  if (!name) return showToast("يرجى إدخال اسم المحفظة", "warning");
+  
+  const success = await addEWallet(activeShopSlug, name, network, initBal);
+  if (success) {
+    showToast("تم إضافة المحفظة بنجاح", "success");
+    document.getElementById("newWalletName").value = "";
+    document.getElementById("newWalletBalance").value = "0";
+    loadWalletsIntoUI();
+  } else {
+    showToast("خطأ في إضافة المحفظة", "danger");
+  }
+}
+
+async function promptChargeWallet(id, name) {
+  const amt = prompt(`أدخل المبلغ المراد شحنه (إيداع إلكتروني) للمحفظة: ${name}`);
+  if (!amt) return;
+  const parsed = parseFloat(amt);
+  if (isNaN(parsed) || parsed <= 0) return showToast("مبلغ غير صحيح", "warning");
+  
+  const success = await updateEWalletBalance(id, parsed);
+  if (success) {
+    showToast("تم شحن الرصيد بنجاح", "success");
+    loadWalletsIntoUI();
+  }
+}
+
+function handleWalletSelectChange() {
+  const val = document.getElementById("walletSelect").value;
+  const balanceHint = document.getElementById("walletBalanceHint");
+  if (!val) {
+    balanceHint.textContent = "";
+    return;
+  }
+  const w = activeWallets.find(x => x.id === val);
+  if (w) {
+    balanceHint.textContent = `الرصيد الإلكتروني المتاح: ${parseFloat(w.electronic_balance).toFixed(2)} ج`;
+  }
+}
+
 function resetTransferForm() {
+  const s = document.getElementById("walletSelect");
+  if(s) s.value = "";
   document.getElementById("transferType").value = "send";
   document.getElementById("transferPhone").value = "";
   document.getElementById("transferAmount").value = "0";
   document.getElementById("transferFee").value = "10";
+  document.getElementById("walletBalanceHint").textContent = "";
   calculateTransferTotals();
 }
 
@@ -2342,42 +2436,44 @@ function calculateTransferTotals() {
   const hintEl = document.getElementById("transferTypeHint");
   
   if (type === "send") {
-    // Customer wants to send money. They pay us Amount + Fee.
     textEl.textContent = "المطلوب استلامه من العميل (كاش):";
     valueEl.textContent = (amount + fee).toFixed(2) + " ج";
     valueEl.style.color = "#16a34a"; // Green (Income to drawer)
-    hintEl.textContent = "تستلم كاش من العميل لترسله إلكترونياً (زيادة في الخزينة).";
+    hintEl.textContent = "يقل الرصيد الإلكتروني للخط، وتستلم كاش يوضع في درج الخزينة.";
   } else {
-    // Customer wants to receive money. We pay them Amount, but we deduct our Fee.
     textEl.textContent = "المطلوب تسليمه للعميل (كاش):";
     valueEl.textContent = (amount - fee).toFixed(2) + " ج";
     valueEl.style.color = "#dc2626"; // Red (Expense from drawer)
-    hintEl.textContent = "تسلم العميل كاش مقابل رصيد إلكتروني أرسله لك (سحب من الخزينة).";
+    hintEl.textContent = "يزيد الرصيد الإلكتروني للخط، وتسلم للعميل كاش يخصم من درج الخزينة.";
   }
 }
 
 async function submitMoneyTransfer() {
+  const walletId = document.getElementById("walletSelect").value;
   const type = document.getElementById("transferType").value;
   const phone = document.getElementById("transferPhone").value.trim();
   const amount = parseFloat(document.getElementById("transferAmount").value) || 0;
   const fee = parseFloat(document.getElementById("transferFee").value) || 0;
   
-  if (!phone) {
-    showToast("يرجى إدخال رقم الهاتف!", "warning");
-    return;
-  }
+  if (!walletId) return showToast("يرجى اختيار المحفظة!", "warning");
+  if (!phone) return showToast("يرجى إدخال رقم الهاتف!", "warning");
+  if (amount <= 0) return showToast("يرجى إدخال مبلغ صحيح!", "warning");
   
-  if (amount <= 0) {
-    showToast("يرجى إدخال مبلغ صحيح للتحويل!", "warning");
+  const w = activeWallets.find(x => x.id === walletId);
+  if (!w) return;
+  
+  if (type === "send" && parseFloat(w.electronic_balance) < amount) {
+    alert(`عفواً! رصيد المحفظة الإلكتروني (${parseFloat(w.electronic_balance).toFixed(2)}) لا يكفي لتحويل ${amount} ج.`);
     return;
   }
   
   const net = type === "send" ? amount + fee : amount - fee;
-  
-  // 1. Save Transfer Record
   const user = sessionStorage.getItem("tenant_user_name") || "Cashier";
-  const success = await saveMoneyTransferData({
+  
+  // 1. Process Wallet & Save Record
+  const success = await processMoneyTransfer({
     shop_id: activeShopSlug,
+    wallet_id: walletId,
     type: type,
     phone_number: phone,
     amount: amount,
@@ -2387,26 +2483,24 @@ async function submitMoneyTransfer() {
   });
   
   if (!success) {
-    showToast("حدث خطأ أثناء حفظ التحويل", "danger");
+    showToast("حدث خطأ أثناء تنفيذ التحويل (ربما نقص في الرصيد)", "danger");
     return;
   }
   
   // 2. Add to Treasury
   if (type === "send") {
-    // We received (Amount + Fee) Cash
-    await addTreasuryTransaction(activeShopSlug, "income", amount, "تحويل وارد (إرسال)", `استلام نقدي لتحويل لـ ${phone}`, user);
+    // We received Cash
+    await addTreasuryTransaction(activeShopSlug, "income", amount, "تحويل وارد إلكتروني", `استلام كاش لحوالة صادرة لـ ${phone} من ${w.wallet_name}`, user);
     if (fee > 0) await addTreasuryTransaction(activeShopSlug, "income", fee, "إيراد رسوم خدمة", `عمولة تحويل لـ ${phone}`, user);
   } else {
-    // We paid out (Amount - Fee) Cash
-    // Note: We received electronic money equal to 'amount', but the drawer pays out 'net'.
-    // So we record an expense of 'amount' and an income of 'fee' to balance it, or just one expense of 'net'.
-    // Since we are tracking the physical cash drawer:
-    await addTreasuryTransaction(activeShopSlug, "expense", amount, "تحويل منصرف (استقبال)", `تسليم نقدي لحوالة من ${phone}`, user);
+    // We paid out Cash
+    await addTreasuryTransaction(activeShopSlug, "expense", amount, "تحويل منصرف نقدي", `تسليم كاش لحوالة واردة من ${phone} إلى ${w.wallet_name}`, user);
     if (fee > 0) await addTreasuryTransaction(activeShopSlug, "income", fee, "إيراد رسوم خدمة", `عمولة استقبال من ${phone}`, user);
   }
   
-  showToast("تم تنفيذ العملية وتسجيلها بالخزينة بنجاح", "success");
+  showToast("تم تنفيذ العملية وربط الخزينة والمحفظة بنجاح", "success");
   resetTransferForm();
+  await loadWalletsIntoUI();
   renderTransfersTable();
   if (typeof updateTreasuryBalanceDisplay === "function") {
     updateTreasuryBalanceDisplay();
@@ -2420,7 +2514,7 @@ async function renderTransfersTable() {
   const data = await getRecentMoneyTransfers(activeShopSlug, 20);
   
   if (!data || data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:15px; color:#64748b;">لا توجد تحويلات حديثة</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:#64748b;">لا توجد تحويلات حديثة</td></tr>`;
     return;
   }
   
@@ -2432,14 +2526,16 @@ async function renderTransfersTable() {
     
     const d = new Date(t.created_at);
     const timeStr = d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    const walletName = t.e_wallets ? t.e_wallets.wallet_name : 'غير محدد';
     
     return `
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${typeLabel}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem;">${walletName}</td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${t.phone_number}</td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">
           <div>${parseFloat(t.amount).toFixed(0)} ج</div>
-          <div style="font-size: 0.7rem; color: #64748b;">الرسوم: ${parseFloat(t.fee).toFixed(0)} ج</div>
+          <div style="font-size: 0.7rem; color: #16a34a;">عمولة: ${parseFloat(t.fee).toFixed(0)} ج</div>
         </td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b;">${timeStr}</td>
       </tr>

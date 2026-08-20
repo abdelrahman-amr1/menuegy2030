@@ -862,3 +862,106 @@ async function getRecentMoneyTransfers(shopId, limit = 50) {
     return [];
   }
 }
+
+// ==========================================
+// E-WALLETS & MONEY TRANSFERS LOGIC
+// ==========================================
+
+async function getEWallets(shopId) {
+  if (!isDbConnected()) return [];
+  try {
+    const { data, error } = await window.supabaseDb
+      .from("e_wallets")
+      .select("*")
+      .eq("shop_id", shopId)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Error fetching e_wallets:", e);
+    return [];
+  }
+}
+
+async function addEWallet(shopId, name, network, initialBalance) {
+  if (!isDbConnected()) return false;
+  try {
+    const { error } = await window.supabaseDb
+      .from("e_wallets")
+      .insert([{
+        shop_id: shopId,
+        wallet_name: name,
+        network: network,
+        electronic_balance: initialBalance
+      }]);
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error("Error adding e_wallet:", e);
+    return false;
+  }
+}
+
+async function updateEWalletBalance(walletId, amountChange) {
+  if (!isDbConnected()) return false;
+  try {
+    const { data: wallet, error: fetchErr } = await window.supabaseDb
+      .from("e_wallets")
+      .select("electronic_balance")
+      .eq("id", walletId)
+      .single();
+    if (fetchErr) throw fetchErr;
+    
+    let newBalance = parseFloat(wallet.electronic_balance) + parseFloat(amountChange);
+    
+    const { error: updateErr } = await window.supabaseDb
+      .from("e_wallets")
+      .update({ electronic_balance: newBalance })
+      .eq("id", walletId);
+      
+    if (updateErr) throw updateErr;
+    return true;
+  } catch (e) {
+    console.error("Error updating wallet balance:", e);
+    return false;
+  }
+}
+
+async function processMoneyTransfer(transferData) {
+  if (!isDbConnected()) return false;
+  try {
+    // 1. Save Transfer Record
+    const { error: insertError } = await window.supabaseDb
+      .from("money_transfers")
+      .insert([transferData]);
+    if (insertError) throw insertError;
+    return true;
+  } catch (e) {
+    console.error("Error processing transfer:", e);
+    return false;
+  }
+}
+
+async function getRecentMoneyTransfers(shopId, limit = 50) {
+  if (!isDbConnected()) return [];
+  try {
+    const { data, error } = await window.supabaseDb
+      .from("money_transfers")
+      .select(`
+        *,
+        e_wallets (
+          wallet_name,
+          network
+        )
+      `)
+      .eq("shop_id", shopId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+      
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Error fetching money transfers:", e);
+    return [];
+  }
+}

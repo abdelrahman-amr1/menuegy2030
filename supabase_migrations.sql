@@ -99,3 +99,29 @@ CREATE TABLE IF NOT EXISTS money_transfers (
     user_id TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
+
+-- Run this to create the E-Wallets tables:
+CREATE TABLE IF NOT EXISTS e_wallets (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    wallet_name TEXT NOT NULL,
+    network TEXT NOT NULL, -- vodafone, orange, etisalat, we, instapay
+    electronic_balance NUMERIC DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+-- Drop the old table if it exists (since we just created it and it has no real data)
+DROP TABLE IF EXISTS money_transfers;
+
+CREATE TABLE IF NOT EXISTS money_transfers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    wallet_id UUID REFERENCES e_wallets(id) ON DELETE CASCADE,
+    type TEXT NOT NULL, -- 'send' (إرسال) or 'receive' (استقبال) or 'charge' (شحن رصيد إلكتروني للخط)
+    phone_number TEXT,
+    amount NUMERIC NOT NULL,
+    fee NUMERIC DEFAULT 0,
+    net_amount NUMERIC NOT NULL,
+    user_id TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);

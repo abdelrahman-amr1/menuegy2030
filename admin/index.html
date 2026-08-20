@@ -1237,77 +1237,149 @@
   <div id="barcodePrintContainer"></div>
 
   <!-- ========================================== -->
-  <!-- 9. MONEY TRANSFERS MODAL (خدمات تحويل الأموال كاش/إنستاباي) -->
+  <!-- ========================================== -->
+  <!-- 9. MONEY TRANSFERS MODAL (إدارة المحافظ الإلكترونية وإنستاباي) -->
   <!-- ========================================== -->
   <div class="modal-overlay" id="moneyTransfersModalOverlay" onclick="closeMoneyTransfersModal()">
-    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 800px; width: 95%;">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 900px; width: 95%;">
       <div class="modal-header" style="background: #0f172a; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
         <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #38bdf8;">
-          <i class="fa-solid fa-money-bill-transfer"></i> خدمات تحويل الأموال (InstaPay / Cash)
+          <i class="fa-solid fa-wallet"></i> خدمات المحافظ وإنستاباي
         </h3>
         <button onclick="closeMoneyTransfersModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
           <i class="fa-solid fa-xmark"></i> إغلاق
         </button>
       </div>
       
-      <div class="modal-body" style="padding: 1.5rem; max-height: 80vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
+      <!-- Tabs -->
+      <div style="display: flex; background: #e2e8f0; border-bottom: 1px solid #cbd5e1;">
+        <button id="btnTabTransfer" onclick="switchWalletTab('transfer')" style="flex: 1; padding: 12px; border: none; background: #0ea5e9; color: #fff; font-weight: bold; cursor: pointer;">
+          <i class="fa-solid fa-money-bill-transfer"></i> تحويلات العملاء
+        </button>
+        <button id="btnTabManage" onclick="switchWalletTab('manage')" style="flex: 1; padding: 12px; border: none; background: #e2e8f0; color: #475569; font-weight: bold; cursor: pointer;">
+          <i class="fa-solid fa-sim-card"></i> إدارة الخطوط والأرصدة
+        </button>
+      </div>
+      
+      <div class="modal-body" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-          <!-- Left: New Transfer Form -->
+        <!-- TRANSFER TAB -->
+        <div id="walletTabTransfer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- Left: Form -->
           <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
             <h4 style="margin: 0 0 15px 0; color: #0284c7;"><i class="fa-solid fa-plus-circle"></i> عملية تحويل جديدة</h4>
             
             <div style="margin-bottom: 15px;">
+              <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">المحفظة (الخط المستخدم)</label>
+              <select id="walletSelect" onchange="handleWalletSelectChange()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-weight: bold;"></select>
+              <small id="walletBalanceHint" style="color: #0284c7; font-weight: bold; font-size: 0.75rem; display: block; margin-top: 4px;"></small>
+            </div>
+
+            <div style="margin-bottom: 15px;">
               <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">نوع العملية</label>
               <select id="transferType" onchange="calculateTransferTotals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-weight: bold;">
-                <option value="send">إرسال أموال (Cash In)</option>
-                <option value="receive">استقبال أموال (Cash Out)</option>
+                <option value="send">إرسال للعميل (يخصم من رصيد الخط الإلكتروني)</option>
+                <option value="receive">استقبال من العميل (يزيد رصيد الخط الإلكتروني)</option>
               </select>
-              <small style="color: #64748b; font-size: 0.75rem;" id="transferTypeHint">تستلم كاش من العميل لترسله إلكترونياً (تزيد الخزينة).</small>
             </div>
 
-            <div style="margin-bottom: 15px;">
-              <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">رقم هاتف العميل (للتوثيق)</label>
-              <input type="text" id="transferPhone" placeholder="01X XXXX XXXX" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
-            </div>
-
-            <div style="margin-bottom: 15px;">
-              <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">المبلغ الأصلي للتحويل (ج.م)</label>
-              <input type="number" id="transferAmount" value="0" min="0" oninput="calculateTransferTotals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 1.1rem; font-weight: bold;">
-            </div>
-
-            <div style="margin-bottom: 15px;">
-              <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">رسوم الخدمة الثابتة (ج.م)</label>
-              <input type="number" id="transferFee" value="10" min="0" oninput="calculateTransferTotals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
-              <small style="color: #16a34a; font-size: 0.75rem;"><i class="fa-solid fa-info-circle"></i> هذه الرسوم ستسجل كربح صافي في الخزينة.</small>
-            </div>
-
-            <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
-              <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; color: #0f172a;">
-                <span id="transferNetText">المطلوب استلامه من العميل:</span>
-                <span id="transferNetValue" style="color: #0284c7;">0.00 ج</span>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+              <div style="flex: 2;">
+                <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">رقم هاتف العميل</label>
+                <input type="text" id="transferPhone" placeholder="01X XXXX XXXX" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">الرسوم (ج)</label>
+                <input type="number" id="transferFee" value="10" min="0" oninput="calculateTransferTotals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
               </div>
             </div>
 
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">مبلغ الحوالة الأصلي (ج.م)</label>
+              <input type="number" id="transferAmount" value="0" min="0" oninput="calculateTransferTotals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 1.1rem; font-weight: bold;">
+            </div>
+
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px;">
+              <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 5px;">
+                <span id="transferNetText">التوجيه الكاش للخزينة:</span>
+                <span id="transferNetValue" style="color: #0284c7;">0.00 ج</span>
+              </div>
+              <small id="transferTypeHint" style="color: #64748b; font-size: 0.75rem;"></small>
+            </div>
+
             <button onclick="submitMoneyTransfer()" class="btn" style="width: 100%; padding: 12px; font-size: 1.1rem; font-weight: bold; background: #0284c7; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
-              تأكيد وتنفيذ العملية
+              تأكيد العملية وتسجيلها بالخزينة
             </button>
           </div>
 
           <!-- Right: Recent Transfers Table -->
           <div style="background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
-            <h4 style="margin: 0 0 15px 0; color: #334155;"><i class="fa-solid fa-clock-rotate-left"></i> آخر التحويلات</h4>
+            <h4 style="margin: 0 0 15px 0; color: #334155;"><i class="fa-solid fa-clock-rotate-left"></i> سجل التحويلات</h4>
             <div style="flex: 1; overflow-y: auto;">
               <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: right;">
                 <thead style="background: #f1f5f9; position: sticky; top: 0;">
                   <tr>
                     <th style="padding: 8px; border-bottom: 1px solid #cbd5e1;">النوع</th>
+                    <th style="padding: 8px; border-bottom: 1px solid #cbd5e1;">الخط</th>
                     <th style="padding: 8px; border-bottom: 1px solid #cbd5e1;">الرقم</th>
                     <th style="padding: 8px; border-bottom: 1px solid #cbd5e1;">المبلغ</th>
                     <th style="padding: 8px; border-bottom: 1px solid #cbd5e1;">الوقت</th>
                   </tr>
                 </thead>
                 <tbody id="transfersTableBody">
+                  <!-- Filled by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- MANAGE TAB -->
+        <div id="walletTabManage" style="display: none;">
+          <div style="display: flex; gap: 20px;">
+            <!-- Add New Wallet -->
+            <div style="flex: 1; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <h4 style="margin: 0 0 15px 0; color: #16a34a;"><i class="fa-solid fa-plus"></i> تسجيل محفظة / خط جديد</h4>
+              
+              <div style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">اسم الخط أو المحفظة</label>
+                <input type="text" id="newWalletName" placeholder="مثال: فودافون كاش درج 1" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+              </div>
+              
+              <div style="margin-bottom: 10px;">
+                <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">الشبكة / النوع</label>
+                <select id="newWalletNetwork" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+                  <option value="vodafone">فودافون كاش</option>
+                  <option value="orange">أورانج كاش</option>
+                  <option value="etisalat">اتصالات كاش</option>
+                  <option value="we">وي باي</option>
+                  <option value="instapay">إنستاباي / حساب بنكي</option>
+                </select>
+              </div>
+              
+              <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">الرصيد الإلكتروني الحالي (ج)</label>
+                <input type="number" id="newWalletBalance" value="0" min="0" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+              </div>
+              
+              <button onclick="createNewWallet()" class="btn" style="width: 100%; padding: 10px; font-weight: bold; background: #16a34a; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
+                إضافة الخط
+              </button>
+            </div>
+            
+            <!-- List Wallets -->
+            <div style="flex: 2; background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; max-height: 400px; overflow-y: auto;">
+              <h4 style="margin: 0 0 15px 0; color: #334155;"><i class="fa-solid fa-sim-card"></i> المحافظ المسجلة وأرصدتها</h4>
+              <table style="width: 100%; border-collapse: collapse; text-align: right; font-size: 0.9rem;">
+                <thead style="background: #f1f5f9;">
+                  <tr>
+                    <th style="padding: 10px; border-bottom: 1px solid #cbd5e1;">الاسم</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #cbd5e1;">الشبكة</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #cbd5e1;">الرصيد الإلكتروني</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #cbd5e1;">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="walletsManageTableBody">
                   <!-- Filled by JS -->
                 </tbody>
               </table>
