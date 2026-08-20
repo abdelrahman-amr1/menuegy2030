@@ -965,3 +965,146 @@ async function getRecentMoneyTransfers(shopId, limit = 50) {
     return [];
   }
 }
+
+// ==========================================
+// CUSTOMERS & DEBTS LOGIC (إدارة العملاء والديون)
+// ==========================================
+
+async function getCustomers(shopId) {
+  if (!isDbConnected()) return [];
+  try {
+    const { data, error } = await window.supabaseDb
+      .from("customers")
+      .select("*")
+      .eq("shop_id", shopId)
+      .order("name", { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Error fetching customers:", e);
+    return [];
+  }
+}
+
+async function addCustomer(shopId, name, phone, type, creditLimit) {
+  if (!isDbConnected()) return false;
+  try {
+    const { error } = await window.supabaseDb
+      .from("customers")
+      .insert([{
+        shop_id: shopId,
+        name: name,
+        phone: phone,
+        customer_type: type,
+        credit_limit: creditLimit,
+        total_debt: 0
+      }]);
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.error("Error adding customer:", e);
+    return false;
+  }
+}
+
+async function getCustomerTransactions(customerId) {
+  if (!isDbConnected()) return [];
+  try {
+    const { data, error } = await window.supabaseDb
+      .from("customer_transactions")
+      .select("*")
+      .eq("customer_id", customerId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Error fetching customer transactions:", e);
+    return [];
+  }
+}
+
+async function processCustomerPayment(shopId, customerId, amount, notes, userId) {
+  if (!isDbConnected()) return false;
+  try {
+    // 1. Get current debt
+    const { data: cust, error: fetchErr } = await window.supabaseDb
+      .from("customers")
+      .select("total_debt, name")
+      .eq("id", customerId)
+      .single();
+    if (fetchErr) throw fetchErr;
+    
+    let newDebt = parseFloat(cust.total_debt) - parseFloat(amount);
+    
+    // 2. Update debt
+    const { error: updateErr } = await window.supabaseDb
+      .from("customers")
+      .update({ total_debt: newDebt })
+      .eq("id", customerId);
+    if (updateErr) throw updateErr;
+    
+    // 3. Record Payment Transaction
+    const { error: transErr } = await window.supabaseDb
+      .from("customer_transactions")
+      .insert([{
+        shop_id: shopId,
+        customer_id: customerId,
+        type: 'payment',
+        amount: amount,
+        notes: notes || 'سداد دفعة نقدية',
+        user_id: userId
+      }]);
+    if (transErr) throw transErr;
+    
+    return { success: true, customerName: cust.name };
+  } catch (e) {
+    console.error("Error processing customer payment:", e);
+    return { success: false };
+  }
+}
+
+async function processCustomerCharge(shopId, customerId, amount, referenceId, userId) {
+  if (!isDbConnected()) return false;
+  try {
+    // 1. Get current debt
+    const { data: cust, error: fetchErr } = await window.supabaseDb
+      .from("customers")
+      .select("total_debt, credit_limit")
+      .eq("id", customerId)
+      .single();
+    if (fetchErr) throw fetchErr;
+    
+    let newDebt = parseFloat(cust.total_debt) + parseFloat(amount);
+    
+    // Check credit limit if > 0
+    if (parseFloat(cust.credit_limit) > 0 && newDebt > parseFloat(cust.credit_limit)) {
+      return { success: false, reason: "limit_exceeded" };
+    }
+    
+    // 2. Update debt
+    const { error: updateErr } = await window.supabaseDb
+      .from("customers")
+      .update({ total_debt: newDebt })
+      .eq("id", customerId);
+    if (updateErr) throw updateErr;
+    
+    // 3. Record Charge Transaction
+    const { error: transErr } = await window.supabaseDb
+      .from("customer_transactions")
+      .insert([{
+        shop_id: shopId,
+        customer_id: customerId,
+        type: 'charge',
+        amount: amount,
+        reference_id: referenceId,
+        notes: 'سحب بضاعة آجل',
+        user_id: userId
+      }]);
+    if (transErr) throw transErr;
+    
+    return { success: true };
+  } catch (e) {
+    console.error("Error processing customer charge:", e);
+    return { success: false };
+  }
+}

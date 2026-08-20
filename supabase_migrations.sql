@@ -125,3 +125,30 @@ CREATE TABLE IF NOT EXISTS money_transfers (
     user_id TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
+
+-- ==========================================
+-- CUSTOMERS & DEBTS MANAGEMENT (إدارة العملاء والديون)
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS customers (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    customer_type TEXT DEFAULT 'normal', -- normal, credit, vip, wholesale
+    total_debt NUMERIC DEFAULT 0, -- Total outstanding debt
+    credit_limit NUMERIC DEFAULT 0, -- 0 means no limit
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+CREATE TABLE IF NOT EXISTS customer_transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id TEXT NOT NULL,
+    customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+    type TEXT NOT NULL, -- 'charge' (سحب آجل), 'payment' (سداد نقدية)
+    amount NUMERIC NOT NULL,
+    reference_id TEXT, -- e.g. Invoice ID
+    notes TEXT,
+    user_id TEXT NOT NULL, -- Cashier who made the transaction
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);

@@ -321,7 +321,13 @@ async function loadAdminProducts() {
   populateAdminCategoryFilter();
   updateStats();
   applyFiltersAndRender();
+  
+  // Also load customers for the POS dropdown and general memory
+  if (typeof loadCustomersIntoUI === "function") {
+    await loadCustomersIntoUI();
+  }
 }
+
 
 // Update Stats Cards
 function updateStats() {
@@ -1697,6 +1703,7 @@ async function completePosOrderAndPrint() {
 
   const shopNameText = document.getElementById("adminFooterShopName")?.textContent || "متجر MenuEgy";
   const paymentMethod = document.getElementById("posPaymentMethod")?.value || "cash";
+  const customerId = document.getElementById("posCustomerSelect")?.value;
   const paymentMethodText = paymentMethod === "cash" ? "نقداً (كاش)" : paymentMethod === "card" ? "بطاقة إلكترونية" : paymentMethod === "credit" ? "حساب آجل" : "تقسيط";
 
   const subTotal = posCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -1707,9 +1714,28 @@ async function completePosOrderAndPrint() {
   const vatVal = isVatActive ? (afterDiscount * 0.14) : 0;
   const finalTotal = afterDiscount + vatVal;
 
+  if (paymentMethod === "credit" && (!customerId || customerId === "cash")) {
+    showToast("يجب اختيار العميل المسجل لإضافة الحساب الآجل!", "warning");
+    return;
+  }
+
+  const user = sessionStorage.getItem("tenant_user_name") || "Cashier";
   const now = new Date();
   const invoiceNum = "INV-" + Math.floor(100000 + Math.random() * 900000);
   const dateStr = now.toLocaleDateString("ar-EG") + " " + now.toLocaleTimeString("ar-EG");
+
+  // If Credit, process charge first to ensure limits
+  if (paymentMethod === "credit") {
+    const res = await processCustomerCharge(activeShopSlug, customerId, finalTotal, invoiceNum, user);
+    if (!res.success) {
+      if (res.reason === "limit_exceeded") {
+        alert("لا يمكن الإتمام! هذا العميل تجاوز الحد الائتماني المسموح له.");
+      } else {
+        showToast("خطأ في تسجيل المديونية", "danger");
+      }
+      return;
+    }
+  }
 
   // 1. Deduct Stock Quantity from DB & Local State and Build Invoice Items
   const invoiceItemsArr = [];
@@ -1738,7 +1764,6 @@ async function completePosOrderAndPrint() {
   }
   
   // Save Invoice Header to DB
-  const user = sessionStorage.getItem("tenant_user_name") || "Cashier";
   const invoiceHeader = {
     shop_id: activeShopSlug,
     invoice_num: invoiceNum,
@@ -1826,7 +1851,6 @@ async function completePosOrderAndPrint() {
   
   // 3. Add to Treasury if payment is cash
   if (paymentMethod === "cash" && finalTotal > 0) {
-    const user = sessionStorage.getItem("tenant_user_name") || "Cashier";
     await addTreasuryTransaction(activeShopSlug, "income", finalTotal, "مبيعات نقدية POS", `فاتورة رقم ${invoiceNum}`, user);
   }
 
@@ -1841,6 +1865,7 @@ async function completePosOrderAndPrint() {
     window.print();
   }, 100);
 }
+
 
 /* ==================================================== */
 /* SHOP SUB-USERS & CASHIERS MANAGEMENT SYSTEM */
@@ -2538,6 +2563,139 @@ async function renderTransfersTable() {
           <div style="font-size: 0.7rem; color: #16a34a;">عمولة: ${parseFloat(t.fee).toFixed(0)} ج</div>
         </td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b;">${timeStr}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+// ==========================================
+// CUSTOMERS & DEBTS UI LOGIC
+// ==========================================
+
+let activeCustomers = [];
+
+async function openCustomersModal() {
+  const overlay = document.getElementById("customersModalOverlay");
+  if (overlay) overlay.classList.add("open");
+  switchCustomerTab('list');
+  await loadCustomersIntoUI();
+}
+
+function closeCustomersModal() {
+  const overlay = document.getElementById("customersModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+function switchCustomerTab(tab) {
+  document.getElementById("custTabList").style.display = tab === 'list' ? 'block' : 'none';
+  document.getElementById("custTabLedger").style.display = tab === 'ledger' ? 'block' : 'none';
+}
+
+async function loadCustomersIntoUI() {
+  activeCustomers = await getCustomers(activeShopSlug);
+  
+  // Populate Customers List Table
+  const tbody = document.getElementById("customersTableBody");
+  if (tbody) {
+    if (activeCustomers.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px;">لا يوجد عملاء مسجلين</td></tr>`;
+    } else {
+      tbody.innerHTML = activeCustomers.map(c => `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold;">${c.name}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${c.phone || '-'}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">${c.customer_type}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: ${parseFloat(c.total_debt) > 0 ? '#dc2626' : '#16a34a'};">${parseFloat(c.total_debt).toFixed(2)} ج</td>
+          <td style="padding: 10px; border-bottom: 1px solid #e2e8f0;">
+             <button onclick="promptCustomerPayment('${c.id}', '${c.name}', ${c.total_debt})" class="btn" style="background:#16a34a; color:#fff; padding:4px 8px; font-size:0.8rem; border-radius:4px;"><i class="fa-solid fa-hand-holding-dollar"></i> تحصيل دفعة</button>
+             <button onclick="viewCustomerLedger('${c.id}', '${c.name}')" class="btn" style="background:#0ea5e9; color:#fff; padding:4px 8px; font-size:0.8rem; border-radius:4px; margin-right: 5px;"><i class="fa-solid fa-file-invoice"></i> كشف حساب</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+  
+  // Populate POS Customer Dropdown
+  const posSelect = document.getElementById("posCustomerSelect");
+  if (posSelect) {
+    posSelect.innerHTML = '<option value="cash">عميل نقدي سريع (بدون تسجيل)</option>';
+    activeCustomers.forEach(c => {
+      posSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+    });
+  }
+}
+
+async function createNewCustomer() {
+  const name = document.getElementById("newCustName").value.trim();
+  const phone = document.getElementById("newCustPhone").value.trim();
+  const type = document.getElementById("newCustType").value;
+  const limit = parseFloat(document.getElementById("newCustLimit").value) || 0;
+  
+  if (!name) return showToast("يرجى إدخال اسم العميل", "warning");
+  
+  const success = await addCustomer(activeShopSlug, name, phone, type, limit);
+  if (success) {
+    showToast("تم إضافة العميل بنجاح", "success");
+    document.getElementById("newCustName").value = "";
+    document.getElementById("newCustPhone").value = "";
+    loadCustomersIntoUI();
+  } else {
+    showToast("خطأ في إضافة العميل", "danger");
+  }
+}
+
+async function promptCustomerPayment(id, name, currentDebt) {
+  if (currentDebt <= 0) {
+    alert("هذا العميل ليس عليه أي مديونيات متأخرة.");
+    return;
+  }
+  const amt = prompt(`العميل: ${name}\nإجمالي المديونية: ${parseFloat(currentDebt).toFixed(2)}\nأدخل المبلغ المراد تحصيله (سداد نقدي):`);
+  if (!amt) return;
+  const parsed = parseFloat(amt);
+  if (isNaN(parsed) || parsed <= 0) return showToast("مبلغ غير صحيح", "warning");
+  if (parsed > currentDebt) return showToast("المبلغ المُحصل أكبر من المديونية!", "warning");
+  
+  const user = sessionStorage.getItem("tenant_user_name") || "Admin";
+  const res = await processCustomerPayment(activeShopSlug, id, parsed, 'دفعة نقدية', user);
+  if (res.success) {
+    // Add to treasury
+    await addTreasuryTransaction(activeShopSlug, "income", parsed, "تحصيل ديون", `سداد دفعة نقدية من العميل: ${res.customerName}`, user);
+    showToast("تم التحصيل وتسميع المبلغ بالخزينة بنجاح", "success");
+    loadCustomersIntoUI();
+    if (typeof updateTreasuryBalanceDisplay === "function") {
+      updateTreasuryBalanceDisplay();
+    }
+  } else {
+    showToast("حدث خطأ أثناء التحصيل", "danger");
+  }
+}
+
+async function viewCustomerLedger(id, name) {
+  document.getElementById("ledgerCustomerName").textContent = name;
+  const tbody = document.getElementById("ledgerTableBody");
+  tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">جاري التحميل...</td></tr>';
+  switchCustomerTab('ledger');
+  
+  const txs = await getCustomerTransactions(id);
+  if (txs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 15px;">لا توجد حركات سابقة لهذا العميل</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = txs.map(t => {
+    const isPayment = t.type === 'payment';
+    const typeLabel = isPayment ? 
+      `<span style="color: #16a34a;"><i class="fa-solid fa-arrow-down"></i> سداد (دفعة)</span>` : 
+      `<span style="color: #dc2626;"><i class="fa-solid fa-arrow-up"></i> سحب (آجل)</span>`;
+    const d = new Date(t.created_at);
+    const timeStr = d.toLocaleDateString('ar-EG') + ' ' + d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    
+    return `
+      <tr>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${timeStr}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${typeLabel}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: ${isPayment ? '#16a34a' : '#dc2626'};">${parseFloat(t.amount).toFixed(2)} ج</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${t.notes || '-'}</td>
       </tr>
     `;
   }).join("");
