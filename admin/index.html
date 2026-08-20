@@ -102,11 +102,23 @@
       </button>
 
       <button onclick="openShopUsersModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
-        <i class="fa-solid fa-users-gear" style="color: #60a5fa; margin-left: 6px;"></i> إدارة المستخدمين والكاشير
+        <i class="fa-solid fa-users-gear" style="color: #60a5fa; margin-left: 6px;"></i> إدارة الكاشير
+      </button>
+
+      <button onclick="openReportsModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+        <i class="fa-solid fa-chart-pie" style="color: #c084fc; margin-left: 6px;"></i> التقارير والأرباح
+      </button>
+
+      <button onclick="openTreasuryModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+        <i class="fa-solid fa-vault" style="color: #fcd34d; margin-left: 6px;"></i> الخزينة والمصروفات
+      </button>
+
+      <button onclick="openPurchasesModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+        <i class="fa-solid fa-truck-ramp-box" style="color: #f87171; margin-left: 6px;"></i> المشتريات والموردين
       </button>
 
       <button id="posTerminalMainBtn" onclick="openPosTerminalModal()" class="btn" style="background: linear-gradient(135deg, #16a34a, #15803d); color: #ffffff; border: 1px solid #22c55e; font-weight: 800; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(22,163,74,0.3); cursor: pointer; transition: all 0.3s ease;">
-        <i class="fa-solid fa-calculator" style="color: #86efac; margin-left: 6px;"></i> نقطة البيع وشاشة الكاشير (POS Terminal)
+        <i class="fa-solid fa-calculator" style="color: #86efac; margin-left: 6px;"></i> شاشة الكاشير (POS)
       </button>
     </div>
     <section class="admin-stats">
@@ -384,14 +396,14 @@
       </div>
 
       <!-- Tab Navigation Headers (7 Tabs) -->
-      <div class="sahl-tabs-nav" style="display: flex; background: #e2e8f0; border-bottom: 2px solid #cbd5e1; overflow-x: auto; direction: rtl;">
-        <button class="sahl-tab-btn active" onclick="switchPermTab('permGeneral', this)">صلاحيات عامة</button>
-        <button class="sahl-tab-btn" onclick="switchPermTab('permInvoices', this)">الفواتير</button>
-        <button class="sahl-tab-btn" onclick="switchPermTab('permInventory', this)">البضاعة</button>
-        <button class="sahl-tab-btn" onclick="switchPermTab('permAccounts', this)">الحسابات</button>
-        <button class="sahl-tab-btn" onclick="switchPermTab('permTreasury', this)">الخزينة</button>
-        <button class="sahl-tab-btn" onclick="switchPermTab('permAdvanced', this)">تقارير متقدمة</button>
-        <button class="sahl-tab-btn" onclick="switchPermTab('permInstallments', this)">تقسيط</button>
+      <div class="menuegy-tabs-nav" style="display: flex; background: #e2e8f0; border-bottom: 2px solid #cbd5e1; overflow-x: auto; direction: rtl;">
+        <button class="menuegy-tab-btn active" onclick="switchPermTab('permGeneral', this)">صلاحيات عامة</button>
+        <button class="menuegy-tab-btn" onclick="switchPermTab('permInvoices', this)">الفواتير</button>
+        <button class="menuegy-tab-btn" onclick="switchPermTab('permInventory', this)">البضاعة</button>
+        <button class="menuegy-tab-btn" onclick="switchPermTab('permAccounts', this)">الحسابات</button>
+        <button class="menuegy-tab-btn" onclick="switchPermTab('permTreasury', this)">الخزينة</button>
+        <button class="menuegy-tab-btn" onclick="switchPermTab('permAdvanced', this)">تقارير متقدمة</button>
+        <button class="menuegy-tab-btn" onclick="switchPermTab('permInstallments', this)">تقسيط</button>
       </div>
 
       <div class="modal-body" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
@@ -576,13 +588,13 @@
       </div>
 
       <!-- Tab Navigation Headers (6 Tabs) -->
-      <div class="sahl-tabs-nav" style="display: flex; background: #e2e8f0; border-bottom: 2px solid #cbd5e1; overflow-x: auto; direction: rtl;">
-        <button class="sahl-tab-btn active" onclick="switchSysTab('sysGeneral', this)">عام</button>
-        <button class="sahl-tab-btn" onclick="switchSysTab('sysCustomFields', this)">حقول إضافية</button>
-        <button class="sahl-tab-btn" onclick="switchSysTab('sysTaxes', this)">الضرائب والفوترة</button>
-        <button class="sahl-tab-btn" onclick="switchSysTab('sysSecurity', this)">كلمات السر</button>
-        <button class="sahl-tab-btn" onclick="switchSysTab('sysScaleBarcode', this)">أخرى وميزان الباركود</button>
-        <button class="sahl-tab-btn" onclick="switchSysTab('sysRestaurant', this)">إعداد المطعم وطابعات المطبخ</button>
+      <div class="menuegy-tabs-nav" style="display: flex; background: #e2e8f0; border-bottom: 2px solid #cbd5e1; overflow-x: auto; direction: rtl;">
+        <button class="menuegy-tab-btn active" onclick="switchSysTab('sysGeneral', this)">عام</button>
+        <button class="menuegy-tab-btn" onclick="switchSysTab('sysCustomFields', this)">حقول إضافية</button>
+        <button class="menuegy-tab-btn" onclick="switchSysTab('sysTaxes', this)">الضرائب والفوترة</button>
+        <button class="menuegy-tab-btn" onclick="switchSysTab('sysSecurity', this)">كلمات السر</button>
+        <button class="menuegy-tab-btn" onclick="switchSysTab('sysScaleBarcode', this)">أخرى وميزان الباركود</button>
+        <button class="menuegy-tab-btn" onclick="switchSysTab('sysRestaurant', this)">إعداد المطعم وطابعات المطبخ</button>
       </div>
 
       <div class="modal-body" style="padding: 1.5rem; max-height: 70vh; overflow-y: auto; background: #f8fafc; direction: rtl;">
@@ -596,7 +608,7 @@
               <h5 style="margin-top: 0; color: #1e293b;">مجلد حفظ الصور والتصاميم:</h5>
               <p style="font-size: 12px; color: #64748b; margin-bottom: 8px;">حدد مجلد لحفظ الصور به... يمكنك تحديد مجلد مشاركة من الجهاز الرئيسي أو السيرفر لجميع الأجهزة.</p>
               <div style="display: flex; gap: 10px;">
-                <input type="text" id="sys_images_save_path" value="C:\SAHL\UserFiles\" style="flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: monospace;">
+                <input type="text" id="sys_images_save_path" value="/uploads/images/" style="flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: monospace;">
                 <button type="button" class="btn btn-outline" style="padding: 4px 12px; font-size: 12px;">تصفح</button>
               </div>
             </div>
@@ -1219,8 +1231,77 @@
   <!-- JsBarcode Library for SVG & Canvas Barcode rendering -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
+  <!-- ========================================== -->
+  <!-- 7. REPORTS & ANALYTICS MODAL (التقارير والأرباح) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="reportsModalOverlay" onclick="closeReportsModal()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 800px; width: 95%;">
+      <div class="modal-header" style="background: #1e293b; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #c084fc;">
+          <i class="fa-solid fa-chart-pie"></i> التقارير والأرباح وتحليل المبيعات
+        </h3>
+        <button onclick="closeReportsModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i> إغلاق
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem; background: #f8fafc; direction: rtl; text-align: center;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 30px; color: #475569;">
+          <i class="fa-solid fa-chart-line" style="font-size: 3rem; color: #c084fc; margin-bottom: 15px;"></i>
+          <h2 style="margin: 0 0 10px 0; color: #1e293b;">جاري معالجة بيانات التقارير...</h2>
+          <p>هذه الشاشة ستعرض قريباً إجمالي المبيعات، الأرباح الصافية، والمنتجات الأكثر مبيعاً بناءً على فواتير الـ POS.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 8. TREASURY & EXPENSES MODAL (الخزينة والمصروفات) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="treasuryModalOverlay" onclick="closeTreasuryModal()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 800px; width: 95%;">
+      <div class="modal-header" style="background: #1e293b; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fcd34d;">
+          <i class="fa-solid fa-vault"></i> إدارة الخزينة والمصروفات اليومية
+        </h3>
+        <button onclick="closeTreasuryModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i> إغلاق
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem; background: #f8fafc; direction: rtl; text-align: center;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 30px; color: #475569;">
+          <i class="fa-solid fa-money-bill-transfer" style="font-size: 3rem; color: #fcd34d; margin-bottom: 15px;"></i>
+          <h2 style="margin: 0 0 10px 0; color: #1e293b;">شاشة الخزينة والإقفال اليومي</h2>
+          <p>سيتم تفعيل تسجيل المصروفات التشغيلية (كهرباء، رواتب، إيجار) وتسليم عهدة الكاشير وإقفال الوردية في التحديث القادم.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 9. PURCHASES & SUPPLIERS MODAL (المشتريات والموردين) -->
+  <!-- ========================================== -->
+  <div class="modal-overlay" id="purchasesModalOverlay" onclick="closePurchasesModal()">
+    <div class="modal-card" onclick="event.stopPropagation()" style="max-width: 800px; width: 95%;">
+      <div class="modal-header" style="background: #1e293b; color: #fff; padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #f87171;">
+          <i class="fa-solid fa-truck-ramp-box"></i> المشتريات وفواتير الموردين
+        </h3>
+        <button onclick="closePurchasesModal()" class="btn" style="background: rgba(255,255,255,0.2); color: #fff; border: none; padding: 5px 12px; font-size: 0.85rem; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i> إغلاق
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem; background: #f8fafc; direction: rtl; text-align: center;">
+        <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 30px; color: #475569;">
+          <i class="fa-solid fa-boxes-packing" style="font-size: 3rem; color: #f87171; margin-bottom: 15px;"></i>
+          <h2 style="margin: 0 0 10px 0; color: #1e293b;">إدارة الموردين وتوريد البضاعة</h2>
+          <p>لإدخال فواتير المشتريات من الموردين وزيادة أرصدة المخزن تلقائياً وتسجيل الدفعات الآجلة. (قيد الإنشاء)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
-  <script src="../js/database.js?v=8"></script>
-  <script src="../js/admin.js?v=8"></script>
+  <script src="../js/database.js"></script>
+  <script src="../js/admin.js"></script>
 </body>
 </html>

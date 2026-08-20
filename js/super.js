@@ -78,12 +78,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     loginBtn.addEventListener("click", () => {
+      // --- BRUTE FORCE PROTECTION ---
+      const attemptKey = `login_attempts_super_admin`;
+      let attempts = JSON.parse(localStorage.getItem(attemptKey)) || { count: 0, lockoutTime: 0 };
+      
+      if (attempts.lockoutTime > Date.now()) {
+        const remainingMins = Math.ceil((attempts.lockoutTime - Date.now()) / 60000);
+        errorMsg.innerHTML = `تم قفل الحساب مؤقتاً بسبب كثرة المحاولات الخاطئة. حاول مجدداً بعد <strong>${remainingMins}</strong> دقيقة.`;
+        errorMsg.style.display = "block";
+        return;
+      }
+      // -----------------------------
+
       if (passInput.value === MASTER_PASSWORD) {
+        localStorage.removeItem(attemptKey); // Reset attempts on success
         sessionStorage.setItem("super_auth", "true");
         authOverlay.style.display = "none";
         loadDashboard();
       } else {
-        errorMsg.textContent = "الرقم السري خاطئ! يرجى المحاولة مرة أخرى.";
+        attempts.count += 1;
+        if (attempts.count >= 5) {
+          attempts.lockoutTime = Date.now() + (15 * 60 * 1000); // 15 mins
+          errorMsg.textContent = "تم إدخال كلمة سر خاطئة 5 مرات متتالية. تم قفل تسجيل الدخول لمدة 15 دقيقة.";
+        } else {
+          errorMsg.textContent = `الرقم السري خاطئ! يرجى المحاولة مرة أخرى. (المحاولات المتبقية: ${5 - attempts.count})`;
+        }
+        localStorage.setItem(attemptKey, JSON.stringify(attempts));
         errorMsg.style.display = "block";
       }
     });

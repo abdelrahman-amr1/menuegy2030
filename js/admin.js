@@ -219,6 +219,19 @@ async function handleAdminLogin(event) {
     return;
   }
 
+  // --- BRUTE FORCE PROTECTION ---
+  const attemptKey = `login_attempts_${shopSlug}_${user}`;
+  let attempts = JSON.parse(localStorage.getItem(attemptKey)) || { count: 0, lockoutTime: 0 };
+  
+  if (attempts.lockoutTime > Date.now()) {
+    const remainingMins = Math.ceil((attempts.lockoutTime - Date.now()) / 60000);
+    errorMsg.innerHTML = `تم قفل الحساب مؤقتاً بسبب كثرة المحاولات الخاطئة. حاول مجدداً بعد <strong>${remainingMins}</strong> دقيقة.`;
+    errorMsg.style.display = "block";
+    showToast("حساب مقفل مؤقتاً!", "danger");
+    return;
+  }
+  // -----------------------------
+
   try {
     const shop = await getShopProfile(shopSlug);
     
@@ -247,6 +260,9 @@ async function handleAdminLogin(event) {
     }
 
     if (authenticated) {
+      // Reset attempts on success
+      localStorage.removeItem(attemptKey);
+      
       sessionStorage.setItem("tenant_admin_auth", "true");
       sessionStorage.setItem("tenant_admin_shop_id", shopSlug);
       sessionStorage.setItem("tenant_user_role", userRole);
@@ -255,7 +271,16 @@ async function handleAdminLogin(event) {
       await checkAuth();
       showToast(`تم تسجيل الدخول بنجاح! مرحباً بك (${userRole === 'cashier' ? 'الكاشير' : 'مدير المتجر'}).`);
     } else {
-      errorMsg.textContent = "خطأ في اسم المستخدم أو كلمة المرور الخاصة بالمتجر أو الكاشير!";
+      // Record failed attempt
+      attempts.count += 1;
+      if (attempts.count >= 5) {
+        attempts.lockoutTime = Date.now() + (15 * 60 * 1000); // 15 mins
+        errorMsg.textContent = "تم إدخال بيانات خاطئة 5 مرات متتالية. تم قفل الحساب لمدة 15 دقيقة لدواعي أمنية.";
+      } else {
+        errorMsg.textContent = `خطأ في اسم المستخدم أو كلمة المرور! (المحاولات المتبقية: ${5 - attempts.count})`;
+      }
+      localStorage.setItem(attemptKey, JSON.stringify(attempts));
+      
       errorMsg.style.display = "block";
       showToast("خطأ في البيانات المُدخلة!", "danger");
     }
@@ -844,7 +869,7 @@ function switchPermTab(tabId, btnElement) {
   const contents = document.querySelectorAll("#userPermissionsModalOverlay .perm-tab-content");
   contents.forEach(c => c.classList.remove("active"));
   
-  const buttons = document.querySelectorAll("#userPermissionsModalOverlay .sahl-tab-btn");
+  const buttons = document.querySelectorAll("#userPermissionsModalOverlay .menuegy-tab-btn");
   buttons.forEach(b => b.classList.remove("active"));
   
   const targetContent = document.getElementById(tabId);
@@ -1055,7 +1080,7 @@ function switchSysTab(tabId, btnElement) {
   const contents = document.querySelectorAll("#systemSettingsModalOverlay .sys-tab-content");
   contents.forEach(c => c.classList.remove("active"));
   
-  const buttons = document.querySelectorAll("#systemSettingsModalOverlay .sahl-tab-btn");
+  const buttons = document.querySelectorAll("#systemSettingsModalOverlay .menuegy-tab-btn");
   buttons.forEach(b => b.classList.remove("active"));
   
   const targetContent = document.getElementById(tabId);
@@ -1072,7 +1097,7 @@ async function openSystemSettingsModal() {
   // Tab 1: General
   if (settings.general) {
     document.getElementById("sys_auto_deliver_sales").checked = settings.general.auto_deliver_sales !== false;
-    document.getElementById("sys_images_save_path").value = settings.general.images_save_path || "C:\\SAHL\\UserFiles\\";
+    document.getElementById("sys_images_save_path").value = settings.general.images_save_path || "/uploads/images/";
     document.getElementById("sys_invoice_print_copies").value = settings.general.invoice_print_copies || 1;
     document.getElementById("sys_lock_invoice_edit_before").value = settings.general.lock_invoice_edit_before || "2000-01-01";
   }
@@ -1894,3 +1919,35 @@ async function deleteSubUser(userId) {
     showToast("فشل الحذف من السحابة.", "danger");
   }
 }
+
+/* ==================================================== */
+/* NEW ERP SYSTEMS MODALS CONTROLLERS */
+/* ==================================================== */
+
+function openReportsModal() {
+  const overlay = document.getElementById("reportsModalOverlay");
+  if (overlay) overlay.classList.add("open");
+}
+function closeReportsModal() {
+  const overlay = document.getElementById("reportsModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+function openTreasuryModal() {
+  const overlay = document.getElementById("treasuryModalOverlay");
+  if (overlay) overlay.classList.add("open");
+}
+function closeTreasuryModal() {
+  const overlay = document.getElementById("treasuryModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+
+function openPurchasesModal() {
+  const overlay = document.getElementById("purchasesModalOverlay");
+  if (overlay) overlay.classList.add("open");
+}
+function closePurchasesModal() {
+  const overlay = document.getElementById("purchasesModalOverlay");
+  if (overlay) overlay.classList.remove("open");
+}
+

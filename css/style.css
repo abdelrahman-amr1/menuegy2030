@@ -2144,26 +2144,36 @@ footer {
 
 .sahl-tab-btn:hover {
   color: #1e293b;
-  background: rgba(255, 255, 255, 0.5);
 }
 
-.sahl-tab-btn.active {
-  color: #0284c7;
-  border-bottom-color: #0284c7;
-  background: #ffffff;
+.menuegy-tab-btn:last-child {
+  border-left: none;
 }
 
-.perm-tab-content, .sys-tab-content {
+.menuegy-tab-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.menuegy-tab-btn.active {
+  background: #fff;
+  color: #0f172a;
+  border-bottom: 2px solid #2563eb;
+  margin-bottom: -2px;
+}
+
+/* MenuEgy Tab Content */
+.menuegy-tab-content {
   display: none;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0 0 8px 8px;
+  animation: fadeInMenuegyTab 0.3s ease;
 }
 
-.perm-tab-content.active, .sys-tab-content.active {
-  display: block;
-  animation: fadeInSahlTab 0.3s ease;
-}
-
-@keyframes fadeInSahlTab {
-  from { opacity: 0; transform: translateY(4px); }
+@keyframes fadeInMenuegyTab {
+  from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 

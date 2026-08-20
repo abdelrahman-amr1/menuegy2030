@@ -496,7 +496,7 @@ async function getShopSystemSettings(shopSlug) {
     // 1. General Settings (عام)
     general: {
       auto_deliver_sales: true,
-      images_save_path: "C:\\SAHL\\UserFiles\\",
+      images_save_path: "/uploads/images/",
       invoice_print_copies: 1,
       lock_invoice_edit_before: "2000-01-01"
     },
