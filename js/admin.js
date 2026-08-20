@@ -902,36 +902,29 @@ async function openUserPermissionsModal() {
 
   // Tab 2: Invoices
   if (perms.invoices) {
-    document.getElementById("perm_view_sales_invoices").checked = perms.invoices.view_sales_invoices !== false;
-    document.getElementById("perm_sales_new").checked = perms.invoices.sales_new !== false;
-    document.getElementById("perm_sales_edit").checked = perms.invoices.sales_edit !== false;
-    document.getElementById("perm_sales_delete").checked = perms.invoices.sales_delete === true;
+    document.getElementById("perm_invoice_view_sales").checked = perms.invoices.view_sales !== false;
+    document.getElementById("perm_invoice_sales_new").checked = perms.invoices.sales_new !== false;
+    document.getElementById("perm_invoice_sales_edit").checked = perms.invoices.sales_edit !== false;
+    document.getElementById("perm_invoice_sales_delete").checked = perms.invoices.sales_delete === true;
+    document.getElementById("perm_invoice_sales_return").checked = perms.invoices.sales_return !== false;
 
-    document.getElementById("perm_view_quotes").checked = perms.invoices.view_quotes !== false;
-    document.getElementById("perm_quote_new").checked = perms.invoices.quote_new !== false;
-    document.getElementById("perm_quote_edit").checked = perms.invoices.quote_edit !== false;
-    document.getElementById("perm_quote_delete").checked = perms.invoices.quote_delete === true;
+    document.getElementById("perm_invoice_view_purchases").checked = perms.invoices.view_purchases !== false;
+    document.getElementById("perm_invoice_purchase_new").checked = perms.invoices.purchase_new !== false;
+    document.getElementById("perm_invoice_purchase_edit").checked = perms.invoices.purchase_edit !== false;
+    document.getElementById("perm_invoice_purchase_delete").checked = perms.invoices.purchase_delete === true;
+    document.getElementById("perm_invoice_purchase_return").checked = perms.invoices.purchase_return !== false;
 
-    document.getElementById("perm_view_purchases").checked = perms.invoices.view_purchases !== false;
-    document.getElementById("perm_purchase_new").checked = perms.invoices.purchase_new !== false;
-    document.getElementById("perm_purchase_edit").checked = perms.invoices.purchase_edit !== false;
-    document.getElementById("perm_purchase_delete").checked = perms.invoices.purchase_delete === true;
+    document.getElementById("perm_invoice_view_quotes").checked = perms.invoices.view_quotes !== false;
+    document.getElementById("perm_invoice_quote_new").checked = perms.invoices.quote_new !== false;
+    document.getElementById("perm_invoice_quote_edit").checked = perms.invoices.quote_edit !== false;
+    document.getElementById("perm_invoice_quote_delete").checked = perms.invoices.quote_delete === true;
 
-    document.getElementById("perm_view_stocktake").checked = perms.invoices.view_stocktake !== false;
-    document.getElementById("perm_view_branch_transfers").checked = perms.invoices.view_branch_transfers !== false;
-    document.getElementById("perm_view_adjustments").checked = perms.invoices.view_adjustments !== false;
-
-    document.getElementById("perm_view_expenses").checked = perms.invoices.view_expenses !== false;
-    document.getElementById("perm_view_receipts").checked = perms.invoices.view_receipts !== false;
-    document.getElementById("perm_transfer_safe_other").checked = perms.invoices.transfer_safe_other !== false;
-    document.getElementById("perm_track_cheques").checked = perms.invoices.track_cheques !== false;
-
-    document.getElementById("perm_allow_sale_edit_price").checked = perms.invoices.allow_sale_edit_price !== false;
-    document.getElementById("perm_allow_invoice_discount").checked = perms.invoices.allow_invoice_discount !== false;
-    document.getElementById("perm_max_discount_pct").value = perms.invoices.max_discount_pct || 10;
-    document.getElementById("perm_allow_sale_below_cost").checked = perms.invoices.allow_sale_below_cost === true;
-    document.getElementById("perm_view_invoice_profit").checked = perms.invoices.view_invoice_profit !== false;
-    document.getElementById("perm_allow_credit_sales").checked = perms.invoices.allow_credit_sales !== false;
+    document.getElementById("perm_invoice_edit_price").checked = perms.invoices.edit_price !== false;
+    document.getElementById("perm_invoice_discount").checked = perms.invoices.discount !== false;
+    document.getElementById("perm_invoice_max_discount").value = perms.invoices.max_discount || 10;
+    document.getElementById("perm_invoice_below_cost").checked = perms.invoices.below_cost === true;
+    document.getElementById("perm_invoice_profit").checked = perms.invoices.view_profit !== false;
+    document.getElementById("perm_invoice_credit_sales").checked = perms.invoices.credit_sales !== false;
   }
 
   // Tab 3: Inventory
@@ -950,23 +943,31 @@ async function openUserPermissionsModal() {
 
   // Tab 4: Accounts
   if (perms.accounts) {
-    document.getElementById("perm_view_accounts").checked = perms.accounts.view_accounts !== false;
-    document.getElementById("perm_acc_new").checked = perms.accounts.acc_new !== false;
-    document.getElementById("perm_acc_edit").checked = perms.accounts.acc_edit !== false;
-    document.getElementById("perm_acc_delete").checked = perms.accounts.acc_delete === true;
-    document.getElementById("perm_view_account_balance").checked = perms.accounts.view_account_balance !== false;
-    document.getElementById("perm_view_account_statement").checked = perms.accounts.view_account_statement !== false;
-    document.getElementById("perm_allowed_customer").checked = perms.accounts.allowed_customer !== false;
-    document.getElementById("perm_allowed_supplier").checked = perms.accounts.allowed_supplier !== false;
-    document.getElementById("perm_allowed_rep").checked = perms.accounts.allowed_rep !== false;
-    document.getElementById("perm_allowed_other").checked = perms.accounts.allowed_other !== false;
+    document.getElementById("perm_acc_view").checked = perms.accounts.view !== false;
+    document.getElementById("perm_acc_new").checked = perms.accounts.new !== false;
+    document.getElementById("perm_acc_edit").checked = perms.accounts.edit !== false;
+    document.getElementById("perm_acc_delete").checked = perms.accounts.delete === true;
+    document.getElementById("perm_acc_balance").checked = perms.accounts.balance !== false;
+    document.getElementById("perm_acc_statement").checked = perms.accounts.statement !== false;
+    document.getElementById("perm_acc_type_customer").checked = perms.accounts.type_customer !== false;
+    document.getElementById("perm_acc_type_supplier").checked = perms.accounts.type_supplier !== false;
+    document.getElementById("perm_acc_type_rep").checked = perms.accounts.type_rep !== false;
+    document.getElementById("perm_acc_type_other").checked = perms.accounts.type_other !== false;
   }
 
   // Tab 5: Treasury
   if (perms.treasury) {
-    document.getElementById("perm_view_treasury_flow").checked = perms.treasury.view_treasury_flow !== false;
-    document.getElementById("perm_analyze_receipts").checked = perms.treasury.analyze_receipts !== false;
-    document.getElementById("perm_analyze_expenses").checked = perms.treasury.analyze_expenses !== false;
+    document.getElementById("perm_treasury_view_receipts").checked = perms.treasury.view_receipts !== false;
+    document.getElementById("perm_treasury_receipt_new").checked = perms.treasury.receipt_new !== false;
+    document.getElementById("perm_treasury_receipt_edit").checked = perms.treasury.receipt_edit !== false;
+    document.getElementById("perm_treasury_receipt_delete").checked = perms.treasury.receipt_delete === true;
+    document.getElementById("perm_treasury_view_expenses").checked = perms.treasury.view_expenses !== false;
+    document.getElementById("perm_treasury_expense_new").checked = perms.treasury.expense_new !== false;
+    document.getElementById("perm_treasury_expense_edit").checked = perms.treasury.expense_edit !== false;
+    document.getElementById("perm_treasury_expense_delete").checked = perms.treasury.expense_delete === true;
+    document.getElementById("perm_treasury_view_flow").checked = perms.treasury.view_flow !== false;
+    document.getElementById("perm_treasury_transfer").checked = perms.treasury.transfer !== false;
+    document.getElementById("perm_treasury_close_shift").checked = perms.treasury.close_shift !== false;
   }
 
   // Tab 6: Advanced Reports
@@ -1004,31 +1005,26 @@ async function saveUserPermissionsForm() {
       active_user: document.getElementById("perm_active_user").checked
     },
     invoices: {
-      view_sales_invoices: document.getElementById("perm_view_sales_invoices").checked,
-      sales_new: document.getElementById("perm_sales_new").checked,
-      sales_edit: document.getElementById("perm_sales_edit").checked,
-      sales_delete: document.getElementById("perm_sales_delete").checked,
-      view_quotes: document.getElementById("perm_view_quotes").checked,
-      quote_new: document.getElementById("perm_quote_new").checked,
-      quote_edit: document.getElementById("perm_quote_edit").checked,
-      quote_delete: document.getElementById("perm_quote_delete").checked,
-      view_purchases: document.getElementById("perm_view_purchases").checked,
-      purchase_new: document.getElementById("perm_purchase_new").checked,
-      purchase_edit: document.getElementById("perm_purchase_edit").checked,
-      purchase_delete: document.getElementById("perm_purchase_delete").checked,
-      view_stocktake: document.getElementById("perm_view_stocktake").checked,
-      view_branch_transfers: document.getElementById("perm_view_branch_transfers").checked,
-      view_adjustments: document.getElementById("perm_view_adjustments").checked,
-      view_expenses: document.getElementById("perm_view_expenses").checked,
-      view_receipts: document.getElementById("perm_view_receipts").checked,
-      transfer_safe_other: document.getElementById("perm_transfer_safe_other").checked,
-      track_cheques: document.getElementById("perm_track_cheques").checked,
-      allow_sale_edit_price: document.getElementById("perm_allow_sale_edit_price").checked,
-      allow_invoice_discount: document.getElementById("perm_allow_invoice_discount").checked,
-      max_discount_pct: parseFloat(document.getElementById("perm_max_discount_pct").value) || 0,
-      allow_sale_below_cost: document.getElementById("perm_allow_sale_below_cost").checked,
-      view_invoice_profit: document.getElementById("perm_view_invoice_profit").checked,
-      allow_credit_sales: document.getElementById("perm_allow_credit_sales").checked
+      view_sales: document.getElementById("perm_invoice_view_sales").checked,
+      sales_new: document.getElementById("perm_invoice_sales_new").checked,
+      sales_edit: document.getElementById("perm_invoice_sales_edit").checked,
+      sales_delete: document.getElementById("perm_invoice_sales_delete").checked,
+      sales_return: document.getElementById("perm_invoice_sales_return").checked,
+      view_purchases: document.getElementById("perm_invoice_view_purchases").checked,
+      purchase_new: document.getElementById("perm_invoice_purchase_new").checked,
+      purchase_edit: document.getElementById("perm_invoice_purchase_edit").checked,
+      purchase_delete: document.getElementById("perm_invoice_purchase_delete").checked,
+      purchase_return: document.getElementById("perm_invoice_purchase_return").checked,
+      view_quotes: document.getElementById("perm_invoice_view_quotes").checked,
+      quote_new: document.getElementById("perm_invoice_quote_new").checked,
+      quote_edit: document.getElementById("perm_invoice_quote_edit").checked,
+      quote_delete: document.getElementById("perm_invoice_quote_delete").checked,
+      edit_price: document.getElementById("perm_invoice_edit_price").checked,
+      discount: document.getElementById("perm_invoice_discount").checked,
+      max_discount: parseFloat(document.getElementById("perm_invoice_max_discount").value) || 0,
+      below_cost: document.getElementById("perm_invoice_below_cost").checked,
+      view_profit: document.getElementById("perm_invoice_profit").checked,
+      credit_sales: document.getElementById("perm_invoice_credit_sales").checked
     },
     inventory: {
       view_items: document.getElementById("perm_inv_view_items").checked,
@@ -1043,21 +1039,29 @@ async function saveUserPermissionsForm() {
       print_barcode: document.getElementById("perm_inv_print_barcode").checked
     },
     accounts: {
-      view_accounts: document.getElementById("perm_view_accounts").checked,
-      acc_new: document.getElementById("perm_acc_new").checked,
-      acc_edit: document.getElementById("perm_acc_edit").checked,
-      acc_delete: document.getElementById("perm_acc_delete").checked,
-      view_account_balance: document.getElementById("perm_view_account_balance").checked,
-      view_account_statement: document.getElementById("perm_view_account_statement").checked,
-      allowed_customer: document.getElementById("perm_allowed_customer").checked,
-      allowed_supplier: document.getElementById("perm_allowed_supplier").checked,
-      allowed_rep: document.getElementById("perm_allowed_rep").checked,
-      allowed_other: document.getElementById("perm_allowed_other").checked
+      view: document.getElementById("perm_acc_view").checked,
+      new: document.getElementById("perm_acc_new").checked,
+      edit: document.getElementById("perm_acc_edit").checked,
+      delete: document.getElementById("perm_acc_delete").checked,
+      balance: document.getElementById("perm_acc_balance").checked,
+      statement: document.getElementById("perm_acc_statement").checked,
+      type_customer: document.getElementById("perm_acc_type_customer").checked,
+      type_supplier: document.getElementById("perm_acc_type_supplier").checked,
+      type_rep: document.getElementById("perm_acc_type_rep").checked,
+      type_other: document.getElementById("perm_acc_type_other").checked
     },
     treasury: {
-      view_treasury_flow: document.getElementById("perm_view_treasury_flow").checked,
-      analyze_receipts: document.getElementById("perm_analyze_receipts").checked,
-      analyze_expenses: document.getElementById("perm_analyze_expenses").checked
+      view_receipts: document.getElementById("perm_treasury_view_receipts").checked,
+      receipt_new: document.getElementById("perm_treasury_receipt_new").checked,
+      receipt_edit: document.getElementById("perm_treasury_receipt_edit").checked,
+      receipt_delete: document.getElementById("perm_treasury_receipt_delete").checked,
+      view_expenses: document.getElementById("perm_treasury_view_expenses").checked,
+      expense_new: document.getElementById("perm_treasury_expense_new").checked,
+      expense_edit: document.getElementById("perm_treasury_expense_edit").checked,
+      expense_delete: document.getElementById("perm_treasury_expense_delete").checked,
+      view_flow: document.getElementById("perm_treasury_view_flow").checked,
+      transfer: document.getElementById("perm_treasury_transfer").checked,
+      close_shift: document.getElementById("perm_treasury_close_shift").checked
     },
     advanced_reports: {
       advanced_reports_access: document.getElementById("perm_advanced_reports_access").checked,

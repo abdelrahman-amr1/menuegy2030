@@ -448,57 +448,44 @@
 
         <!-- Tab 2: Invoices (الفواتير) -->
         <div id="permInvoices" class="perm-tab-content">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
-            <div class="perm-group-box">
-              <h5>فواتير المبيعات:</h5>
-              <label><input type="checkbox" id="perm_view_sales_invoices" checked> عرض فواتير المبيعات</label>
-              <label><input type="checkbox" id="perm_sales_new" checked> جديد (إضافة فاتورة بيع)</label>
-              <label><input type="checkbox" id="perm_sales_edit" checked> تعديل فاتورة بيع</label>
-              <label><input type="checkbox" id="perm_sales_delete"> حذف فاتورة بيع</label>
-            </div>
-
-            <div class="perm-group-box">
-              <h5>عروض الأسعار:</h5>
-              <label><input type="checkbox" id="perm_view_quotes" checked> عرض عروض الأسعار</label>
-              <label><input type="checkbox" id="perm_quote_new" checked> جديد</label>
-              <label><input type="checkbox" id="perm_quote_edit" checked> تعديل</label>
-              <label><input type="checkbox" id="perm_quote_delete"> حذف</label>
-            </div>
-
-            <div class="perm-group-box">
-              <h5>فواتير الشراء:</h5>
-              <label><input type="checkbox" id="perm_view_purchases" checked> عرض فواتير الشراء</label>
-              <label><input type="checkbox" id="perm_purchase_new" checked> جديد</label>
-              <label><input type="checkbox" id="perm_purchase_edit" checked> تعديل</label>
-              <label><input type="checkbox" id="perm_purchase_delete"> حذف</label>
-            </div>
-
-            <div class="perm-group-box">
-              <h5>الجرد والتصفيات:</h5>
-              <label><input type="checkbox" id="perm_view_stocktake" checked> عرض الجرد</label>
-              <label><input type="checkbox" id="perm_view_branch_transfers" checked> عرض تحويلات الفروع</label>
-              <label><input type="checkbox" id="perm_view_adjustments" checked> عرض التسويات</label>
-            </div>
-
-            <div class="perm-group-box">
-              <h5>المصروفات والمقبوضات:</h5>
-              <label><input type="checkbox" id="perm_view_expenses" checked> عرض المصروفات</label>
-              <label><input type="checkbox" id="perm_view_receipts" checked> عرض المقبوضات</label>
-              <label><input type="checkbox" id="perm_transfer_safe_other" checked> تحويل من خزينة لأخرى</label>
-              <label><input type="checkbox" id="perm_track_cheques" checked> متابعة سداد الشيكات والأقساط</label>
-            </div>
-
-            <div class="perm-group-box">
-              <h5>صلاحيات البيع المتقدمة والخصومات:</h5>
-              <label><input type="checkbox" id="perm_allow_sale_edit_price" checked> تعديل أسعار البيع بالفاتورة</label>
-              <label><input type="checkbox" id="perm_allow_invoice_discount" checked> إضافة خصم للفاتورة</label>
-              <div style="display: flex; gap: 5px; align-items: center; font-size: 11px; margin-top: 3px;">
-                <span>أعلى % خصم:</span>
-                <input type="number" id="perm_max_discount_pct" value="10" style="width: 50px; padding: 2px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <label class="checkbox-card" style="font-weight: bold; margin-bottom: 5px; color: #0284c7;"><input type="checkbox" id="perm_invoice_view_sales" checked> <span>فواتير المبيعات</span></label>
+              <div style="display: flex; gap: 10px; padding-right: 25px; font-size: 13px; flex-wrap: wrap;">
+                <label><input type="checkbox" id="perm_invoice_sales_new" checked> جديد</label>
+                <label><input type="checkbox" id="perm_invoice_sales_edit" checked> تعديل</label>
+                <label><input type="checkbox" id="perm_invoice_sales_delete"> حذف</label>
+                <label><input type="checkbox" id="perm_invoice_sales_return" checked> مرتجع</label>
               </div>
-              <label><input type="checkbox" id="perm_allow_sale_below_cost"> البيع بأقل من سعر التكلفة/الشراء</label>
-              <label><input type="checkbox" id="perm_view_invoice_profit" checked> عرض ربح الفاتورة الحالية</label>
-              <label><input type="checkbox" id="perm_allow_credit_sales" checked> البيع بالأجل</label>
+            </div>
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <label class="checkbox-card" style="font-weight: bold; margin-bottom: 5px; color: #16a34a;"><input type="checkbox" id="perm_invoice_view_purchases" checked> <span>فواتير المشتريات</span></label>
+              <div style="display: flex; gap: 10px; padding-right: 25px; font-size: 13px; flex-wrap: wrap;">
+                <label><input type="checkbox" id="perm_invoice_purchase_new" checked> جديد</label>
+                <label><input type="checkbox" id="perm_invoice_purchase_edit" checked> تعديل</label>
+                <label><input type="checkbox" id="perm_invoice_purchase_delete"> حذف</label>
+                <label><input type="checkbox" id="perm_invoice_purchase_return" checked> مرتجع</label>
+              </div>
+            </div>
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <label class="checkbox-card" style="font-weight: bold; margin-bottom: 5px; color: #d97706;"><input type="checkbox" id="perm_invoice_view_quotes" checked> <span>عروض الأسعار</span></label>
+              <div style="display: flex; gap: 10px; padding-right: 25px; font-size: 13px; flex-wrap: wrap;">
+                <label><input type="checkbox" id="perm_invoice_quote_new" checked> جديد</label>
+                <label><input type="checkbox" id="perm_invoice_quote_edit" checked> تعديل</label>
+                <label><input type="checkbox" id="perm_invoice_quote_delete"> حذف</label>
+              </div>
+            </div>
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b; font-size: 13px;">صلاحيات البيع المتقدمة والخصومات:</h5>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_invoice_edit_price" checked> تعديل أسعار البيع بالفاتورة</label>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_invoice_discount" checked> إضافة خصم للفاتورة</label>
+              <div style="display: flex; gap: 5px; align-items: center; font-size: 13px; margin-bottom: 5px;">
+                <span>أعلى % خصم:</span>
+                <input type="number" id="perm_invoice_max_discount" value="10" style="width: 50px; padding: 2px; border: 1px solid #cbd5e1; border-radius: 3px;">
+              </div>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px; color: #b91c1c;"><input type="checkbox" id="perm_invoice_below_cost"> البيع بأقل من سعر التكلفة</label>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_invoice_profit" checked> عرض ربح الفاتورة الحالية</label>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_invoice_credit_sales" checked> البيع بالأجل للعملاء</label>
             </div>
           </div>
         </div>
@@ -526,32 +513,57 @@
 
         <!-- Tab 4: Accounts (الحسابات) -->
         <div id="permAccounts" class="perm-tab-content">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
-            <label class="checkbox-card"><input type="checkbox" id="perm_view_accounts" checked> <span>عرض الحسابات والعملاء والموردين</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_acc_new" checked> <span>إضافة حساب جديد</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_acc_edit" checked> <span>تعديل حساب</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_acc_delete"> <span>حذف حساب</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_view_account_balance" checked> <span>رصيد الحساب</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_view_account_statement" checked> <span>كشف حساب تفصيلي</span></label>
-          </div>
-
-          <div style="margin-top: 15px; background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
-            <h5 style="margin: 0 0 8px 0; color: #1e293b;">أنواع الحسابات المسموح التعامل معها:</h5>
-            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-              <label><input type="checkbox" id="perm_allowed_customer" checked> عميل</label>
-              <label><input type="checkbox" id="perm_allowed_supplier" checked> مورد</label>
-              <label><input type="checkbox" id="perm_allowed_rep" checked> مندوب بيع</label>
-              <label><input type="checkbox" id="perm_allowed_other" checked> أخرى</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <label class="checkbox-card" style="font-weight: bold; margin-bottom: 5px; color: #4338ca;"><input type="checkbox" id="perm_acc_view" checked> <span>عرض الحسابات</span></label>
+              <div style="display: flex; gap: 10px; padding-right: 25px; font-size: 13px; flex-wrap: wrap;">
+                <label><input type="checkbox" id="perm_acc_new" checked> جديد</label>
+                <label><input type="checkbox" id="perm_acc_edit" checked> تعديل</label>
+                <label><input type="checkbox" id="perm_acc_delete"> حذف</label>
+              </div>
+            </div>
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b; font-size: 13px;">التقارير:</h5>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_acc_balance" checked> رصيد الحساب</label>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_acc_statement" checked> كشف حساب تفصيلي</label>
+            </div>
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff; grid-column: 1 / -1;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b; font-size: 13px;">أنواع الحسابات المسموح التعامل معها:</h5>
+              <div style="display: flex; gap: 15px; flex-wrap: wrap; font-size: 13px;">
+                <label><input type="checkbox" id="perm_acc_type_customer" checked> عميل</label>
+                <label><input type="checkbox" id="perm_acc_type_supplier" checked> مورد</label>
+                <label><input type="checkbox" id="perm_acc_type_rep" checked> مندوب بيع</label>
+                <label><input type="checkbox" id="perm_acc_type_other" checked> أخرى (مصروفات عامة، الخ)</label>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Tab 5: Treasury (الخزينة) -->
         <div id="permTreasury" class="perm-tab-content">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px;">
-            <label class="checkbox-card"><input type="checkbox" id="perm_view_treasury_flow" checked> <span>عرض حركة الخزينة ورصيدها</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_analyze_receipts" checked> <span>تحليل المقبوضات وتصنيفها</span></label>
-            <label class="checkbox-card"><input type="checkbox" id="perm_analyze_expenses" checked> <span>تحليل المصروفات والتكاليف</span></label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <label class="checkbox-card" style="font-weight: bold; margin-bottom: 5px; color: #15803d;"><input type="checkbox" id="perm_treasury_view_receipts" checked> <span>المقبوضات (الوارد)</span></label>
+              <div style="display: flex; gap: 10px; padding-right: 25px; font-size: 13px; flex-wrap: wrap;">
+                <label><input type="checkbox" id="perm_treasury_receipt_new" checked> جديد</label>
+                <label><input type="checkbox" id="perm_treasury_receipt_edit" checked> تعديل</label>
+                <label><input type="checkbox" id="perm_treasury_receipt_delete"> حذف</label>
+              </div>
+            </div>
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <label class="checkbox-card" style="font-weight: bold; margin-bottom: 5px; color: #b91c1c;"><input type="checkbox" id="perm_treasury_view_expenses" checked> <span>المصروفات (المنصرف)</span></label>
+              <div style="display: flex; gap: 10px; padding-right: 25px; font-size: 13px; flex-wrap: wrap;">
+                <label><input type="checkbox" id="perm_treasury_expense_new" checked> جديد</label>
+                <label><input type="checkbox" id="perm_treasury_expense_edit" checked> تعديل</label>
+                <label><input type="checkbox" id="perm_treasury_expense_delete"> حذف</label>
+              </div>
+            </div>
+            <div class="perm-group-box" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; background: #fff;">
+              <h5 style="margin: 0 0 8px 0; color: #1e293b; font-size: 13px;">عمليات أخرى:</h5>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_treasury_view_flow" checked> عرض حركة الخزينة (الرصيد)</label>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px;"><input type="checkbox" id="perm_treasury_transfer" checked> تحويل من خزينة لأخرى</label>
+              <label style="display: block; font-size: 13px; margin-bottom: 5px; color: #0369a1;"><input type="checkbox" id="perm_treasury_close_shift" checked> تقفيل وردية الكاشير</label>
+            </div>
           </div>
         </div>
 
