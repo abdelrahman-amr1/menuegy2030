@@ -194,6 +194,9 @@ async function checkAuth() {
     if (dashboardContent) dashboardContent.style.display = "block";
     if (logoutBtn) logoutBtn.style.display = "flex";
     
+    // Apply granular permissions UI restrictions
+    applyUserPermissions();
+    
     await loadAdminProducts();
   } else {
     if (loginContainer) loginContainer.style.display = "flex";
@@ -252,10 +255,12 @@ async function handleAdminLogin(event) {
     // 1. Check Main Shop Admin Credentials
     let authenticated = false;
     let userRole = "owner";
+    let userPermissions = "all";
 
     if (shop.admin_username === user && shop.admin_password === pass) {
       authenticated = true;
       userRole = "owner";
+      userPermissions = "all";
     } else {
       // 2. Check Sub-Users / Cashiers Accounts
       const subUsers = shop.sub_users || [];
@@ -263,6 +268,7 @@ async function handleAdminLogin(event) {
       if (match) {
         authenticated = true;
         userRole = match.role || "cashier";
+        userPermissions = match.permissions ? JSON.stringify(match.permissions) : "{}";
       }
     }
 
@@ -273,6 +279,7 @@ async function handleAdminLogin(event) {
       sessionStorage.setItem("tenant_admin_auth", "true");
       sessionStorage.setItem("tenant_admin_shop_id", shopSlug);
       sessionStorage.setItem("tenant_user_role", userRole);
+      sessionStorage.setItem("tenant_user_permissions", userPermissions);
       activeShopSlug = shopSlug;
       
       await checkAuth();
@@ -1625,9 +1632,27 @@ function renderPosCartTable() {
 
 function calculatePosTotals() {
   const subTotal = posCart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const discountPct = parseFloat(document.getElementById("posDiscountPct")?.value) || 0;
-  const isVatActive = document.getElementById("posVatActive")?.checked;
+  let discountPct = parseFloat(document.getElementById("posDiscountPct")?.value) || 0;
+  
+  // Apply permissions check for discounts
+  const role = sessionStorage.getItem("tenant_user_role");
+  if (role !== "owner" && window.currentSubUserPermissions) {
+    const perms = window.currentSubUserPermissions;
+    if (perms.invoices) {
+      if (perms.invoices.discount === false) {
+        discountPct = 0;
+        if (document.getElementById("posDiscountPct")) document.getElementById("posDiscountPct").value = 0;
+      } else if (perms.invoices.max_discount !== undefined) {
+        if (discountPct > perms.invoices.max_discount) {
+          discountPct = perms.invoices.max_discount;
+          if (document.getElementById("posDiscountPct")) document.getElementById("posDiscountPct").value = discountPct;
+          showToast(`أقصى نسبة خصم مسموحة لك هي ${discountPct}%`, "warning");
+        }
+      }
+    }
+  }
 
+  const isVatActive = document.getElementById("posVatActive")?.checked;
   const discountVal = subTotal * (discountPct / 100);
   const afterDiscount = Math.max(0, subTotal - discountVal);
   const vatVal = isVatActive ? (afterDiscount * 0.14) : 0;
@@ -1962,3 +1987,64 @@ function closePurchasesModal() {
   if (overlay) overlay.classList.remove("open");
 }
 
+
+// --- 3. PERMISSIONS ENFORCEMENT ---
+function applyUserPermissions() {
+  const role = sessionStorage.getItem("tenant_user_role");
+  if (role === "owner") return; // Super admin has full access
+  
+  const permsStr = sessionStorage.getItem("tenant_user_permissions");
+  if (!permsStr) return;
+  
+  try {
+    const perms = JSON.parse(permsStr);
+    
+    // Helper to hide elements securely
+    const hideEl = (id) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    };
+    
+    // Menu Buttons
+    if (!perms.general || perms.general.admin_app === false) {
+      hideEl("btnUsersMenu");
+    }
+    
+    if (!perms.advanced_reports || perms.advanced_reports.advanced_reports_access === false) {
+      hideEl("btnReportsMenu");
+    }
+    
+    if (!perms.treasury || perms.treasury.view_receipts === false && perms.treasury.view_expenses === false && perms.treasury.view_flow === false) {
+      hideEl("btnTreasuryMenu");
+    }
+    
+    if (!perms.invoices || perms.invoices.view_purchases === false) {
+      hideEl("btnPurchasesMenu");
+    }
+    
+    if (!perms.invoices || perms.invoices.sales_new === false) {
+      hideEl("posTerminalMainBtn");
+    }
+
+    // Additional specific UI elements inside the POS itself
+    // E.g. Add product button in admin table
+    if (!perms.inventory || perms.inventory.item_new === false) {
+      hideEl("adminAddNewProductBtn");
+    }
+    
+    // Save the parsed permissions object globally for POS checks
+
+    // Specific POS actions
+    if (!perms.invoices || perms.invoices.discount === false) {
+      const discountInput = document.getElementById("posDiscountPct");
+      if (discountInput) {
+        discountInput.disabled = true;
+        discountInput.title = "غير مصرح لك بعمل خصم";
+      }
+    }
+    window.currentSubUserPermissions = perms;
+
+  } catch (e) {
+    console.error("Failed to parse user permissions", e);
+  }
+}

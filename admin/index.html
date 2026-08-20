@@ -107,19 +107,19 @@
         <i class="fa-solid fa-sliders" style="color: #fbbf24; margin-left: 6px;"></i> إعدادات المنصة والفوترة وميزان الباركود
       </button>
 
-      <button onclick="openShopUsersModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+      <button id="btnUsersMenu" onclick="openShopUsersModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
         <i class="fa-solid fa-users-gear" style="color: #60a5fa; margin-left: 6px;"></i> إدارة الكاشير
       </button>
 
-      <button onclick="openReportsModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+      <button id="btnReportsMenu" onclick="openReportsModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
         <i class="fa-solid fa-chart-pie" style="color: #c084fc; margin-left: 6px;"></i> التقارير والأرباح
       </button>
 
-      <button onclick="openTreasuryModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+      <button id="btnTreasuryMenu" onclick="openTreasuryModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
         <i class="fa-solid fa-vault" style="color: #fcd34d; margin-left: 6px;"></i> الخزينة والمصروفات
       </button>
 
-      <button onclick="openPurchasesModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
+      <button id="btnPurchasesMenu" onclick="openPurchasesModal()" class="btn" style="background: linear-gradient(135deg, #1e293b, #334155); color: #ffffff; border: 1px solid #475569; font-weight: 700; font-size: 0.88rem; padding: 0.65rem 1.2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; transition: all 0.3s ease;">
         <i class="fa-solid fa-truck-ramp-box" style="color: #f87171; margin-left: 6px;"></i> المشتريات والموردين
       </button>
 
@@ -184,7 +184,7 @@
             <i class="fa-solid fa-arrow-rotate-left"></i>
             <span>إعادة ضبط المتجر</span>
           </button>
-          <button class="btn btn-primary" onclick="openProductModal(null)">
+          <button id="adminAddNewProductBtn" class="btn btn-primary" onclick="openProductModal(null)">
             <i class="fa-solid fa-plus"></i>
             <span>إضافة منتج جديد</span>
           </button>
